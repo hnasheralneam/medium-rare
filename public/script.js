@@ -3,7 +3,7 @@ import { Grid } from "./engine/grid.js";
 import { Player } from "./engine/player.js";
 
 alert("POV: You are Phil");
-alert("And the customers and angry");
+alert("And the customers are angry");
 alert("The only way to save your beloved restaurant from angry customers is to make as many salads in one minute");
 alert("Pick up raw materials from the crate");
 alert("Slice them and combine to make salad");
