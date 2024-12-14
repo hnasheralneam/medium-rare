@@ -1,0 +1,30 @@
+{
+  "name": "medium-rare",
+  "version": "0.1.0",
+  "description": "Get cook'd",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hnasheralneam/medium-rare.git"
+  },
+  "keywords": [
+    "cook"
+  ],
+  "author": "Kai and Hamza",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/hnasheralneam/medium-rare/issues"
+  },
+  "homepage": "https://github.com/hnasheralneam/medium-rare#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
