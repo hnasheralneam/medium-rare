@@ -1,14 +1,26 @@
 import { stats } from "./engine/cell.js";
 import { Grid } from "./engine/grid.js";
 import { Player } from "./engine/player.js";
+import { SaveData, clearSave } from "./storage.js";
+import { ImageCache } from "./engine/image-cache.js";
+import { hideAlerts, showAlerts, createAlert } from "./alertSystem.js";
 
-alert("POV: You are Phil");
-alert("And the customers are angry");
-alert("The only way to save your beloved restaurant from angry customers is to make as many salads in one minute");
-alert("Pick up raw materials from the crate");
-alert("Slice them and combine to make salad");
-alert("Press X to interact with everything");
-alert("Good luck!");
+SaveData.firstTime = true;
+if (SaveData.firstTime) {
+    showAlerts()
+    createAlert("POV: You are Phil", undefined, true);
+    createAlert("And the customers are angry", undefined, true);
+    createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads in one minute", undefined, true);
+    createAlert("Pick up raw materials from the crate", undefined, true);
+    createAlert("Slice them and combine to make salad", undefined, true);
+    createAlert("Press X to interact with everything", undefined, true);
+    createAlert("Good luck!", undefined, true);
+    hideAlerts(startGame);
+    SaveData.firstTime = false;
+}
+else {
+    startGame()
+}
 
 const grid = new Grid(7, 7);
 
@@ -39,35 +51,18 @@ document.body.appendChild(canvas);
 const ctx = canvas.getContext("2d");
 
 const csize = 32;
-const imageCache = {
-    data: {},
-    get: async function(name) {
-        if (this.data[name] === null) return this.get("placeholder.png");
-        if (this.data[name] === undefined) {
-            try {
-                const blob = await (await fetch(name)).blob();
-                this.data[name] = await window.createImageBitmap(blob);
-            }
-            catch (e) {
-                this.data[name] = null;
-                return this.get("placeholder.png");
-            }
-        }
-        return this.data[name];
-    }
-};
 
 async function draw() {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (const cell of grid.cells) {
-        ctx.drawImage(await imageCache.get(cell.proto.src), cell.x * csize, cell.y * csize, csize, csize);
-        if (cell.item !== null && cell.item !== undefined) ctx.drawImage(await imageCache.get((cell.item) + ".png"), cell.x * csize, cell.y * csize, csize, csize);
+        ctx.drawImage(await ImageCache.get(cell.proto.src), cell.x * csize, cell.y * csize, csize, csize);
+        if (cell.item !== null && cell.item !== undefined) ctx.drawImage(await ImageCache.get((cell.item) + ".png"), cell.x * csize, cell.y * csize, csize, csize);
     }
 
-    ctx.drawImage(await imageCache.get(player.item === null ? "player.png" : "player-jumping.png"), grid.px * csize, grid.py * csize, csize, csize);
+    ctx.drawImage(await ImageCache.get(player.item === null ? "player.png" : "player-jumping.png"), grid.px * csize, grid.py * csize, csize, csize);
     if (player.item !== null) {
-        ctx.drawImage(await imageCache.get(player.item + ".png"), grid.px * csize, (grid.py - 1) * csize, csize, csize);
+        ctx.drawImage(await ImageCache.get(player.item + ".png"), grid.px * csize, (grid.py - 1) * csize, csize, csize);
     }
 }
 
@@ -97,9 +92,26 @@ const listener = (e) => {
 
 document.body.addEventListener("keydown", listener);
 
-setTimeout(() => {
+function startGame() {
+    let timeLeft = 60;
+    setInterval(() => {
+        timeLeft--;
+        document.querySelector(".timer").textContent = timeLeft + " seconds";
+    }, 1000);
+    setTimeout(endGame, 60000)
+}
+
+function endGame() {
     document.body.removeEventListener("keydown", listener);
-    alert(`Game over! Your score is ${stats.score}`);
-}, 60000);
+    console.log("hi");
+    showAlerts();
+    createAlert(`Game over! Your score is ${stats.score}`);
+    if (stats.score >= SaveData.highScore) {
+        createAlert("New high score!");
+    }
+    createAlert("Closing this will reload the game.")
+    SaveData.highScore = Math.max(SaveData.highScore, stats.score);
+    hideAlerts(() => { location.reload() });
+}
 
 draw();

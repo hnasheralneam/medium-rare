@@ -1,8 +1,20 @@
+import { ImageCache } from "./image-cache.js";
+
 const items = ["tomato", "lettuce"];
 
 function randomItem() {
     return items[Math.floor(Math.random() * items.length)];
 }
+
+/*
+ * Schema:
+ * 
+ * displayName: string
+ * srcReq: string[]
+ * src: null       # Invisible
+ *    | string     # Static image source (immutable)
+ *    | cell : str # Parameterized image source
+ */
 
 const CellMap = [
     { // 0
@@ -94,6 +106,8 @@ const CellMap = [
         }
     }
 ];
+
+
 
 export const stats = {
     score: 0,
