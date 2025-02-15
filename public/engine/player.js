@@ -33,6 +33,10 @@ export class Player {
         this.item = item;
     }
 
+    hasItem() {
+        return this.item !== null;
+    }
+
     keyPressed(e, grid) {
         if (Game.paused) return;
         const key = e.code;

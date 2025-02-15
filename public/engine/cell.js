@@ -11,7 +11,7 @@ function randomItem() {
 
 /*
  * Schema:
- * 
+ *
  * displayName: string
  * srcReq: string[]
  * src: null       # Invisible
@@ -59,8 +59,8 @@ const CellMap = [
             cell.item = cell.extra !== undefined ? cell.extra[0] : null;
         },
         /**
-         * @param { Player } player 
-         * @param { Cell } cell 
+         * @param { Player } player
+         * @param { Cell } cell
          */
         interact: (player, cell) => {
             const playerHasItem = player.item !== null;
@@ -86,13 +86,18 @@ const CellMap = [
         solid: true,
         init: () => {},
         interact: (player, cell) => {
-            if (player.item !== null) {
-                if (cell.item !== null || cell.item !== undefined) return;
+            if (cell.item == null || cell.item == undefined) {
                 cell.item = player.releaseItem();
-                return;
             }
-            if (!cell.item.proto.cuttable) return;
-            cell.item.setAttr("cutted", true);
+            else if (!player.hasItem()) {
+                if (cell.item.proto.cuttable) {
+                    if (cell.item.attr("cutted")) {
+                        player.giveItem(cell.item);
+                        cell.item = null;
+                    }
+                    else cell.item.setAttr("cutted", true);
+                }
+            }
         }
     },
     {
@@ -101,7 +106,7 @@ const CellMap = [
         solid: true,
         init: (_) => {},
         interact: (player, _) => {
-            if (player.item === "salad-sliced") {
+            if (player.item.name() == "salad") {
                 player.deleteItem();
                 Game.stats.score++;
             }

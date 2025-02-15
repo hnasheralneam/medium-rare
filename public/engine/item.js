@@ -27,12 +27,12 @@ for (const item of ItemList) {
 const RecipeList = [
     {
         items: ["tomato", "lettuce"],
-        check: ({ tomato, lettuce }) => {
-            if (tomato.attr("sliced") && lettuce.attr("sliced")) {
+        check: ([tomato, lettuce]) => {
+            if (tomato.attr("cutted") && lettuce.attr("cutted")) {
                 return Item.fromName("salad");
             }
             return null;
-        } 
+        }
     }
 ];
 const RecipeMap = {};
@@ -44,7 +44,7 @@ function mangleNames(names) {
     const toSort = [...names];
     toSort.sort();
     return `${toSort.length}:${toSort.map(s => `<${s}>`).join("|")}`;
-} 
+}
 
 export const Recipes = {
     /** @param { Item[] } materials */

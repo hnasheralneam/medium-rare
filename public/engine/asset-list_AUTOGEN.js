@@ -1,7 +1,7 @@
 export const assets = [
     "global/placeholder.png",
     "items/tomato-sliced.png",
-    "items/salad-sliced.png",
+    "items/salad.png",
     "items/lettuce-sliced.png",
     "items/lettuce.png",
     "items/tomato.png",
