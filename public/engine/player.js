@@ -1,3 +1,12 @@
+import { Game } from "./game.js";
+
+const movements = {
+    up: [0, -1],
+    down: [0, 1],
+    left: [-1, 0],
+    right: [1, 0]
+};
+
 export class Player {
     #listener_function;
     inputMap;
@@ -25,13 +34,26 @@ export class Player {
     }
 
     keyPressed(e, grid) {
+        if (Game.paused) return;
         const key = e.code;
-        const val = this.inputMap["movement"][key];
-        if (val !== undefined) {
-            grid.movePlayer(this, val[0], val[1]);
-        }
-        else if (key === this.inputMap.interact) {
-            grid.interact(this);
+        const action = this.inputMap[key];
+        if (action === undefined) return;
+        this.handleAction(action, grid);
+    }
+
+    /**
+     * @param { String } action
+     * @param { import("./grid.js").Grid } grid
+     */
+    handleAction(action, grid) {
+        if (action === "interact") grid.interact(this);
+        else {
+            const move = movements[action];
+            if (move === undefined) {
+                console.log("Unexpected action:", action);
+                return;
+            }
+            grid.movePlayer(this, move[0], move[1]);
         }
     }
 }

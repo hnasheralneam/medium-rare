@@ -1,9 +1,12 @@
 import { ImageCache } from "./image-cache.js";
+import { Game } from "./game.js";
+import { Item, Recipes } from "./item.js";
+import { Player } from "./player.js";
 
 const items = ["tomato", "lettuce"];
 
 function randomItem() {
-    return items[Math.floor(Math.random() * items.length)];
+    return Item.fromName(items[Math.floor(Math.random() * items.length)]);
 }
 
 /*
@@ -55,15 +58,18 @@ const CellMap = [
         init: (cell) => {
             cell.item = cell.extra !== undefined ? cell.extra[0] : null;
         },
+        /**
+         * @param { Player } player 
+         * @param { Cell } cell 
+         */
         interact: (player, cell) => {
             const playerHasItem = player.item !== null;
             const counterHasItem = cell.item !== null;
             if (playerHasItem && counterHasItem) {
-                if (player.item === "salad-sliced" || cell.item === "salid-sliced") return;
-                if (player.item.indexOf("sliced") === -1 || cell.item.indexOf("sliced") === -1) return;
-                if (player.item === cell.item) return;
-                player.item = null;
-                cell.item = "salad-sliced";
+                const result = Recipes.using(player.item, cell.item);
+                if (result === null) return;
+                cell.item = result;
+                player.deleteItem();
                 return;
             }
             if (playerHasItem === counterHasItem) return;
@@ -81,16 +87,12 @@ const CellMap = [
         init: () => {},
         interact: (player, cell) => {
             if (player.item !== null) {
+                if (cell.item !== null || cell.item !== undefined) return;
                 cell.item = player.releaseItem();
+                return;
             }
-            else {
-                if (cell.item.indexOf("sliced") === -1) cell.item += "-sliced"; 
-                else {
-                    const item = cell.item;
-                    player.giveItem(item);
-                    cell.item = null;
-                } 
-            }
+            if (!cell.item.proto.cuttable) return;
+            cell.item.setAttr("cutted", true);
         }
     },
     {
@@ -101,17 +103,12 @@ const CellMap = [
         interact: (player, _) => {
             if (player.item === "salad-sliced") {
                 player.deleteItem();
-                stats.score++;
+                Game.stats.score++;
             }
         }
     }
 ];
 
-
-
-export const stats = {
-    score: 0,
-};
 
 export class Cell {
     /** @param { number } id */

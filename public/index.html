@@ -5,96 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/sprites/player/idle.png">
     <title>Medium Rare</title>
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        canvas {
-            height: 100vh;
-            width: 100vw;
-            image-rendering: pixelated;
-        }
-
-        .alert-outer {
-            visibility: hidden;
-
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            overflow: auto;
-            background-color: #eee;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .alert-parent button {
-            color: #fff;
-            background-color: #0099ff;
-            border: none;
-            font-size: 1.2rem;
-            padding: .5rem 1rem;
-            border-radius: .5rem;
-        }
-        .alert-parent button:active {
-            outline: solid .2rem #00538a;
-        }
-        .alert {
-            text-align: center;
-            padding: 2rem;
-            font-family: cursive;
-            font-size: 2rem;
-            max-width: 700px;
-        }
-
-        .shaky {
-            animation: shake 0.15s infinite linear;
-        }
-
-        .timer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background-color: #eee;
-            color: #222;
-            font-family: sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: .2rem;
-        }
-
-        @keyframes shake {
-            0% {
-                transform: translate(0px, 0px);
-            }
-            20% {
-                transform: translate(1px, 2px);
-            }
-            40% {
-                transform: translate(-1px, 3px);
-            }
-            60% {
-                transform: translate(2px, -3px);
-            }
-            80% {
-                transform: translate(-3px, -1px);
-            }
-            100% {
-                transform: translate(0px, 0px);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="timer">60 seconds</div>
+    <div class="settings hidden">
+        <h1>Paused</h1>
+        <button class="continue">Continue</button>
+        <br><br><br>
+        <div class="controls"></div>
+    </div>
+    <div class="timer">60 seconds | 0 Points</div>
+    <div class="play-pause">Pause</div>
     <div class="alert-outer">
         <div class="alert-parent"></div>
     </div>
-    <script src="script.js" type="module"></script>
+    <div class="level-picker hidden">
+        <h1>Pick a level</h1>
+    </div>
 </body>
+<script src="script.js" type="module"></script>
 </html>

@@ -16,7 +16,7 @@ class OrderHandler {
     }
 
     countDown(orderIndex) {
-        let ordeTimeLeft = this.orders[orderIndex].timeLeft;
+        let orderTimeLeft = this.orders[orderIndex].timeLeft;
         while (orderTimeLeft > 0) {
             orderTimeLeft -= 1000
             setTimeout(() => {
