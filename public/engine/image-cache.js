@@ -1,21 +1,46 @@
+import { assets } from "./asset-list_AUTOGEN.js";
+
+const data = {};
+
+function getChecked(fullname) {
+    if (data[fullname] === undefined) return ImageCache.placeholder();
+    return data[fullname];
+}
+
+
 export const ImageCache = {
-    data: {},
-    get: async function(name) {
-        if (this.data[name] === null) return this.get("placeholder.png");
-        if (this.data[name] === undefined) {
-            try {
-                const image = new Image(32, 32);
-                image.src = name;
-                await image.decode();
-                this.data[name] = await window.createImageBitmap(image);
-            }
-            catch (e) {
-                console.log(name);
-                this.data[name] = null;
-                return null;
-                //return this.get("placeholder.png");
-            }
+    getGlobal(name) {
+        return getChecked(`global/${name}.png`);
+    },
+    getTile(name) {
+        return getChecked(`tiles/${name}.png`);
+    },
+    getSprite(name, frame) {
+        return getChecked(`sprites/${name}/${frame}.png`);
+    },
+    getItem(name) {
+        return getChecked(`items/${name}.png`);
+    },
+    placeholder() {
+        return data["global/placeholder.png"];
+    },
+    async init() {
+        const imagesPre = assets.map(name => {
+            const im = new Image();
+            im.src = name;
+            return new Promise((res, rej) => {
+                im.onload = () => res(im);
+            });
+        });
+        const images = await Promise.all(imagesPre);
+        const bitmapsPre = images.map(im => window.createImageBitmap(im));
+        try {
+            (await Promise.all(bitmapsPre)).forEach((bitmap, i) => {
+                data[assets[i]] = bitmap;
+            });
+        } catch {
+            return false;
         }
-        return this.data[name];
+        return true;
     }
 };

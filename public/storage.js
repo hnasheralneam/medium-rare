@@ -29,7 +29,6 @@ function init() {
 }
 
 export const clearSave = () => {
-    console.log("Clearing save...");
     localStorage.setItem(storageName, null);
     location.reload();
 }

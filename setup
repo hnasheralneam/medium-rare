@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cd assets
+
+target=../public/engine/asset-list_AUTOGEN.js
+
+printf "export const assets = [\n" > $target
+
+for asset in $(find * -name \*)
+do
+    echo $asset
+    if [[ -d $asset ]] || [[ $asset == raw* ]] then
+        continue
+    fi
+    printf "    \"$asset\",\n" >> $target
+done
+
+printf "];" >> $target
+
+cd ..

@@ -19,19 +19,19 @@ function randomItem() {
 const CellMap = [
     { // 0
         displayName: "air",
-        src: "floor.png",
+        src: "floor",
         solid: false,
         init: (_) => {}
     },
     { // 1
         displayName: "wall",
-        src: "wall.png",
+        src: "wall",
         solid: true,
         init: (_) => {}
     },
     { // 2
         displayName: "waste bucket",
-        src: "trash.png",
+        src: "trash",
         solid: true,
         init: (_) => {},
         interact: (player, _) => {
@@ -40,7 +40,7 @@ const CellMap = [
     },
     { // 3
         displayName: "raw materials",
-        src: "crate.png",
+        src: "crate",
         solid: true,
         init: () => {},
         interact: (player, cell) => {
@@ -50,7 +50,7 @@ const CellMap = [
     },
     { // 4
         displayName: "counter",
-        src: "counter.png",
+        src: "counter",
         solid: true,
         init: (cell) => {
             cell.item = cell.extra !== undefined ? cell.extra[0] : null;
@@ -76,7 +76,7 @@ const CellMap = [
     },
     { // 5
         displayName: "cutting board",
-        src: "cuttingboard.png",
+        src: "cuttingboard",
         solid: true,
         init: () => {},
         interact: (player, cell) => {
@@ -95,7 +95,7 @@ const CellMap = [
     },
     {
         displayName: "submit",
-        src: "delivery.png",
+        src: "delivery",
         solid: true,
         init: (_) => {},
         interact: (player, _) => {
