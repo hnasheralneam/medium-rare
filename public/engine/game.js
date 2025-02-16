@@ -20,6 +20,7 @@ h[HEIGHT]
 
 // player start positions should be defined in here as well
 const levels = {
+    // showcase image is the name of the level
     huge: {
         layout: [
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -34,7 +35,8 @@ const levels = {
         ],
         width: 11,
         height: 9,
-        minPlayers: 2
+        minPlayers: 2,
+        maxPlayers: 4
     },
 
     wide: {
@@ -49,7 +51,8 @@ const levels = {
         ],
         width: 9,
         height: 7,
-        minPlayers: 2
+        minPlayers: 2,
+        maxPlayers: 4
     },
 
     square: {
@@ -64,7 +67,8 @@ const levels = {
         ],
         width: 7,
         height: 7,
-        minPlayers: 1
+        minPlayers: 1,
+        maxPlayers: 2
     }
 }
 
@@ -78,8 +82,9 @@ export const Game = {
     stats: {
         score: 0
     },
+    levels: levels,
 
-    start() {
+    start(level) {
         const player1 = new Player({
             ArrowUp: "up",
             ArrowDown: "down",
@@ -100,7 +105,7 @@ export const Game = {
         this.players.push(player1);
         this.players.push(player2);
 
-        this.level = levels["huge"];
+        this.level = level;
         this.grid = new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout);
         for (const player of this.players) {
