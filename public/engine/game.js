@@ -2,6 +2,7 @@ import * as G from "./graphics.js";
 import { Grid } from "./grid.js";
 import { Player } from "./player.js";
 import { ImageCache } from "./image-cache.js";
+import { OrderHandler } from "./orderHandler.js";
 import { SaveData, clearSave } from "../storage.js";
 import { hideAlerts, showAlerts, createAlert } from "../alertSystem.js";
 
@@ -36,7 +37,8 @@ const levels = {
         width: 11,
         height: 9,
         minPlayers: 2,
-        maxPlayers: 4
+        maxPlayers: 4,
+        menuOptions: ["salad"]
     },
 
     wide: {
@@ -52,7 +54,8 @@ const levels = {
         width: 9,
         height: 7,
         minPlayers: 2,
-        maxPlayers: 4
+        maxPlayers: 4,
+        menuOptions: ["salad"]
     },
 
     square: {
@@ -68,7 +71,8 @@ const levels = {
         width: 7,
         height: 7,
         minPlayers: 1,
-        maxPlayers: 2
+        maxPlayers: 2,
+        menuOptions: ["salad"]
     }
 }
 
@@ -111,6 +115,8 @@ export const Game = {
         for (const player of this.players) {
             this.grid.addPlayer(player);
         }
+
+        this.orderHandler = new OrderHandler(this.level.menuOptions);
 
         this.keydownHandle = (e) => {
             for (let i = 0; i < this.players.length; i++) {
@@ -207,7 +213,7 @@ export const Game = {
         G.clear("#000");
         for (const cell of this.grid.cells) {
             G.drawImage(
-                ImageCache.getTile(cell.proto.src),
+                ImageCache.getTile(cell.proto.sourceImage),
                 cell.x * csize,
                 cell.y * csize
             );

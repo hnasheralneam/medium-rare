@@ -52,7 +52,6 @@ function showLevelPicker() {
             }
             return people;
         }
-        console.log(levelName);
         let level = Game.levels[levelName];
         let button = document.createElement("button");
         button.textContent = "Play";

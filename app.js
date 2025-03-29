@@ -7,10 +7,14 @@ const port = process.env.PORT || 8080;
 app.use(express.static("public"));
 app.use(express.static("assets"));
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
     res.render("index.html");
 });
 
+app.get("/prefetch", (_req, res) => {
+    res.send("test");
+})
+
 server.listen(port, () => {
-    console.log("Started");
+    console.log("Started on port " + port);
 });

@@ -13,7 +13,7 @@ export const ImageCache = {
         return getChecked(`global/${name}.png`);
     },
     getTile(name) {
-        return getChecked(`tiles/${name}.png`);
+        return getChecked(`tiles/${name}`);
     },
     getSprite(name, frame) {
         return getChecked(`sprites/${name}/${frame}.png`);

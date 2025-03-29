@@ -24,8 +24,9 @@ for (const item of ItemList) {
     ItemMap[item.name] = item;
 }
 
-const RecipeList = [
+export const RecipeList = [
     {
+        name: "salad",
         items: ["tomato", "lettuce"],
         check: ([tomato, lettuce]) => {
             if (tomato.attr("cutted") && lettuce.attr("cutted")) {
@@ -35,6 +36,15 @@ const RecipeList = [
         }
     }
 ];
+export function findRecipe(name) {
+    for (const recipe of RecipeList) {
+        if (recipe.name === name) {
+            return recipe;
+        }
+    }
+    return null;
+}
+
 const RecipeMap = {};
 for (const { items, check } of RecipeList) {
     RecipeMap[mangleNames(items)] = check;

@@ -2,6 +2,7 @@ import { ImageCache } from "./image-cache.js";
 import { Game } from "./game.js";
 import { Item, Recipes } from "./item.js";
 import { Player } from "./player.js";
+import * as Tiles from "./tiles/exports.js";
 
 const items = ["tomato", "lettuce"];
 
@@ -106,10 +107,7 @@ const CellMap = [
         solid: true,
         init: (_) => {},
         interact: (player, _) => {
-            if (player.item.name() == "salad") {
-                player.deleteItem();
-                Game.stats.score++;
-            }
+            Game.orderHandler.submitOrder(player);
         }
     }
 ];
@@ -128,4 +126,29 @@ export class Cell {
         proto.init(this);
     }
 
+}
+
+
+const tileNameList = [
+    "Floor",
+    "Wall",
+    "Trash",
+    "Crate",
+    "Counter",
+    "CuttingBoard",
+    "Delivery"
+];
+
+// Updated thing
+export class Tile {
+    constructor(id, pos, data) {
+        const name = tileNameList[id];
+        if (name === undefined) throw new Error(`Invalid tile ID: ${id}`);
+        const proto = Tiles[name];
+        if (proto === undefined) throw new Error(`Unrecognized tile: ${name}`);
+        this.x = pos.x;
+        this.y = pos.y;
+        this.proto = proto;
+        proto.init(this, data);
+    }
 }

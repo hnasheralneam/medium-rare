@@ -1,4 +1,4 @@
-import { Cell } from "./cell.js";
+import { /*Cell,*/ Tile } from "./cell.js";
 
 export class Grid {
     /**
@@ -20,7 +20,19 @@ export class Grid {
         return (x < this.width && x >= 0) && (y < this.height && y >= 0);
     }
 
+    /**
+     * @deprecated Use `Grid.tileAt(x, y)` instead
+     */
     cellAt(x, y) {
+        return this.tileAt(x, y);
+    }
+
+    /**
+     * @param { number } x x coordinate of tile
+     * @param { number } y y coordinate of tile
+     * @return { Tile }
+     */
+    tileAt(x, y) {
         return this.cells[x + y * this.width];
     }
 
@@ -39,9 +51,10 @@ export class Grid {
         const tx = player.pos[0] + player.vel[0];
         const ty = player.pos[1] + player.vel[1];
         if (!this.inBounds(tx, ty)) return;
-        const func = this.cellAt(tx, ty).proto.interact;
+        const tile = this.tileAt(tx, ty);
+        const func = tile.proto.onInteract;
         if (func === undefined) return;
-        func(player, this.cellAt(tx, ty));
+        func(tile, player, "interact");
     }
 
     loadData(numMap) {
@@ -51,7 +64,8 @@ export class Grid {
         infos.forEach((info, i) => {
             const x = i % this.width;
             const y = Math.floor(i / this.width);
-            this.cells[i] = new Cell(info.id, { x, y }, info.extra);
+            //this.cells[i] = new Cell(info.id, { x, y }, info.extra);
+            this.cells[i] = new Tile(info.id, { x, y }, info.extra);
         });
     }
 }
