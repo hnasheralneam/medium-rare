@@ -17,6 +17,11 @@ const ItemList = [
         name: "salad",
         src: (_) => "salad",
         cuttable: false
+    },
+    {
+        name: "steak",
+        src: (_) => "steak",
+        cuttable: false
     }
 ];
 const ItemMap = {};

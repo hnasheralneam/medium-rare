@@ -141,15 +141,18 @@ export const Game = {
         document.body.removeEventListener("keydown", this.keydownHandle);
         clearInterval(this.timer);
 
-        showAlerts();
-        createAlert(`Game over! Your score is ${Game.stats.score}`);
-        if (Game.stats.score >= SaveData.highScore) {
-            createAlert("New high score!");
-        }
-        createAlert("Closing this will reload the game.")
-        SaveData.highScore = Math.max(SaveData.highScore, Game.stats.score);
-        hideAlerts(() => { location.reload() });
 
+        const postGamePanel = document.querySelector(".post-game");
+        postGamePanel.classList.remove("hidden");
+        postGamePanel.innerHTML = `
+        <div>
+            <h2>Game Complete!</h2>
+            <h1>Your score:  ${Game.stats.score}</h1>
+            <span>${Game.stats.score >= SaveData.highScore ? "New high score!" : ""}</span>
+            <p>Completed ${orderHandler.completedOrders.length} </p>
+            <button onclick="location.reload()">Play again</button>
+        </div>
+        `;
     },
 
     startTimer() {

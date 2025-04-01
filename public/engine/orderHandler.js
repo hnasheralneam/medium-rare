@@ -42,6 +42,9 @@ export class OrderHandler {
 
     submitOrder(player) {
         // later make sure that it has a plate
+        if (player.item === null) return;
+        // should be fixed
+        // not giving this error, but there are still times the playre cannot submit a food <-- still a problem (but it might only be from the left side of delivery)
         if (this.mealOptions.includes(player.item.name())) {
             let order = this.orders.find(o => o.name == player.item.name());
             if (order) {
@@ -54,6 +57,9 @@ export class OrderHandler {
                     setTimeout(() => { this.generateOrder(); }, 2000);
                 }
             }
+        }
+        else {
+            console.log("wrong food:" + player.item.name() + " : "  + this.mealOptions)
         }
     }
 }
@@ -103,35 +109,25 @@ class Order {
     }
 
     countDown() {
-        // THIS NEEDS TO RESPECT PAUSE!
-        if (Game.paused) return;
         let interval = 250;
-        this.timeLeft -= interval;
-        let percent = (this.timeLeft / this.time) * 100;
-        this.element.querySelector(".time-left-progress").style.width = `${percent}%`;
-        if (percent <= 30) {
-            this.element.querySelector(".time-left-progress").style.backgroundColor = "red";
+        if (!Game.paused) {
+            this.timeLeft -= interval;
+            let percent = (this.timeLeft / this.time) * 100;
+            this.element.querySelector(".time-left-progress").style.width = `${percent}%`;
+            if (percent <= 30) {
+                this.element.querySelector(".time-left-progress").style.backgroundColor = "red";
+            }
+            if (this.timeLeft <= 0) {
+                this.element.remove();
+                this.handler.failedOrders.push(this);
+                this.handler.orders.splice(this.handler.orders.indexOf(this), 1);
+                // consider making a beep/bad noise, and good noise for submitted
+                // take away time/score and give visual feedback for that
+                return;
+            }
         }
-        if (this.timeLeft <= 0) {
-            this.element.remove();
-            this.handler.failedOrders.push(this);
-            this.handler.orders.splice(this.handler.orders.indexOf(this), 1);
-            // consider making a beep/bad noise, and good noise for submitted
-            // take away time/score and give visual feedback for that
-            // also make a game over screen to show orders missed
-        }
-        else {
-            setTimeout(() => {
-                this.countDown();
-            }, interval);
-        }
-        // also handle when order is met (will be done in order handler, because it will choose item of food that is soonest to expiring)
+        setTimeout(() => {
+            this.countDown();
+        }, interval);
     }
 }
-/*
-order handler should
-- create/make age/end order
-- handle orders being submitted
-- update order ui (removing/adding, handling time left)
-}
-*/

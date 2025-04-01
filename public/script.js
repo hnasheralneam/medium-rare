@@ -14,6 +14,7 @@ window.addEventListener("resize", () => Game.display());
 SaveData.firstTime = false;
 if (SaveData.firstTime) {
     showAlerts();
+    // instead of all this, show a pre-game screen with your previous high score and start button
     createAlert("POV: You are Phil", undefined, true);
     createAlert("And the customers are angry", undefined, true);
     createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads in one minute", undefined, true);
