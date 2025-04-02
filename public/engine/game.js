@@ -38,7 +38,8 @@ const levels = {
         height: 9,
         minPlayers: 2,
         maxPlayers: 4,
-        menuOptions: ["salad"]
+        menuOptions: ["salad"],
+        timeSeconds: 100
     },
 
     wide: {
@@ -55,7 +56,8 @@ const levels = {
         height: 7,
         minPlayers: 2,
         maxPlayers: 4,
-        menuOptions: ["salad"]
+        menuOptions: ["salad"],
+        timeSeconds: 80
     },
 
     square: {
@@ -72,7 +74,8 @@ const levels = {
         height: 7,
         minPlayers: 1,
         maxPlayers: 2,
-        menuOptions: ["salad"]
+        menuOptions: ["salad"],
+        timeSeconds: 30 // usually 60
     }
 }
 
@@ -149,14 +152,16 @@ export const Game = {
             <h2>Game Complete!</h2>
             <h1>Your score:  ${Game.stats.score}</h1>
             <span>${Game.stats.score >= SaveData.highScore ? "New high score!" : ""}</span>
-            <p>Completed ${orderHandler.completedOrders.length} </p>
+            <p>Completed ${this.orderHandler.completedOrders.length} orders, failed ${this.orderHandler.failedOrders.length} orders</p>
             <button onclick="location.reload()">Play again</button>
         </div>
         `;
     },
 
     startTimer() {
-        let timeLeft = 60;
+        console.log(this.level)
+        let timeLeft = this.level.timeSeconds;
+        document.querySelector(".timer").textContent = timeLeft + " seconds | 0 Points";
         this.timer = setInterval(() => {
             if (this.paused) return;
             if (timeLeft <= 0) {

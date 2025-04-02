@@ -108,6 +108,7 @@ canvas {
    height: 4rem;
    width: 4rem;
    margin: 1rem;
+   image-rendering: pixelated;
 }
 
 /* not settings */
@@ -238,7 +239,7 @@ canvas {
    right: 0;
    bottom: 0;
    left: 0;
-   background-color: red;
+   background-color: #ddd;
    z-index: 2;
 }
 
@@ -246,4 +247,9 @@ canvas {
    display: flex;
    justify-content: center;
    align-items: center;
+}
+
+.post-game div {
+   text-align: center;
+   font-family: sans-serif;
 }

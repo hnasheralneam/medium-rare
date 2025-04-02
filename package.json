@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/hnasheralneam/medium-rare#readme",
   "dependencies": {
+    "ejs": "^3.1.10",
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3"

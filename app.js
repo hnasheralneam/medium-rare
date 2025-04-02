@@ -6,14 +6,17 @@ const port = process.env.PORT || 8080;
 
 app.use(express.static("public"));
 app.use(express.static("assets"));
+app.set("view engine", "ejs");
 
 app.get("/", (_req, res) => {
-    res.render("index.html");
+    res.render("home.html");
 });
 
-app.get("/prefetch", (_req, res) => {
-    res.send("test");
-})
+app.get("/play/:level", (req, res) => {
+    res.render("game.html", {
+        level: req.params.level
+    });
+});
 
 server.listen(port, () => {
     console.log("Started on port " + port);
