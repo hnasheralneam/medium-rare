@@ -59,7 +59,7 @@ export class OrderHandler {
             }
         }
         else {
-            console.log("wrong food:" + player.item.name() + " : "  + this.mealOptions)
+            console.log("wrong food:" + player.item.name() + " : "  + this.mealOptions);
         }
     }
 }
@@ -88,14 +88,14 @@ class Order {
         for (let ingredient of ingredientNames) {
             let element = document.createElement("img");
             element.classList.add("ingredient");
-            element.src = `items/${ingredient}.png`;
+            element.src = `../items/${ingredient}.png`;
             ingredientList.appendChild(element);
         }
         orderElement.appendChild(ingredientList);
         // add plate image behind later
         let foodImage = document.createElement("img");
         foodImage.classList.add("image");
-        foodImage.src = `items/${this.name}.png`;
+        foodImage.src = `../items/${this.name}.png`;
         orderElement.appendChild(foodImage);
         let timeLeft = document.createElement("div");
         timeLeft.classList.add("time-left");
@@ -110,24 +110,24 @@ class Order {
 
     countDown() {
         let interval = 250;
-        if (!Game.paused) {
-            this.timeLeft -= interval;
-            let percent = (this.timeLeft / this.time) * 100;
-            this.element.querySelector(".time-left-progress").style.width = `${percent}%`;
-            if (percent <= 30) {
-                this.element.querySelector(".time-left-progress").style.backgroundColor = "red";
+        let countdownInterval = setInterval(() => {
+            if (!Game.paused) {
+                this.timeLeft -= interval;
+                let percent = (this.timeLeft / this.time) * 100;
+                this.element.querySelector(".time-left-progress").style.width = `${percent}%`;
+                if (percent <= 30) {
+                    this.element.querySelector(".time-left-progress").style.backgroundColor = "red";
+                }
+                if (this.timeLeft <= 0) {
+                    console.log("Failed an order");
+                    this.element.remove();
+                    this.handler.failedOrders.push(this);
+                    this.handler.orders.splice(this.handler.orders.indexOf(this), 1);
+                    // consider making a beep/bad noise, and good noise for submitted
+                    // take away time/score and give visual feedback for that
+                    clearInterval(countdownInterval);
+                }
             }
-            if (this.timeLeft <= 0) {
-                this.element.remove();
-                this.handler.failedOrders.push(this);
-                this.handler.orders.splice(this.handler.orders.indexOf(this), 1);
-                // consider making a beep/bad noise, and good noise for submitted
-                // take away time/score and give visual feedback for that
-                return;
-            }
-        }
-        setTimeout(() => {
-            this.countDown();
         }, interval);
     }
 }

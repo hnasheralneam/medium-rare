@@ -6,18 +6,20 @@ const port = process.env.PORT || 8080;
 
 app.use(express.static("public"));
 app.use(express.static("assets"));
+app.use("/scripts", express.static(__dirname + "/public/scripts/"));
+app.use("/item/", express.static(__dirname + "/assets/items"));
 app.set("view engine", "ejs");
 
 app.get("/", (_req, res) => {
-    res.render("home.html");
+    res.render("home");
 });
 
 app.get("/play/:level", (req, res) => {
-    res.render("game.html", {
+    res.render("game", {
         level: req.params.level
     });
 });
 
 server.listen(port, () => {
-    console.log("Started on port " + port);
+    console.log("Medium Rare active on port " + port);
 });

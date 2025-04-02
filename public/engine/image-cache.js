@@ -10,19 +10,19 @@ function getChecked(fullname) {
 
 export const ImageCache = {
     getGlobal(name) {
-        return getChecked(`global/${name}.png`);
+        return getChecked(`../global/${name}.png`);
     },
     getTile(name) {
-        return getChecked(`tiles/${name}`);
+        return getChecked(`../tiles/${name}`);
     },
     getSprite(name, frame) {
-        return getChecked(`sprites/${name}/${frame}.png`);
+        return getChecked(`../sprites/${name}/${frame}.png`);
     },
     getItem(name) {
-        return getChecked(`items/${name}.png`);
+        return getChecked(`../items/${name}.png`);
     },
     placeholder() {
-        return data["global/placeholder.png"];
+        return data["../global/placeholder.png"];
     },
     async init() {
         const imagesPre = assets.map(name => {

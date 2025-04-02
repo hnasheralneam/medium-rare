@@ -1,0 +1,17 @@
+.level-picker {
+   font-family: sans-serif;
+}
+
+.level-picker-element {
+   display: inline-block;
+   margin: 2rem;
+}
+
+.level-picker-element * {
+   margin: .4rem 0;
+}
+
+.level-picker-element button {
+   padding: .25rem .5rem;
+   font-size: 1.1rem;
+}

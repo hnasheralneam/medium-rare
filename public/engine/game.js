@@ -91,7 +91,7 @@ export const Game = {
     },
     levels: levels,
 
-    start(level) {
+    start(levelName) {
         const player1 = new Player({
             ArrowUp: "up",
             ArrowDown: "down",
@@ -112,7 +112,8 @@ export const Game = {
         this.players.push(player1);
         this.players.push(player2);
 
-        this.level = level;
+        // this.level = level;
+        this.level = levels[levelName];
         this.grid = new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout);
         for (const player of this.players) {

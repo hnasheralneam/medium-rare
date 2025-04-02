@@ -52,19 +52,6 @@ canvas {
 }
 
 /* settings */
-.settings, .level-picker {
-   position: fixed;
-   top: 0;
-   right: 0;
-   left: 0;
-   bottom: 0;
-   background-color: #ddd;
-   transition: .2s;
-   text-align: center;
-   padding: 2.5rem 0;
-   z-index: 0;
-}
-
 .settings h1 {
    font-family: cursive;
    font-size: 4rem;
@@ -92,10 +79,6 @@ canvas {
    transform: scale(1.1);
 }
 
-.hidden {
-   opacity: 0;
-   pointer-events: none;
-}
 
 .settings .player-controls-parent {
    display: grid;
@@ -112,24 +95,6 @@ canvas {
 }
 
 /* not settings */
-.level-picker {
-   font-family: sans-serif;
-}
-
-.level-picker-element {
-   display: inline-block;
-   margin: 2rem;
-}
-
-.level-picker-element * {
-   margin: .4rem 0;
-}
-
-.level-picker-element button {
-   padding: .25rem .5rem;
-   font-size: 1.1rem;
-}
-
 .timer {
    position: fixed;
    bottom: 0;
@@ -230,7 +195,7 @@ canvas {
 .order .time-left-progress {
    height: 100%;
    background-color: #13e873;
-   transition: .2s;
+   transition: .2s linear;
 }
 
 .fullscreen-modal {

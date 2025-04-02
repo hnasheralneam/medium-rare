@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/sprites/player/idle.png">
     <title>Medium Rare</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/shared.css">
     <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
 </head>
 <body>
+    <script>
+        let levelName = <% - level %>;
+    </script>
+
     <div class="timer">60 seconds | 0 Points</div>
     <div class="orders"></div>
     <div class="play-pause">Pause</div>
     <div class="modals">
-        <div class="settings hidden">
+        <div class="settings modal hidden">
             <h1>Paused</h1>
             <button class="continue">Continue</button>
             <br><br><br>
@@ -22,14 +27,9 @@
         <div class="alert-outer">
             <div class="alert-parent"></div>
         </div>
-        <div class="level-picker hidden">
-            <h1>Pick a level</h1>
-            <br><hr><br>
-        </div>
-
         <div class="post-game fullscreen-modal hidden"></div>
         <div class="pre-game fullscreen-modal hidden"></div>
     </div>
 </body>
-<script src="script.js" type="module"></script>
+<script src="/script.js" type="module"></script>
 </html>
