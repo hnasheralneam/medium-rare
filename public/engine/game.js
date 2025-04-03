@@ -6,19 +6,6 @@ import { OrderHandler } from "./orderHandler.js";
 import { SaveData, clearSave } from "../storage.js";
 import { hideAlerts, showAlerts, createAlert } from "../alertSystem.js";
 
-
-/*
-
-Level Storage:
-Text file (or string)
-
-?<VERSION>
-w[WIDTH]
-h[HEIGHT]
-#0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-
-*/
-
 // player start positions should be defined in here as well
 const levels = {
     // showcase image is the name of the level
@@ -251,3 +238,16 @@ export const Game = {
         G.restore();
     }
 };
+
+
+/*
+
+Level Storage:
+Text file (or string)
+
+?<VERSION>
+w[WIDTH]
+h[HEIGHT]
+#0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+
+*/

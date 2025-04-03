@@ -1,15 +1,17 @@
-import { Cell } from "./engine/cell.js";
-import { Grid } from "./engine/grid.js";
-import { Player } from "./engine/player.js";
+// import { Cell } from "./engine/cell.js";
+// import { Grid } from "./engine/grid.js";
+// import { Player } from "./engine/player.js";
 import { Game } from "./engine/game.js";
 import { SaveData, clearSave } from "./storage.js";
 import { ImageCache } from "./engine/image-cache.js";
-import * as G from "./engine/graphics.js";
+// import * as G from "./engine/graphics.js";
 import { showAlerts, createAlert, hideAlerts } from "./alertSystem.js";
 
 await ImageCache.init();
 
 window.addEventListener("resize", () => Game.display());
+
+const levelName = window.location.href.split("/").at(-1); // may break if url ends with /
 
 // this line is for testing
 SaveData.firstTime = false;
@@ -33,8 +35,7 @@ else {
 }
 
 function startWide() {
-    console.log(levelName);
-    Game.start("wide");
+    Game.start(levelName);
 }
 
 let settingsPanel = document.querySelector(".settings");

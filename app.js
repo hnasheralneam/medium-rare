@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const http = require("http");
+const ejs = require("ejs");
 const server = http.createServer(app);
 const port = process.env.PORT || 8080;
 
@@ -15,6 +16,7 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/play/:level", (req, res) => {
+    console.log(req.params.level)
     res.render("game", {
         level: req.params.level
     });
