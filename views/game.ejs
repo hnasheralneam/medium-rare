@@ -26,6 +26,43 @@
         <div class="post-game fullscreen-modal hidden"></div>
         <div class="pre-game fullscreen-modal hidden"></div>
     </div>
+    <% if (multiplayer) { %>
+        <div class="fullscreen-modal">congratuluatitons
+            <p>you are playing multiplayer</p>
+
+
+
+
+            <div class="main">
+                <h2 class="roomcode-display">Room Code: </h2>
+                <p class="waiting-text">Waiting to be let in</p>
+                <ul class="waiting"></ul>
+                <p>In the room</p>
+                <ul class="inRoom"></ul>
+            </div>
+            <br>
+            <div>
+                <h2>Lobby chat</h2>
+                <div class="messages"></div>
+                <form class="message-form" action="" onsubmit="return sendMessage(event)">
+                    <input class="message-input" type="text" name="message" required>
+                    <input type="submit" value="Send">
+                </form>
+            </div>
+
+
+        </div>
+
+
+
+
+        <script src="/scripts/lobby.js"></script>
+        <script>
+            const levelName = "<%= level %>";
+
+            alert("level data exists! \n" + "<%= level %>")
+        </script>
+    <% } %>
 </body>
 <script src="/script.js" type="module"></script>
 </html>

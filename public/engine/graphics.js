@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 /*
 
              -height/2
-                 ^        
+                 ^
                  |
                  |
 -width/2 <-------+-------> +width/2
@@ -44,7 +44,7 @@ document.body.appendChild(canvas);
 
 export function drawImage(image, x, y) {
     const [dx, dy] = lastModifier();
-    ctx.drawImage(image, x + Math.round(canvas.width / 2) + dx, y + Math.round(canvas.height / 2) + dy);
+    ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
 }
 
 export function fillRect(x, y, w, h) {

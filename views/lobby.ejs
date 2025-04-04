@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Multiplayer Lobby | Medium Rare</title>
+</head>
+
+<body>
+   <div class="main">
+      <h2 class="roomcode-display">Room Code: </h2>
+      <p class="waiting-text">Waiting to be let in</p>
+      <ul class="waiting"></ul>
+      <p>In the room</p>
+      <ul class="inRoom"></ul>
+   </div>
+   <br>
+   <div>
+      <h2>Lobby chat</h2>
+      <div class="messages"></div>
+      <form class="message-form" action="" onsubmit="return sendMessage(event)">
+         <input class="message-input" type="text" name="message" required>
+         <input type="submit" value="Send">
+      </form>
+   </div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/scripts/lobby.js"></script>
+
+</html>

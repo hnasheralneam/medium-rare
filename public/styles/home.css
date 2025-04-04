@@ -1,3 +1,7 @@
+.level-picker * {
+   overflow: hidden;
+}
+
 .level-picker {
    font-family: sans-serif;
 }
@@ -14,4 +18,93 @@
 .level-picker-element button {
    padding: .25rem .5rem;
    font-size: 1.1rem;
+}
+
+
+
+
+
+
+
+.multiplayer-menu {
+   position: fixed;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   transition: all .2s;
+}
+
+.multiplayer-menu .inner {
+   display: inline-block;
+   text-align: center;
+   border-radius: 1.5em;
+   background-color: #e6e6e6;
+   padding: 2rem 6rem;
+   margin: .5rem auto;
+   box-shadow: 0 .2rem .4rem #bbb;
+}
+
+.join-room, .create-room {
+   position: fixed;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   backdrop-filter: blur(.4em);
+   background-color: #ffffff60;
+   opacity: 0;
+   pointer-events: none;
+   transition: .2s;
+}
+
+.modal-content {
+   position: relative;
+   width: 30rem;
+   min-height: 20rem;
+   padding: 2em;
+   background-color: #fff;
+   box-shadow: 0 .2em .5em #ddd;
+   transition: .3s;
+   border-radius: .6em;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+}
+
+.modal-content:hover {
+   box-shadow: 0 .8em 1.5em #aaa;
+}
+
+.close-modal {
+   position: absolute;
+   top: 0;
+   right: 0;
+   margin: 1.5rem;
+   font-weight: 900;
+   color: red;
+   border-radius: 2rem;
+   height: 2.5rem;
+   width: 2.5rem;
+   background-color: #eee;
+   border: solid .2rem #ccc;
+}
+
+.multiplayer-menu button {
+   padding: .4em .6em;
+   background-color: #f0f0f0;
+   border: none;
+   border-radius: .4em;
+   box-shadow: 0 0 .2em #bbb;
+}
+
+.multiplayer-menu button:hover {
+   background-color: #e8e8e8;
+}
+
+.multiplayer-menu button:active {
+   background-color: #f6f6f6;
 }

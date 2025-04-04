@@ -7,6 +7,7 @@ import { SaveData, clearSave } from "../storage.js";
 import { hideAlerts, showAlerts, createAlert } from "../alertSystem.js";
 
 // player start positions should be defined in here as well
+// amount of orders should be defined here as well
 const levels = {
     // showcase image is the name of the level
     huge: {
@@ -54,7 +55,7 @@ const levels = {
             1, 2, 0, 0, 0, 0, 1,
             1, 4, 0, 0, 0, 0, 1,
             1, 5, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 1,
+            1, 5, 0, 0, 0, 0, 1,
             1, 1, 1, 1, 1, 1, 1,
         ],
         width: 7,
@@ -62,9 +63,10 @@ const levels = {
         minPlayers: 1,
         maxPlayers: 2,
         menuOptions: ["salad"],
-        timeSeconds: 30 // usually 60
+        timeSeconds: 60
     }
 }
+
 
 export const Game = {
     /** @type { Player[] } */
@@ -77,6 +79,7 @@ export const Game = {
         score: 0
     },
     levels: levels,
+    busy: false,
 
     start(levelName) {
         const player1 = new Player({
@@ -113,7 +116,9 @@ export const Game = {
             for (let i = 0; i < this.players.length; i++) {
                 const player = this.players[i];
                 player.keyPressed(e, this.grid);
+                if (player.anim === 1) this.notifyRedraw();
             }
+
             // this will be called only when the listener is set
             this.display();
         };
@@ -222,20 +227,37 @@ export const Game = {
             }
         }
         for (const player of this.players) {
+            const pos = player.smoothPos();
             G.drawImage(
                 ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"),
-                player.pos[0] * csize,
-                player.pos[1] * csize
+                pos[0] * csize,
+                pos[1] * csize
             );
             if (player.item !== null) {
                 G.drawImage(
                     ImageCache.getItem(player.item.src()),
-                    player.pos[0] * csize,
-                    (player.pos[1] - 1) * csize
+                    pos[0] * csize,
+                    (pos[1] - 1) * csize
                 );
             }
         }
         G.restore();
+    },
+
+    notifyRedraw() {
+        if (this.busy) return;
+        this.busy = true;
+        window.requestAnimationFrame(() => this.loop());
+    },
+
+    loop() {
+        if (!this.busy) return;
+        this.busy = false;
+        for (const player of this.players) {
+            if (player.tickAnim()) this.busy = true;
+        }
+        this.display();
+        window.requestAnimationFrame(() => this.loop());
     }
 };
 

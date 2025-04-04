@@ -36,15 +36,24 @@ export class Grid {
         return this.cells[x + y * this.width];
     }
 
+    checkMovement(player, dx, dy) {
+        const nx = player.pos[0] + dx;
+        const ny = player.pos[1] + dy;
+        if (!this.inBounds(nx, ny)) return false;
+        if (this.cellAt(nx, ny).proto.solid) return false;
+        return true;
+    }
+
     movePlayer(player, dx, dy) {
         player.vel[0] = dx;
         player.vel[1] = dy;
         const nx = player.pos[0] + dx;
         const ny = player.pos[1] + dy;
-        if (!this.inBounds(nx, ny)) return;
-        if (this.cellAt(nx, ny).proto.solid) return;
+        if (!this.inBounds(nx, ny)) return false;
+        if (this.cellAt(nx, ny).proto.solid) return false;
         player.pos[0] = nx;
         player.pos[1] = ny;
+        return true;
     }
 
     interact(player) {

@@ -3,7 +3,7 @@ import { Game } from "../engine/game.js";
 showLevelPicker();
 
 function showLevelPicker() {
-    let levelPicker = document.querySelector(".level-picker");
+    let levelPicker = document.querySelector(".level-picker-contents");
     levelPicker.classList.remove("hidden");
 
     // setTimeout(() => {

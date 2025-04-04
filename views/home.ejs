@@ -3,16 +3,74 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="icon" type="image/x-icon" href="/sprites/player/idle.png">
    <title>🏠 | Medium Rare</title>
    <link rel="stylesheet" href="styles/home.css">
    <link rel="stylesheet" href="styles/shared.css">
+   <script defer src="https://umami.hnasheralneam.dev/script.js"
+      data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
 </head>
 <body>
    <div class="level-picker modal">
       <h1>Pick a level</h1>
       <br>
       <hr><br>
+      <div class="level-picker-contents"></div>
+      <br><br><br>
+      <div class="multiplayer-menu">
+         <div class="inner">
+            <p>Multiplayer Room</p>
+            <br>
+            <button onclick="openModal('join')">Join</button>
+            <button onclick="openModal('create')">Create</button>
+         </div>
+      </div>
+   </div>
+   <!-- Modals -->
+   <div class="join-room">
+      <div class="modal-content">
+         <div>
+            <h1>Join a Room</h1>
+            <button class="close-modal" onclick="openModal('join')">X</button>
+            <form class="join-form" action="" onsubmit="return joinRoom(event)">
+               <p class="error-place"></p>
+               <h2>Room Code</h2>
+               <input class="roomcode" type="text" name="roomcode" required>
+               <h3>Nickname</h3>
+               <input class="nickname" type="text" name="nickname" required><br>
+               <input type="submit" value="Let's go!">
+            </form>
+            <br><br><br>
+            <div class="waiting-room hidden">
+               <p class="waiting-nickname"></p>
+               <h2>Waiting to be let in...</h2>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="create-room">
+      <div class="modal-content">
+         <div>
+            <h1>Create a Room</h1>
+            <button class="close-modal" onclick="openModal('create')">X</button>
+            <form class="create-form" action="" onsubmit="return createRoom(event)">
+               <h2>Nickname</h2>
+               <input class="nickname" type="text" name="nickname" required><br>
+               <input type="submit" value="Let's do it!">
+            </form>
+         </div>
+      </div>
    </div>
 </body>
+<div class="scripts"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="scripts/roomHome.js"></script>
 <script src="scripts/levelPicker.js" type="module"></script>
+<script>
+function attachScript(src) {
+   const script = document.createElement("script");
+   script.setAttribute("src", src);
+   document.querySelector(".scripts").appendChild(script);
+}
+</script>
 </html>

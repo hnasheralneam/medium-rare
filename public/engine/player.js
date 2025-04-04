@@ -7,6 +7,8 @@ const movements = {
     right: [1, 0]
 };
 
+const easing = x => x ** 3;
+
 export class Player {
     #listener_function;
     inputMap;
@@ -17,6 +19,20 @@ export class Player {
         this.item = null;
         this.pos = [x, y];
         this.vel = [0, 0];
+        this.anim = 0;
+    }
+
+    smoothPos() {
+        const t = easing(this.anim);
+        const [px, py] = this.pos;
+        const [vx, vy] = this.vel;
+        return [px - t * vx, py - t * vy];
+    }
+
+    tickAnim() {
+        if (this.anim === 0) return false;
+        this.anim = Math.max(0, this.anim - 0.09);
+        return true;
     }
 
     deleteItem() {
@@ -50,14 +66,19 @@ export class Player {
      * @param { import("./grid.js").Grid } grid
      */
     handleAction(action, grid) {
-        if (action === "interact") grid.interact(this);
+        if (action === "interact") {
+            if (this.anim > 0.5) return;
+            grid.interact(this);
+        }
         else {
             const move = movements[action];
             if (move === undefined) {
                 console.log("Unexpected action:", action);
                 return;
             }
-            grid.movePlayer(this, move[0], move[1]);
+            if (grid.checkMovement(this, move[0], move[1]) && this.anim !== 0) return;
+            if (grid.movePlayer(this, move[0], move[1]))
+                this.anim = 1;
         }
     }
 }
