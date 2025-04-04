@@ -11,7 +11,7 @@ socket.emit("player connecting to room", userInfo);
 
 
 socket.on("you were let in", (roomname) => {
-   location.href = window.location.origin + `/multi/${roomname}`;
+   location.href = window.location.origin + `/play?room=${roomname}`;
 });
 
 socket.on("leader left lobby", () => {

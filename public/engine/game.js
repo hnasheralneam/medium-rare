@@ -152,7 +152,6 @@ export const Game = {
     },
 
     startTimer() {
-        console.log(this.level)
         let timeLeft = this.level.timeSeconds;
         document.querySelector(".timer").textContent = timeLeft + " seconds | 0 Points";
         this.timer = setInterval(() => {

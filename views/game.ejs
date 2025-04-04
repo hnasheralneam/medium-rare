@@ -7,9 +7,22 @@
     <title>Medium Rare</title>
     <link rel="stylesheet" href="/styles/styles.css">
     <link rel="stylesheet" href="/styles/shared.css">
+
     <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+
+    <% if (!multiplayer) { %>
+        <script>
+            const levelName = "<%= level %>";
+            window.levelName = levelName;
+
+            // alert("level data exists! \n" + "<%= level %>")
+        </script>
+    <% } %>
+
+
     <div class="timer">60 seconds | 0 Points</div>
     <div class="orders"></div>
     <div class="play-pause">Pause</div>
@@ -27,12 +40,7 @@
         <div class="pre-game fullscreen-modal hidden"></div>
     </div>
     <% if (multiplayer) { %>
-        <div class="fullscreen-modal">congratuluatitons
-            <p>you are playing multiplayer</p>
-
-
-
-
+        <div class="fullscreen-modal">
             <div class="main">
                 <h2 class="roomcode-display">Room Code: </h2>
                 <p class="waiting-text">Waiting to be let in</p>
@@ -57,11 +65,6 @@
 
 
         <script src="/scripts/lobby.js"></script>
-        <script>
-            const levelName = "<%= level %>";
-
-            alert("level data exists! \n" + "<%= level %>")
-        </script>
     <% } %>
 </body>
 <script src="/script.js" type="module"></script>

@@ -11,16 +11,17 @@ await ImageCache.init();
 
 window.addEventListener("resize", () => Game.display());
 
-const levelName = window.location.href.split("/").at(-1); // may break if url ends with /
+// const levelName = window.location.href.split("/").at(-1); // may break if url ends with /
+const levelName = window.levelName;
 
 // this line is for testing
-SaveData.firstTime = false;
+// SaveData.firstTime = false;
 if (SaveData.firstTime) {
     showAlerts();
     // instead of all this, show a pre-game screen with your previous high score and start button
     createAlert("POV: You are Phil", undefined, true);
     createAlert("And the customers are angry", undefined, true);
-    createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads in one minute", undefined, true);
+    createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads as possible within the time", undefined, true);
     createAlert("Pick up raw materials from the crate", undefined, true);
     createAlert("Slice them and combine to make salad", undefined, true);
     createAlert("Button for interacting is in settings", undefined, true);
@@ -30,7 +31,7 @@ if (SaveData.firstTime) {
 }
 else {
     showAlerts();
-    createAlert("Good luck!", undefined, true);
+    createAlert("Let's go!", undefined, true);
     hideAlerts(startWide);
 }
 

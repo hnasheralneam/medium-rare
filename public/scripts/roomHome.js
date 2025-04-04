@@ -55,7 +55,7 @@ socket.on("room created", (data) => {
       usertype: data.usertype,
       location: "home"
    }));
-   location.href = location.href + `multi/${data.roomname}`;
+   location.href = location.href + `play?room=${data.roomname}`;
 });
 
 socket.on("joined room", (data) => {

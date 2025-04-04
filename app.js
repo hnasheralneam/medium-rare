@@ -24,12 +24,18 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/play/:level", (req, res) => {
-    console.log(req.params.level)
     res.render("game", {
-        multiplayer: true,
+        multiplayer: false,
         level: req.params.level
     });
 });
+
+app.get("/play", (req, res) => {
+    res.render("game", {
+        multiplayer: true
+    });
+});
+
 
 
 
@@ -69,25 +75,6 @@ io.on("connection", (socket) => {
         }
     });
 
-
-    // Handle cursors
-    socket.on("get cursors", () => {
-        // start sending cursors
-        let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-        let sendCursorsPosLoop = setInterval(() => {
-            let cursorPositions = rooms[indexInRooms]["users"].map(user => ({ name: user.nickname, pos: user.pos }));
-            io.in(rooms[indexInRooms]["info"].name).emit("cursor positions", cursorPositions);
-        }, 100);
-        io.in(rooms[indexInRooms]["info"].name).emit("start sending cursors");
-    });
-
-    socket.on("cursor position", (cursorPos) => {
-        userData.pos = cursorPos;
-
-        let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-        let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == userData.socketid);
-        if (indexInUsers != -1) rooms[indexInRooms]["users"][indexInUsers] = userData;
-    });
 
 
     socket.on("create room", () => {

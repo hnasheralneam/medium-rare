@@ -42,13 +42,17 @@ export class OrderHandler {
 
     submitOrder(player) {
         // later make sure that it has a plate
-        if (player.item === null) return;
+        if (player.item === null) {
+            console.log("holding nothing");
+            return;
+        }
         // should be fixed
-        // not giving this error, but there are still times the playre cannot submit a food <-- still a problem (but it might only be from the left side of delivery)
+        // not giving this error, but there are still times the playre cannot submit a food <-- still a problem
         if (this.mealOptions.includes(player.item.name())) {
             let order = this.orders.find(o => o.name == player.item.name());
             if (order) {
                 order.element.remove();
+                order.finish();
                 this.orders.splice(this.orders.indexOf(order), 1);
                 this.completedOrders.push(order);
                 Game.stats.score++;
@@ -110,7 +114,7 @@ class Order {
 
     countDown() {
         let interval = 250;
-        let countdownInterval = setInterval(() => {
+        this.countdownInterval = setInterval(() => {
             if (!Game.paused) {
                 this.timeLeft -= interval;
                 let percent = (this.timeLeft / this.time) * 100;
@@ -125,9 +129,13 @@ class Order {
                     this.handler.orders.splice(this.handler.orders.indexOf(this), 1);
                     // consider making a beep/bad noise, and good noise for submitted
                     // take away time/score and give visual feedback for that
-                    clearInterval(countdownInterval);
+                    clearInterval(this.countdownInterval);
                 }
             }
         }, interval);
+    }
+
+    finish() {
+        clearInterval(this.countdownInterval);
     }
 }

@@ -118,40 +118,6 @@ socket.on("latency tested", () => {
 });
 
 
-// Handle cursor displays
-function start() {
-   console.log("started")
-   socket.emit("get cursors");
-}
-
-let lastMousex, lastMousey;
-socket.on("start sending cursors", () => {
-   let sendCursorsLoop = setInterval(() => {
-      if (lastMousex != dragAndDrop.mousex || lastMousey != dragAndDrop.mousey) {
-         lastMousex = dragAndDrop.mousex;
-         lastMousey = dragAndDrop.mousey;
-         socket.emit("cursor position", { x: dragAndDrop.mousex, y: dragAndDrop.mousey });
-      }
-   }, latency);
-});
-
-socket.on("cursor positions", (cursorPositions) => {
-   cursorPositions.forEach((cursorPos) => {
-      if (cursorPos.name === userInfo.nickname) return; // Skip current user's cursor
-
-      let cursorElement = document.querySelector(`.cursor-${cursorPos.name}`);
-      if (!cursorElement) {
-         cursorElement = document.createElement("div");
-         cursorElement.classList.add(`cursor-${cursorPos.name}`);
-         cursorElement.classList.add("cursor");
-         cursorElement.title = cursorPos.name;
-         document.body.append(cursorElement);
-      }
-      cursorElement.style.left = cursorPos.pos.x + "px";
-      cursorElement.style.top = cursorPos.pos.y + "px";
-   });
-});
-
 // Lobby chat - html is this
 function sendMessage(event) {
    event.preventDefault();
