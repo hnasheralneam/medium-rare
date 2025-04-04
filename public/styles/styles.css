@@ -214,7 +214,7 @@ canvas {
    align-items: center;
 }
 
-.post-game div {
+.post-game div, .pre-game div {
    text-align: center;
    font-family: sans-serif;
 }

@@ -14,6 +14,7 @@ app.use(express.static("public"));
 app.use(express.static("assets"));
 app.use("/scripts", express.static(__dirname + "/public/scripts/"));
 app.use("/item/", express.static(__dirname + "/assets/items"));
+app.use("/resources/", express.static(__dirname + "/resources"));
 app.set("view engine", "ejs");
 
 
@@ -51,6 +52,10 @@ io.on("connection", (socket) => {
         userData = userInfo;
 
         let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+        if (indexInRooms == -1) {
+            console.error("Room does not exist!");
+            return;
+        }
         let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == oldSocketId);
         if (indexInUsers != -1) rooms[indexInRooms]["users"][indexInUsers] = userData;
         io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
@@ -60,6 +65,10 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         if (userData.usertype == "leader") {
             let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+            if (indexInRooms == -1) {
+                console.error("Room does not exist!");
+                return;
+            }
             io.in(rooms[indexInRooms]["info"].name).emit("leader left lobby", rooms[indexInRooms]["users"]);
         }
         else if (userData.location == "waiting room") {
@@ -85,13 +94,28 @@ io.on("connection", (socket) => {
                 code: Math.floor(100000 + Math.random() * 900000),
                 open: true
             },
-            users: []
+            users: [],
+            data: {
+                paused: false,
+                level: null,
+                grid: null
+            }
         });
         socket.emit("room created", {
             socketid: socket.id,
             roomname: roomid,
             usertype: "leader"
         });
+    });
+    // "load" the game before actually starting
+    socket.on("init room data", ({roomid, levelName, grid}) => {
+        let index = rooms.findIndex(room => room.info.name == roomid);
+        rooms[index]["data"] = {
+            paused: true,
+            level: levelName,
+            grid: grid
+        }
+
     });
     socket.on("get roomcode", (roomid) => {
         let indexInRooms = rooms.findIndex(room => room.info.name == roomid);
@@ -123,6 +147,11 @@ io.on("connection", (socket) => {
 
     socket.on("leader connecting to room", (userInfo) => {
         let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
+        if (indexInRooms == -1) {
+            console.error("Room does not exist!");
+            return;
+        }
+
         rooms[indexInRooms]["users"].push(userInfo);
 
         socket.join(userInfo.roomname);
@@ -135,6 +164,11 @@ io.on("connection", (socket) => {
     socket.on("player joining lobby", (userInfo, socketid) => {
         // Adds user to socket room
         let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
+        if (indexInRooms == -1) {
+            console.error("Room does not exist!");
+            return;
+        }
+
         socket.join(userInfo.roomname);
 
         // Sends to all in room

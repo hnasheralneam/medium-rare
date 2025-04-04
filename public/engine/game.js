@@ -4,69 +4,6 @@ import { Player } from "./player.js";
 import { ImageCache } from "./image-cache.js";
 import { OrderHandler } from "./orderHandler.js";
 import { SaveData, clearSave } from "../storage.js";
-import { hideAlerts, showAlerts, createAlert } from "../alertSystem.js";
-
-// player start positions should be defined in here as well
-// amount of orders should be defined here as well
-const levels = {
-    // showcase image is the name of the level
-    huge: {
-        layout: [
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 0, 0, 0, 0, 4, 0, 0, 0, 6, 1,
-            1, 3, 0, 4, 0, 4, 0, 4, 4, 4, 1,
-            1, 4, 4, 4, 0, 4, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 4, 4, 4, 0, 1,
-            1, 0, 4, 4, 4, 0, 4, 0, 0, 0, 1,
-            1, 0, 0, 0, 4, 0, 4, 0, 4, 0, 1,
-            1, 0, 0, 5, 4, 0, 0, 0, 4, 2, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-        ],
-        width: 11,
-        height: 9,
-        minPlayers: 2,
-        maxPlayers: 4,
-        menuOptions: ["salad"],
-        timeSeconds: 100
-    },
-
-    wide: {
-        layout: [
-            1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 4, 0, 0, 4, 0, 0, 6, 1,
-            1, 4, 0, 0, 4, 0, 0, 0, 1,
-            1, 4, 0, 0, 4, 0, 0, 4, 1,
-            1, 5, 0, 0, 4, 0, 0, 3, 1,
-            1, 0, 0, 0, 4, 0, 0, 2, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1
-        ],
-        width: 9,
-        height: 7,
-        minPlayers: 2,
-        maxPlayers: 4,
-        menuOptions: ["salad"],
-        timeSeconds: 80
-    },
-
-    square: {
-        layout: [
-            1, 1, 1, 1, 1, 1, 1,
-            1, 3, 0, 0, 0, 6, 1,
-            1, 2, 0, 0, 0, 0, 1,
-            1, 4, 0, 0, 0, 0, 1,
-            1, 5, 0, 0, 0, 0, 1,
-            1, 5, 0, 0, 0, 0, 1,
-            1, 1, 1, 1, 1, 1, 1,
-        ],
-        width: 7,
-        height: 7,
-        minPlayers: 1,
-        maxPlayers: 2,
-        menuOptions: ["salad"],
-        timeSeconds: 60
-    }
-}
-
 
 export const Game = {
     /** @type { Player[] } */
@@ -78,10 +15,10 @@ export const Game = {
     stats: {
         score: 0
     },
-    levels: levels,
     busy: false,
+    levelNames: ["square", "wide", "huge"],
 
-    start(levelName) {
+    async start(levelName) {
         const player1 = new Player({
             ArrowUp: "up",
             ArrowDown: "down",
@@ -101,9 +38,7 @@ export const Game = {
 
         this.players.push(player1);
         this.players.push(player2);
-
-        // this.level = level;
-        this.level = levels[levelName];
+        this.level = await this.getLevelData(levelName);
         this.grid = new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout);
         for (const player of this.players) {
@@ -131,6 +66,15 @@ export const Game = {
         this.startTimer();
 
         this.initControlsDisplay();
+    },
+
+    async getLevelData(levelName) {
+        const url = `/resources/levels/${levelName}.json`;
+        return await fetch(url)
+            .then(x => x.text())
+            .then(y => {
+                return JSON.parse(y);
+            });
     },
 
     end() {
@@ -183,7 +127,7 @@ export const Game = {
             playerElement.innerHTML = `
                 <div>
                     <h2>Player ${index}</h2>
-                    <img src="sprites/${player.sprite}/idle.png">
+                    <img src="/sprites/${player.sprite}/idle.png">
                 </div>
                 <div class="controls-map"></div>
                 <br>
@@ -259,16 +203,3 @@ export const Game = {
         window.requestAnimationFrame(() => this.loop());
     }
 };
-
-
-/*
-
-Level Storage:
-Text file (or string)
-
-?<VERSION>
-w[WIDTH]
-h[HEIGHT]
-#0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-
-*/

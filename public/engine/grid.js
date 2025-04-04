@@ -21,13 +21,6 @@ export class Grid {
     }
 
     /**
-     * @deprecated Use `Grid.tileAt(x, y)` instead
-     */
-    cellAt(x, y) {
-        return this.tileAt(x, y);
-    }
-
-    /**
      * @param { number } x x coordinate of tile
      * @param { number } y y coordinate of tile
      * @return { Tile }
@@ -40,7 +33,7 @@ export class Grid {
         const nx = player.pos[0] + dx;
         const ny = player.pos[1] + dy;
         if (!this.inBounds(nx, ny)) return false;
-        if (this.cellAt(nx, ny).proto.solid) return false;
+        if (this.tileAt(nx, ny).proto.solid) return false;
         return true;
     }
 
@@ -50,7 +43,7 @@ export class Grid {
         const nx = player.pos[0] + dx;
         const ny = player.pos[1] + dy;
         if (!this.inBounds(nx, ny)) return false;
-        if (this.cellAt(nx, ny).proto.solid) return false;
+        if (this.tileAt(nx, ny).proto.solid) return false;
         player.pos[0] = nx;
         player.pos[1] = ny;
         return true;

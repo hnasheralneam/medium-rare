@@ -69,6 +69,7 @@ socket.on("joined room", (data) => {
    }));
 
    attachScript("scripts/waitingRoom.js");
+   document.querySelector(".join-form").remove();
 });
 
 socket.on("no such room", (errorMessage) => {

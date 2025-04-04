@@ -43,7 +43,6 @@ export class OrderHandler {
     submitOrder(player) {
         // later make sure that it has a plate
         if (player.item === null) {
-            console.log("holding nothing");
             return;
         }
         // should be fixed
@@ -61,9 +60,6 @@ export class OrderHandler {
                     setTimeout(() => { this.generateOrder(); }, 2000);
                 }
             }
-        }
-        else {
-            console.log("wrong food:" + player.item.name() + " : "  + this.mealOptions);
         }
     }
 }

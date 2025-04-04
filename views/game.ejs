@@ -40,29 +40,35 @@
         <div class="pre-game fullscreen-modal hidden"></div>
     </div>
     <% if (multiplayer) { %>
-        <div class="fullscreen-modal">
+        <div class="fullscreen-modal multiplayer-lobby">
             <div class="main">
                 <h2 class="roomcode-display">Room Code: </h2>
                 <p class="waiting-text">Waiting to be let in</p>
                 <ul class="waiting"></ul>
                 <p>In the room</p>
                 <ul class="inRoom"></ul>
+                <div class="leader-options hidden">
+                    <form action="">
+                        <label for="level-selection">Choose level</label>
+                        <select name="level-selection" class="level-select-dropdown">
+                            <option value="square">Square</option>
+                            <option value="wide">Wide</option>
+                            <option value="huge">Huge</option>
+                        </select>
+                    </form>
+                    <button onclick="leaderStart()">Start game</button>
+                </div>
             </div>
             <br>
             <div>
-                <h2>Lobby chat</h2>
+                <h2>Chat</h2>
                 <div class="messages"></div>
                 <form class="message-form" action="" onsubmit="return sendMessage(event)">
                     <input class="message-input" type="text" name="message" required>
                     <input type="submit" value="Send">
                 </form>
             </div>
-
-
         </div>
-
-
-
 
         <script src="/scripts/lobby.js"></script>
     <% } %>

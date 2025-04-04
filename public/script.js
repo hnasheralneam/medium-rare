@@ -1,24 +1,19 @@
-// import { Cell } from "./engine/cell.js";
-// import { Grid } from "./engine/grid.js";
-// import { Player } from "./engine/player.js";
 import { Game } from "./engine/game.js";
 import { SaveData, clearSave } from "./storage.js";
 import { ImageCache } from "./engine/image-cache.js";
-// import * as G from "./engine/graphics.js";
 import { showAlerts, createAlert, hideAlerts } from "./alertSystem.js";
 
 await ImageCache.init();
 
 window.addEventListener("resize", () => Game.display());
 
-// const levelName = window.location.href.split("/").at(-1); // may break if url ends with /
 const levelName = window.levelName;
+window.startGame = (levelName) => {
+    Game.start(levelName);
+}
 
-// this line is for testing
-// SaveData.firstTime = false;
 if (SaveData.firstTime) {
     showAlerts();
-    // instead of all this, show a pre-game screen with your previous high score and start button
     createAlert("POV: You are Phil", undefined, true);
     createAlert("And the customers are angry", undefined, true);
     createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads as possible within the time", undefined, true);
@@ -30,13 +25,27 @@ if (SaveData.firstTime) {
     SaveData.firstTime = false;
 }
 else {
-    showAlerts();
-    createAlert("Let's go!", undefined, true);
-    hideAlerts(startWide);
+    createPreGamePanel();
 }
 
-function startWide() {
-    Game.start(levelName);
+function createPreGamePanel() {
+    const preGamePanel = document.querySelector(".pre-game");
+    let pressListener;
+    preGamePanel.classList.remove("hidden");
+    preGamePanel.innerHTML = `
+        <div>
+            <h2>Level: ${levelName}</h2>
+            <h1>Your high score: ${SaveData.highScore}</h1>
+            <button onclick="${preGamePanel.classList.remove('hidden')}; clearInterval(${pressListener}); window.startGame(${levelName})">Play</button>
+        </div>
+    `;
+    pressListener = document.addEventListener("keypress", (e) => {
+        if (e.key == "Enter") {
+            document.querySelector(".pre-game").classList.add("hidden");
+            clearInterval(pressListener);
+            window.startGame(levelName);
+        }
+    });
 }
 
 let settingsPanel = document.querySelector(".settings");

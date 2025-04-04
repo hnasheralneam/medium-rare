@@ -1,5 +1,3 @@
-console.log("connected lobby script")
-
 let socket = io();
 
 // Join room
@@ -11,7 +9,7 @@ if (typeof userInfo.nickname == "undefined") location.href = window.location.ori
 
 // Ensure that all user data is up-to-date
 
-socket.emit("get socketid", userInfo.nickname); // If people have the same nickname...
+socket.emit("get socketid", userInfo.nickname);
 socket.on("here is socketid", (socketid) => {
    let oldSocketId = userInfo.socketid;
    userInfo.socketid = socketid;
@@ -25,6 +23,8 @@ socket.on("here is socketid", (socketid) => {
    }
 });
 
+// for all multiplayer games gameid must exist
+window.gameid = userInfo.roomname;
 
 socket.emit("get roomcode", userInfo.roomname);
 socket.on("here is roomcode", (roomcode) => {
@@ -35,7 +35,6 @@ socket.on("here is roomcode", (roomcode) => {
 
 
 // Leader only
-
 socket.on("user in waiting room left", (departingUserSocketId) => {
    let userEl = document.querySelector("#id-" + departingUserSocketId);
    if (userEl) userEl.remove();
@@ -56,7 +55,6 @@ socket.on("someone in waiting room", (newUserInfo) => {
 
 
 // All user events
-
 socket.on("you were kicked out", () => {
    location.href = window.location.origin;
 });
@@ -98,11 +96,13 @@ function updateUsersList(users) {
 }
 
 // Add start button for leader
+function leaderStart() {
+   window.levelName = document.querySelector(".level-select-dropdown").value;
+   document.querySelector(".multiplayer-lobby").remove();
+   window.startGame(window.levelName);
+}
 if (userInfo.usertype == "leader") {
-   let startButton = document.createElement("BUTTON")
-   startButton.textContent = "Start game";
-   startButton.onclick = () => { start() };
-   document.body.querySelector(".main").append(startButton);
+   document.querySelector(".leader-options").classList.remove("hidden");
 }
 
 // Latency test

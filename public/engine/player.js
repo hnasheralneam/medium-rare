@@ -1,4 +1,5 @@
 import { Game } from "./game.js";
+import { Queue } from "../utils/queue.js";
 
 const movements = {
     up: [0, -1],
@@ -18,20 +19,22 @@ export class Player {
         this.inputMap = inputMap;
         this.item = null;
         this.pos = [x, y];
+        this.lastPos = [x, y];
         this.vel = [0, 0];
         this.anim = 0;
+        //this.pendingActions = Queue.withSize(10);
     }
 
     smoothPos() {
         const t = easing(this.anim);
         const [px, py] = this.pos;
-        const [vx, vy] = this.vel;
-        return [px - t * vx, py - t * vy];
+        const [lx, ly] = this.lastPos;
+        return [px - t * (px - lx), py - t * (py - ly)];
     }
 
     tickAnim() {
         if (this.anim === 0) return false;
-        this.anim = Math.max(0, this.anim - 0.09);
+        this.anim = Math.max(0, this.anim - 0.06);
         return true;
     }
 
@@ -73,12 +76,18 @@ export class Player {
         else {
             const move = movements[action];
             if (move === undefined) {
-                console.log("Unexpected action:", action);
                 return;
             }
-            if (grid.checkMovement(this, move[0], move[1]) && this.anim !== 0) return;
-            if (grid.movePlayer(this, move[0], move[1]))
+            // if (grid.checkMovement(this, move[0], move[1]) && this.anim !== 0) {
+            //     //this.pendingActions.offer(action);
+            //     return;
+            // };
+            const [sx, sy] = this.smoothPos();
+            if (grid.movePlayer(this, move[0], move[1])) {
                 this.anim = 1;
+                this.lastPos[0] = sx;
+                this.lastPos[1] = sy;
+            }
         }
     }
 }
