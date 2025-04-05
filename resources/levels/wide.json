@@ -13,5 +13,9 @@
    "minPlayers": 2,
    "maxPlayers": 4,
    "menuOptions": ["salad"],
-   "timeSeconds": 80
+   "timeSeconds": 80,
+   "playerPositions": [
+      [5, 3],
+      [3, 3]
+   ]
 }

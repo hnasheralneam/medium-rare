@@ -12,17 +12,14 @@ const easing = x => x ** 3;
 
 export class Player {
     #listener_function;
-    inputMap;
 
-    constructor(inputMap, x, y, sprite) {
+    constructor(x, y, sprite) {
         this.sprite = sprite;
-        this.inputMap = inputMap;
         this.item = null;
         this.pos = [x, y];
         this.lastPos = [x, y];
         this.vel = [0, 0];
         this.anim = 0;
-        //this.pendingActions = Queue.withSize(10);
     }
 
     smoothPos() {
@@ -56,14 +53,6 @@ export class Player {
         return this.item !== null;
     }
 
-    keyPressed(e, grid) {
-        if (Game.paused) return;
-        const key = e.code;
-        const action = this.inputMap[key];
-        if (action === undefined) return;
-        this.handleAction(action, grid);
-    }
-
     /**
      * @param { String } action
      * @param { import("./grid.js").Grid } grid
@@ -89,5 +78,57 @@ export class Player {
                 this.lastPos[1] = sy;
             }
         }
+    }
+}
+
+export class InputPlayer extends Player {
+    #listener_function;
+    inputMap;
+
+    constructor(inputMap, x, y, sprite) {
+        super(x, y, sprite);
+        this.inputMap = inputMap;
+    }
+
+    keyPressed(e, grid) {
+        if (Game.paused) return;
+        const key = e.code;
+        const action = this.inputMap[key];
+        if (action === undefined) return;
+        this.handleAction(action, grid);
+    }
+}
+
+export class GamepadPlayer extends Player {
+    #listener_function;
+    gamepadIndex;
+
+    constructor(gamepadIndex, x, y, sprite) {
+        super(x, y, sprite);
+        this.gamepadIndex = gamepadIndex;
+    }
+
+    handleGamepad(grid) {
+        if (Game.paused) return;
+        const gamepad = navigator.getGamepads()[this.gamepadIndex];
+        if (gamepad === null) return;
+        const x = gamepad.axes[0];
+        const y = gamepad.axes[1];
+        let action = gamepad.buttons[0].pressed ? "interact" : null;
+        if (action == null) {
+            console.log(x, y);
+            if (Math.abs(x) > Math.abs(y)) {
+                action = x > .3 ? "right" : null;
+                if (action == null) action = x < -.3 ? "left" : null;
+            }
+            else {
+                action = y > .3 ? "down" : null;
+                if (action == null) action = y < -.3 ? "up" : null;
+            }
+        }
+        if (action === null) return;
+        console.log("acting:" + action)
+        this.handleAction(action, grid);
+        Game.notifyRedraw();
     }
 }

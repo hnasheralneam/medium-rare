@@ -1,9 +1,35 @@
 import * as G from "./graphics.js";
 import { Grid } from "./grid.js";
-import { Player } from "./player.js";
+import { Player, InputPlayer, GamepadPlayer } from "./player.js";
 import { ImageCache } from "./image-cache.js";
 import { OrderHandler } from "./orderHandler.js";
 import { SaveData, clearSave } from "../storage.js";
+
+let inputMaps = [
+    {
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        Period: "interact"
+    },
+    {
+        KeyW: "up",
+        KeyA: "left",
+        KeyS: "down",
+        KeyD: "right",
+        KeyX: "interact",
+        KeyQ: "interact",
+        KeyE: "interact"
+    }
+];
+let playerSprites = ["player", "player2"]
+let numberOfPlayers = 2;
+
+window.addEventListener("gamepadconnected", (e) => {
+    Game.addGamepadPlayer(e.gamepad.index);
+});
+
 
 export const Game = {
     /** @type { Player[] } */
@@ -17,31 +43,44 @@ export const Game = {
     },
     busy: false,
     levelNames: ["square", "wide", "huge"],
+    gamepadPlayerIndexs: [],
+
+    addGamepadPlayer(index) {
+        this.gamepadPlayerIndexs.push(index);
+    },
 
     async start(levelName) {
-        const player1 = new Player({
-            ArrowUp: "up",
-            ArrowDown: "down",
-            ArrowLeft: "left",
-            ArrowRight: "right",
-            Period: "interact"
-        }, 5, 3, "player");
-        const player2 = new Player({
-            KeyW: "up",
-            KeyA: "left",
-            KeyS: "down",
-            KeyD: "right",
-            KeyX: "interact",
-            KeyQ: "interact",
-            KeyE: "interact"
-        }, 3, 3, "player2");
+        console.log("Started game");
+        this.init();
 
-        this.players.push(player1);
-        this.players.push(player2);
         this.level = await this.getLevelData(levelName);
         this.grid = new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout);
-        for (const player of this.players) {
+
+        for (let i = 0; i < this.gamepadPlayerIndexs.length; i++) {
+            let index = this.gamepadPlayerIndexs[i];
+            let player = new GamepadPlayer(
+                index,
+                this.level.playerPositions[index][0],
+                this.level.playerPositions[index][1],
+                "player"
+            );
+            this.players.push(player);
+            this.grid.addPlayer(player);
+
+            setInterval(() => {
+                player.handleGamepad(this.grid);
+            }, 170);
+        }
+
+        for (let i = 0; i < numberOfPlayers; i++) {
+            let player = new InputPlayer(
+                inputMaps[i],
+                this.level.playerPositions[i + this.gamepadPlayerIndexs.length][0],
+                this.level.playerPositions[i + this.gamepadPlayerIndexs.length][1],
+                playerSprites[i]
+            );
+            this.players.push(player);
             this.grid.addPlayer(player);
         }
 
@@ -50,21 +89,22 @@ export const Game = {
         this.keydownHandle = (e) => {
             for (let i = 0; i < this.players.length; i++) {
                 const player = this.players[i];
-                player.keyPressed(e, this.grid);
-                if (player.anim === 1) this.notifyRedraw();
+                if (player.constructor.name === "InputPlayer") {
+                    player.keyPressed(e, this.grid);
+                    if (player.anim === 1) this.notifyRedraw();
+                }
             }
 
             // this will be called only when the listener is set
             this.display();
         };
-
-        // this listener needs to be cleared when the game is finished
         document.body.addEventListener("keydown", this.keydownHandle);
-
 
         this.display();
         this.startTimer();
+    },
 
+    init() {
         this.initControlsDisplay();
     },
 
@@ -198,6 +238,9 @@ export const Game = {
         this.busy = false;
         for (const player of this.players) {
             if (player.tickAnim()) this.busy = true;
+            // if (player.constructor.name === "GamepadPlayer") {
+            //     player.handleGamepad(this.grid);
+            // }
         }
         this.display();
         window.requestAnimationFrame(() => this.loop());

@@ -19,7 +19,7 @@ if (SaveData.firstTime) {
     createAlert("The only way to save your beloved restaurant from angry customers is to make as many salads as possible within the time", undefined, true);
     createAlert("Pick up raw materials from the crate", undefined, true);
     createAlert("Slice them and combine to make salad", undefined, true);
-    createAlert("Button for interacting is in settings", undefined, true);
+    createAlert("Player controls are in the settings (pause menu)", undefined, true);
     createAlert("Good luck!", undefined, true);
     hideAlerts(startWide);
     SaveData.firstTime = false;
@@ -36,7 +36,7 @@ function createPreGamePanel() {
         <div>
             <h2>Level: ${levelName}</h2>
             <h1>Your high score: ${SaveData.highScore}</h1>
-            <button onclick="${preGamePanel.classList.remove('hidden')}; clearInterval(${pressListener}); window.startGame(${levelName})">Play</button>
+            <button onclick="document.querySelector('.pre-game').classList.add('hidden'); clearInterval(${pressListener}); window.startGame('${levelName}')">Play</button>
         </div>
     `;
     pressListener = document.addEventListener("keypress", (e) => {

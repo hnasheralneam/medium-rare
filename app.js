@@ -108,7 +108,7 @@ io.on("connection", (socket) => {
         });
     });
     // "load" the game before actually starting
-    socket.on("init room data", ({roomid, levelName, grid}) => {
+    socket.on("init game data", ({roomid, levelName, grid}) => {
         let index = rooms.findIndex(room => room.info.name == roomid);
         rooms[index]["data"] = {
             paused: true,

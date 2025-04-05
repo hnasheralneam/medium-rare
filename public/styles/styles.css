@@ -218,3 +218,9 @@ canvas {
    text-align: center;
    font-family: sans-serif;
 }
+
+.pre-game button, .post-game button {
+   font-size: 1.1rem;
+   padding: .5rem .7rem;
+   margin: 1rem 0;
+}
