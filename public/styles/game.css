@@ -224,3 +224,19 @@ canvas {
    padding: .5rem .7rem;
    margin: 1rem 0;
 }
+
+/* Pregame player preview */
+.pregame-player {
+   margin: 1rem;
+   display: inline-block;
+   background-color: #eee;
+   padding: 1rem;
+   border-radius: 1rem;
+}
+
+.pregame-player img {
+   height: 4rem;
+   width: 4rem;
+   margin-top: 1rem;
+   image-rendering: pixelated;
+}

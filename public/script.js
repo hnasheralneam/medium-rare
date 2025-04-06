@@ -12,6 +12,18 @@ window.startGame = (levelName) => {
     Game.start(levelName);
 }
 
+let pressListener;
+window.attemptStartingGame = () => {
+    if (Game.getPlayerCount() > 0) { // should be > than min for level and < than max for level
+        document.querySelector(".pre-game").classList.add("hidden");
+        clearInterval(pressListener);
+        window.startGame(levelName);
+    }
+    else {
+        document.querySelector(".output").textContent = "Add at least one player";
+    }
+}
+
 if (SaveData.firstTime) {
     showAlerts();
     createAlert("POV: You are Phil", undefined, true);
@@ -21,7 +33,7 @@ if (SaveData.firstTime) {
     createAlert("Slice them and combine to make salad", undefined, true);
     createAlert("Player controls are in the settings (pause menu)", undefined, true);
     createAlert("Good luck!", undefined, true);
-    hideAlerts(startWide);
+    hideAlerts(createPreGamePanel);
     SaveData.firstTime = false;
 }
 else {
@@ -30,23 +42,55 @@ else {
 
 function createPreGamePanel() {
     const preGamePanel = document.querySelector(".pre-game");
-    let pressListener;
     preGamePanel.classList.remove("hidden");
     preGamePanel.innerHTML = `
         <div>
             <h2>Level: ${levelName}</h2>
-            <h1>Your high score: ${SaveData.highScore}</h1>
-            <button onclick="document.querySelector('.pre-game').classList.add('hidden'); clearInterval(${pressListener}); window.startGame('${levelName}')">Play</button>
+            <p class="output"></p>
+            ${(SaveData.highScore > 0) ? "<h1>Your high score: " + SaveData.highScore + "</h1>" : ""}
+            <p>Press arrow/wsad keys to choose controls for player</p>
+            <button onclick="window.attemptStartingGame()">Play</button>
+            <br>
+            <div class="connected-players"></div>
         </div>
     `;
     pressListener = document.addEventListener("keypress", (e) => {
         if (e.key == "Enter") {
-            document.querySelector(".pre-game").classList.add("hidden");
-            clearInterval(pressListener);
-            window.startGame(levelName);
+            window.attemptStartingGame();
         }
     });
 }
+
+window.updatePlayersOnPregameDisplay = () => {
+    const connectedPlayersElement = document.querySelector(".connected-players");
+    connectedPlayersElement.innerHTML = "";
+
+    const allPlayers = [...Game.keyboardPlayerInputMaps, ...Game.gamepadPlayerIndexs];
+    // fix style, keep side-by-side
+    for (let i = 0; i < allPlayers.length; i++) {
+        const player = allPlayers[i];
+        const playerElement = document.createElement("div");
+        playerElement.classList.add("pregame-player");
+        playerElement.innerHTML = `
+            <h2>Player ${i + 1}</h2>
+            <p>(${typeof player == "number" ? "Gamepad" : "Keyboard"})</p>
+            <img src="/sprites/player${Math.random() > .5 ? "2" : ""}/${Math.random() > .5 ? "idle" : "jumping"}.png">
+            <div class="controls-map"></div>
+        `;
+        const controlsMapElement = playerElement.querySelector(".controls-map");
+        for (let key in player.inputMap) {
+            const controlElement = document.createElement("div");
+            controlElement.classList.add("control");
+            controlElement.innerHTML = `
+                <span>${player.inputMap[key]} - </span>
+                <span>${key}</span>
+            `;
+            controlsMapElement.appendChild(controlElement);
+        }
+        connectedPlayersElement.appendChild(playerElement);
+    }
+}
+
 
 let settingsPanel = document.querySelector(".settings");
 let playPauseButton = document.querySelector(".play-pause");

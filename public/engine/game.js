@@ -24,11 +24,29 @@ let inputMaps = [
     }
 ];
 let playerSprites = ["player", "player2"]
-let numberOfPlayers = 2;
 
+// before game starts
 window.addEventListener("gamepadconnected", (e) => {
     Game.addGamepadPlayer(e.gamepad.index);
 });
+document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
+function keyboardPlayerConnectionListener(e) {
+    const key = e.code;
+    switch (key) {
+        case "KeyW":
+        case "KeyA":
+        case "KeyS":
+        case "KeyD":
+            Game.addKeyboardPlayer(1);
+            break;
+        case "ArrowUp":
+        case "ArrowLeft":
+        case "ArrowDown":
+        case "ArrowRight":
+            Game.addKeyboardPlayer(0);
+            break;
+    }
+}
 
 
 export const Game = {
@@ -44,13 +62,28 @@ export const Game = {
     busy: false,
     levelNames: ["square", "wide", "huge"],
     gamepadPlayerIndexs: [],
+    keyboardPlayerInputMaps: [],
 
     addGamepadPlayer(index) {
+        console.log("registered gamepad player")
         this.gamepadPlayerIndexs.push(index);
+        window.updatePlayersOnPregameDisplay();
+    },
+    addKeyboardPlayer(inputMapIndex) {
+        console.log("registered keyboard player")
+        let inputMap = inputMaps[inputMapIndex];
+        if (!this.keyboardPlayerInputMaps.includes(inputMap)) {
+            this.keyboardPlayerInputMaps.push(inputMap);
+            window.updatePlayersOnPregameDisplay();
+        }
+    },
+    getPlayerCount() {
+        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
     },
 
     async start(levelName) {
         console.log("Started game");
+        document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
         this.init();
 
         this.level = await this.getLevelData(levelName);
@@ -63,7 +96,7 @@ export const Game = {
                 index,
                 this.level.playerPositions[index][0],
                 this.level.playerPositions[index][1],
-                "player"
+                ["player3", "player4"][Math.round(Math.random() * 1)]
             );
             this.players.push(player);
             this.grid.addPlayer(player);
@@ -73,9 +106,9 @@ export const Game = {
             }, 170);
         }
 
-        for (let i = 0; i < numberOfPlayers; i++) {
+        for (let i = 0; i < this.keyboardPlayerInputMaps.length; i++) {
             let player = new InputPlayer(
-                inputMaps[i],
+                this.keyboardPlayerInputMaps[i],
                 this.level.playerPositions[i + this.gamepadPlayerIndexs.length][0],
                 this.level.playerPositions[i + this.gamepadPlayerIndexs.length][1],
                 playerSprites[i]
