@@ -126,6 +126,9 @@ class Order {
                     // consider making a beep/bad noise, and good noise for submitted
                     // take away time/score and give visual feedback for that
                     clearInterval(this.countdownInterval);
+                    if (this.handler.orders.length == 0) {
+                        setTimeout(() => { this.handler.generateOrder(); }, 2000);
+                    }
                 }
             }
         }, interval);

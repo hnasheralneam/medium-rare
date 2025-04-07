@@ -15,7 +15,8 @@
    "menuOptions": ["salad"],
    "timeSeconds": 80,
    "playerPositions": [
-      [5, 3],
-      [3, 3]
+      [5, 2],
+      [3, 3],
+      [5, 4]
    ]
 }

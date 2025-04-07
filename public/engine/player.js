@@ -116,7 +116,6 @@ export class GamepadPlayer extends Player {
         const y = gamepad.axes[1];
         let action = gamepad.buttons[0].pressed ? "interact" : null;
         if (action == null) {
-            console.log(x, y);
             if (Math.abs(x) > Math.abs(y)) {
                 action = x > .3 ? "right" : null;
                 if (action == null) action = x < -.3 ? "left" : null;
@@ -127,7 +126,6 @@ export class GamepadPlayer extends Player {
             }
         }
         if (action === null) return;
-        console.log("acting:" + action)
         this.handleAction(action, grid);
         Game.notifyRedraw();
     }

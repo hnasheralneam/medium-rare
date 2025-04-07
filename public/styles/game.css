@@ -232,6 +232,9 @@ canvas {
    background-color: #eee;
    padding: 1rem;
    border-radius: 1rem;
+   height: 20rem;
+   width: 12rem;
+   text-align: center;
 }
 
 .pregame-player img {

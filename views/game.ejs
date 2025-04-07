@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="/styles/game.css">
     <link rel="stylesheet" href="/styles/shared.css">
 
-    <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
+    <!-- uncomment before commit (because you'll definitly remember) -->
+    <!-- <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script> -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -17,8 +18,7 @@
         <script>
             const levelName = "<%= level %>";
             window.levelName = levelName;
-
-            // alert("level data exists! \n" + "<%= level %>")
+            window.multiplayer = false;
         </script>
     <% } %>
 
@@ -40,6 +40,9 @@
         <div class="pre-game fullscreen-modal hidden"></div>
     </div>
     <% if (multiplayer) { %>
+        <script>
+            window.multiplayer = true;
+        </script>
         <div class="fullscreen-modal multiplayer-lobby">
             <div class="main">
                 <h2 class="roomcode-display">Room Code: </h2>

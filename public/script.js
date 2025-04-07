@@ -11,16 +11,23 @@ const levelName = window.levelName;
 window.startGame = (levelName) => {
     Game.start(levelName);
 }
+if (!window.multiplayer) {
+    Game.init(window.levelName);
+}
 
 let pressListener;
 window.attemptStartingGame = () => {
-    if (Game.getPlayerCount() > 0) { // should be > than min for level and < than max for level
+    if (Game.getPlayerCount() >= Game.level.minPlayers && Game.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
         document.querySelector(".pre-game").classList.add("hidden");
         clearInterval(pressListener);
         window.startGame(levelName);
     }
     else {
-        document.querySelector(".output").textContent = "Add at least one player";
+        if (Game.getPlayerCount() < Game.level.minPlayers)
+            document.querySelector(".output").textContent = `Add at least ${Game.level.minPlayers} player${Game.level.minPlayers > 1 ? "s" : ""}`;
+        else {
+            document.querySelector(".output").textContent = `Have no more than ${Game.level.maxPlayers} player${Game.level.maxPlayers > 1 ? "s" : ""}`;
+        }
     }
 }
 
@@ -66,26 +73,33 @@ window.updatePlayersOnPregameDisplay = () => {
     connectedPlayersElement.innerHTML = "";
 
     const allPlayers = [...Game.keyboardPlayerInputMaps, ...Game.gamepadPlayerIndexs];
+    const pendingPlayers = Game.pendingPlayers;
     // fix style, keep side-by-side
-    for (let i = 0; i < allPlayers.length; i++) {
-        const player = allPlayers[i];
+    for (let i = 0; i < pendingPlayers.length; i++) {
+        const player = pendingPlayers[i];
         const playerElement = document.createElement("div");
         playerElement.classList.add("pregame-player");
         playerElement.innerHTML = `
             <h2>Player ${i + 1}</h2>
-            <p>(${typeof player == "number" ? "Gamepad" : "Keyboard"})</p>
-            <img src="/sprites/player${Math.random() > .5 ? "2" : ""}/${Math.random() > .5 ? "idle" : "jumping"}.png">
+            <p>(${player.type})</p>
+            <img src="/sprites/${player.sprite}/${Math.random() > .5 ? "idle" : "jumping"}.png">
             <div class="controls-map"></div>
         `;
-        const controlsMapElement = playerElement.querySelector(".controls-map");
-        for (let key in player.inputMap) {
-            const controlElement = document.createElement("div");
-            controlElement.classList.add("control");
-            controlElement.innerHTML = `
+        if (player.type == "keyboard") {
+            const controlsMapElement = playerElement.querySelector(".controls-map");
+            let title = document.createElement("h3");
+            title.textContent = "Controls";
+            controlsMapElement.appendChild(title);
+            for (let key in player.inputMap) {
+                const controlElement = document.createElement("div");
+                controlElement.classList.add("control");
+                controlElement.innerHTML = `
                 <span>${player.inputMap[key]} - </span>
                 <span>${key}</span>
             `;
-            controlsMapElement.appendChild(controlElement);
+                controlsMapElement.appendChild(controlElement);
+            }
+            playerElement.append(controlsMapElement);
         }
         connectedPlayersElement.appendChild(playerElement);
     }

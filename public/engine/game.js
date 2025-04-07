@@ -23,7 +23,7 @@ let inputMaps = [
         KeyE: "interact"
     }
 ];
-let playerSprites = ["player", "player2"]
+let playerSprites = ["player", "player2", "player3", "player4"];
 
 // before game starts
 window.addEventListener("gamepadconnected", (e) => {
@@ -48,10 +48,14 @@ function keyboardPlayerConnectionListener(e) {
     }
 }
 
+function getRandomSprite() {
+    return playerSprites[Math.floor(Math.random() * playerSprites.length)];
+}
 
 export const Game = {
     /** @type { Player[] } */
     players: [],
+    pendingPlayers: [],
     /** @type { Grid } */
     grid: null,
     keydownHandle: null,
@@ -65,14 +69,24 @@ export const Game = {
     keyboardPlayerInputMaps: [],
 
     addGamepadPlayer(index) {
-        console.log("registered gamepad player")
+        let pendingPlayer = {
+            type: "gamepad",
+            sprite: getRandomSprite(),
+            index: index
+        };
+        this.pendingPlayers.push(pendingPlayer);
         this.gamepadPlayerIndexs.push(index);
         window.updatePlayersOnPregameDisplay();
     },
     addKeyboardPlayer(inputMapIndex) {
-        console.log("registered keyboard player")
         let inputMap = inputMaps[inputMapIndex];
         if (!this.keyboardPlayerInputMaps.includes(inputMap)) {
+            let pendingPlayer = {
+                type: "keyboard",
+                sprite: getRandomSprite(),
+                inputMap: inputMap
+            };
+            this.pendingPlayers.push(pendingPlayer);
             this.keyboardPlayerInputMaps.push(inputMap);
             window.updatePlayersOnPregameDisplay();
         }
@@ -81,40 +95,50 @@ export const Game = {
         return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
     },
 
+
+    async init(levelName) {
+        this.level = await this.getLevelData(levelName);
+    },
+
     async start(levelName) {
         console.log("Started game");
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
-        this.init();
+        this.init(levelName);
 
-        this.level = await this.getLevelData(levelName);
         this.grid = new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout);
 
-        for (let i = 0; i < this.gamepadPlayerIndexs.length; i++) {
-            let index = this.gamepadPlayerIndexs[i];
-            let player = new GamepadPlayer(
-                index,
-                this.level.playerPositions[index][0],
-                this.level.playerPositions[index][1],
-                ["player3", "player4"][Math.round(Math.random() * 1)]
-            );
-            this.players.push(player);
-            this.grid.addPlayer(player);
+        let j = 0;
+        for (const pendingPlayer of this.pendingPlayers) {
+            let player;
+            if (pendingPlayer.type == "gamepad") {
+                let index = this.gamepadPlayerIndexs[pendingPlayer.index];
+                player = new GamepadPlayer(
+                    index,
+                    this.level.playerPositions[index][0],
+                    this.level.playerPositions[index][1],
+                    pendingPlayer.sprite
+                );
+                this.players.push(player);
+                this.grid.addPlayer(player);
 
-            setInterval(() => {
-                player.handleGamepad(this.grid);
-            }, 170);
-        }
-
-        for (let i = 0; i < this.keyboardPlayerInputMaps.length; i++) {
-            let player = new InputPlayer(
-                this.keyboardPlayerInputMaps[i],
-                this.level.playerPositions[i + this.gamepadPlayerIndexs.length][0],
-                this.level.playerPositions[i + this.gamepadPlayerIndexs.length][1],
-                playerSprites[i]
-            );
-            this.players.push(player);
-            this.grid.addPlayer(player);
+                setInterval(() => {
+                    player.handleGamepad(this.grid);
+                }, 170);
+            }
+            else if (pendingPlayer.type == "keyboard") {
+                player = new InputPlayer(
+                    this.keyboardPlayerInputMaps[j],
+                    this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
+                    this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
+                    pendingPlayer.sprite
+                );
+                j++;
+            }
+            if (player) {
+                this.players.push(player);
+                this.grid.addPlayer(player);
+            }
         }
 
         this.orderHandler = new OrderHandler(this.level.menuOptions);
@@ -133,12 +157,9 @@ export const Game = {
         };
         document.body.addEventListener("keydown", this.keydownHandle);
 
+        this.initControlsDisplay();
         this.display();
         this.startTimer();
-    },
-
-    init() {
-        this.initControlsDisplay();
     },
 
     async getLevelData(levelName) {
@@ -164,8 +185,14 @@ export const Game = {
             <span>${Game.stats.score >= SaveData.highScore ? "New high score!" : ""}</span>
             <p>Completed ${this.orderHandler.completedOrders.length} orders, failed ${this.orderHandler.failedOrders.length} orders</p>
             <button onclick="location.reload()">Play again</button>
+            <button onclick="window.location = window.location.origin">Home</button>
         </div>
         `;
+        document.addEventListener("keypress", (e) => {
+            if (e.key == "Enter") {
+                location.reload();
+            }
+        });
     },
 
     startTimer() {
@@ -191,6 +218,7 @@ export const Game = {
     },
 
     initControlsDisplay() {
+        // this isn't working anymore
         let controlsElement = document.querySelector(".controls");
         let index = 0;
         for (let player of this.players) {
