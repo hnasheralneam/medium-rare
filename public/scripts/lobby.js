@@ -97,9 +97,12 @@ function updateUsersList(users) {
 
 // Add start button for leader
 function leaderStart() {
-   window.levelName = document.querySelector(".level-select-dropdown").value;
+   let levelName = document.querySelector(".level-select-dropdown").value;
+   console.log("Starting game with level: " + levelName);
+   window.levelName = levelName;
+   window.game.init(levelName);
+   window.createPreGamePanel();
    document.querySelector(".multiplayer-lobby").remove();
-   window.startGame(window.levelName);
 }
 if (userInfo.usertype == "leader") {
    document.querySelector(".leader-options").classList.remove("hidden");
@@ -109,12 +112,12 @@ if (userInfo.usertype == "leader") {
 
 let latency;
 let sent = new Date();
-socket.emit("test latency");
+// socket.emit("test latency");
 
 socket.on("latency tested", () => {
    let received = new Date();
    latency = received - sent;
-   console.log("latency: " + latency / 1000);
+   // ("latency: " + latency / 1000);
 });
 
 

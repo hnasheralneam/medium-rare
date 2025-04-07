@@ -67,6 +67,7 @@ export const Game = {
     levelNames: ["square", "wide", "huge"],
     gamepadPlayerIndexs: [],
     keyboardPlayerInputMaps: [],
+    initialized: false,
 
     addGamepadPlayer(index) {
         let pendingPlayer = {
@@ -101,12 +102,14 @@ export const Game = {
     },
 
     async start(levelName) {
+        if (!this.initialized) {
+            await this.init(levelName);
+        }
         console.log("Started game");
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
-        this.init(levelName);
 
         this.grid = new Grid(this.level.width, this.level.height);
-        this.grid.loadData(this.level.layout);
+        this.grid.loadData(this.level.layout, this.level.extra);
 
         let j = 0;
         for (const pendingPlayer of this.pendingPlayers) {
@@ -124,7 +127,7 @@ export const Game = {
 
                 setInterval(() => {
                     player.handleGamepad(this.grid);
-                }, 170);
+                }, 50);
             }
             else if (pendingPlayer.type == "keyboard") {
                 player = new InputPlayer(
@@ -182,12 +185,15 @@ export const Game = {
         <div>
             <h2>Game Complete!</h2>
             <h1>Your score:  ${Game.stats.score}</h1>
-            <span>${Game.stats.score >= SaveData.highScore ? "New high score!" : ""}</span>
+            <span>${Game.stats.score >= SaveData[window.levelName + "HighScore"] ? "New high score!" : ""}</span>
             <p>Completed ${this.orderHandler.completedOrders.length} orders, failed ${this.orderHandler.failedOrders.length} orders</p>
             <button onclick="location.reload()">Play again</button>
             <button onclick="window.location = window.location.origin">Home</button>
         </div>
         `;
+        if (Game.stats.score >= SaveData[window.levelName + "HighScore"]) {
+            SaveData[window.levelName + "HighScore"] = Game.stats.score;
+        }
         document.addEventListener("keypress", (e) => {
             if (e.key == "Enter") {
                 location.reload();
@@ -272,7 +278,12 @@ export const Game = {
         }
         for (const player of this.players) {
             const pos = player.smoothPos();
-            G.drawImage(
+            if (player.flipped) G.drawMirroredImage(
+                ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"),
+                pos[0] * csize,
+                pos[1] * csize
+            );
+            else G.drawImage(
                 ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"),
                 pos[0] * csize,
                 pos[1] * csize
@@ -299,11 +310,10 @@ export const Game = {
         this.busy = false;
         for (const player of this.players) {
             if (player.tickAnim()) this.busy = true;
-            // if (player.constructor.name === "GamepadPlayer") {
-            //     player.handleGamepad(this.grid);
-            // }
         }
         this.display();
         window.requestAnimationFrame(() => this.loop());
     }
 };
+
+window.game = Game;

@@ -119,7 +119,6 @@ class Order {
                     this.element.querySelector(".time-left-progress").style.backgroundColor = "red";
                 }
                 if (this.timeLeft <= 0) {
-                    console.log("Failed an order");
                     this.element.remove();
                     this.handler.failedOrders.push(this);
                     this.handler.orders.splice(this.handler.orders.indexOf(this), 1);

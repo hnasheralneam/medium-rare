@@ -47,6 +47,13 @@ export function drawImage(image, x, y) {
     ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
 }
 
+export function drawMirroredImage(image, x, y) {
+    const [dx, dy] = lastModifier();
+    ctx.scale(-1, 1);
+    ctx.drawImage(image, -Math.round(x + canvas.width / 2) - dx - 32, Math.round(y + canvas.height / 2) + dy);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 export function fillRect(x, y, w, h) {
     const [dx, dy] = lastModifier();
     ctx.fillRect(x + Math.round(canvas.width / 2) + dx, y + Math.round(canvas.height / 2) + dy, w, h);

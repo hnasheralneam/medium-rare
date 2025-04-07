@@ -20,6 +20,7 @@ export class Player {
         this.lastPos = [x, y];
         this.vel = [0, 0];
         this.anim = 0;
+        this.flipped = false;
     }
 
     smoothPos() {
@@ -72,6 +73,11 @@ export class Player {
             //     return;
             // };
             const [sx, sy] = this.smoothPos();
+            if (move[0] > 0.1)
+                this.flipped = true;
+            else if (move[0] < -0.1)
+                this.flipped = false;
+
             if (grid.movePlayer(this, move[0], move[1])) {
                 this.anim = 1;
                 this.lastPos[0] = sx;
@@ -106,6 +112,9 @@ export class GamepadPlayer extends Player {
     constructor(gamepadIndex, x, y, sprite) {
         super(x, y, sprite);
         this.gamepadIndex = gamepadIndex;
+        this.interactPressed = false;
+        this.lastMove = Date.now();
+        this.cooldown = 140;
     }
 
     handleGamepad(grid) {
@@ -114,8 +123,12 @@ export class GamepadPlayer extends Player {
         if (gamepad === null) return;
         const x = gamepad.axes[0];
         const y = gamepad.axes[1];
-        let action = gamepad.buttons[0].pressed ? "interact" : null;
-        if (action == null) {
+        let action;
+        if (gamepad.buttons[0].pressed && this.interactPressed == false) {
+            action = "interact";
+        }
+        this.interactPressed = gamepad.buttons[0].pressed;
+        if (action == null && Date.now() - this.lastMove > this.cooldown) {
             if (Math.abs(x) > Math.abs(y)) {
                 action = x > .3 ? "right" : null;
                 if (action == null) action = x < -.3 ? "left" : null;
@@ -123,6 +136,9 @@ export class GamepadPlayer extends Player {
             else {
                 action = y > .3 ? "down" : null;
                 if (action == null) action = y < -.3 ? "up" : null;
+            }
+            if (action != null) {
+                this.lastMove = Date.now();
             }
         }
         if (action === null) return;

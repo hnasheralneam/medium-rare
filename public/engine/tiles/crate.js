@@ -1,4 +1,4 @@
-import { Tile } from "../cell.js";
+import { Tile } from "../tile.js";
 import { Player } from "../player.js";
 import { Item } from "../item.js";
 
@@ -14,8 +14,11 @@ function pickRandom(list) {
 export const Crate = {
     sourceImage: "crate.png",
     solid: true,
-    init: (self, _data) => {
-        self.items = ["tomato", "lettuce"];
+    init: (self, data) => {
+        if (data !== null)
+            self.items = [data.item];
+        else
+            self.items = ["tomato", "lettuce"];
     },
     /**
      * @param { Tile } self

@@ -6,6 +6,10 @@ const saveDataRaw = {
 };
 const saveDataHandler = {
     get(target, prop, _) {
+        // for scores
+        if (target[prop] == null) {
+            target[prop] = 0;
+        }
         return target[prop];
     },
     set(target, prop, value) {
@@ -32,34 +36,3 @@ export const clearSave = () => {
     localStorage.setItem(storageName, null);
     location.reload();
 }
-
-// export const Storage = (() => {
-//     let saveData;
-//     let firstTime = true;
-
-//     let localSave = localStorage.getItem("mediumrareSave");
-//     if (localSave) {
-//         let saveCheck = JSON.parse(localSave);
-//     if (!Object.is(saveCheck, null)) {
-//         saveData = JSON.parse(localStorage.getItem("mediumrareSave"));
-//         firstTime = false;
-//     }
-//     }
-//     else {
-//         saveData = saveInitial;
-//         save();
-//     }
-
-//     function save() {
-//         localStorage.setItem("mediumrareSave", JSON.stringify(save));
-//     }
-
-//     function isFirstTime() {
-//         return firstTime;
-//     }
-
-//     return {
-//         isFirstTime() { isFirstTime() },
-//         save() { save() }
-//     }
-// })();

@@ -1,4 +1,4 @@
-import { /*Cell,*/ Tile } from "./cell.js";
+import { /*Cell,*/ Tile } from "./tile.js";
 
 export class Grid {
     /**
@@ -59,15 +59,15 @@ export class Grid {
         func(tile, player, "interact");
     }
 
-    loadData(numMap) {
+    loadData(numMap, extraData) {
         if (numMap.length !== this.width * this.height) throw new Error("Mismatched data length");
-        const infos = [];
-        numMap.forEach(id => infos.push({ id }));
-        infos.forEach((info, i) => {
+        for (let i = 0; i < numMap.length; i++) {
             const x = i % this.width;
             const y = Math.floor(i / this.width);
-            //this.cells[i] = new Cell(info.id, { x, y }, info.extra);
-            this.cells[i] = new Tile(info.id, { x, y }, info.extra);
-        });
+            const id = numMap[i];
+            const extraRaw = extraData[i];
+            const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
+            this.cells[i] = new Tile(id, { x, y }, extra);
+        }
     }
 }

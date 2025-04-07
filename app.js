@@ -78,6 +78,10 @@ io.on("connection", (socket) => {
         }
         else if (userData.location == "lobby") {
             let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+            if (indexInRooms == -1) {
+                console.error("Room does not exist!");
+                return;
+            }
             let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == userData.socketid);
             if (indexInUsers != -1) rooms[indexInRooms]["users"].splice(indexInUsers, 1);
             io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);

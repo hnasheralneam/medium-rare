@@ -1,4 +1,4 @@
-import { Tile } from "../cell.js";
+import { Tile } from "../tile.js";
 import { Player } from "../player.js";
 import { Item } from "../item.js";
 

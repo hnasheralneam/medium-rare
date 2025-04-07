@@ -31,7 +31,7 @@ window.attemptStartingGame = () => {
     }
 }
 
-if (SaveData.firstTime) {
+if (SaveData.firstTime && !window.multiplayer) {
     showAlerts();
     createAlert("POV: You are Phil", undefined, true);
     createAlert("And the customers are angry", undefined, true);
@@ -43,7 +43,7 @@ if (SaveData.firstTime) {
     hideAlerts(createPreGamePanel);
     SaveData.firstTime = false;
 }
-else {
+else if (!window.multiplayer) {
     createPreGamePanel();
 }
 
@@ -53,9 +53,11 @@ function createPreGamePanel() {
     preGamePanel.innerHTML = `
         <div>
             <h2>Level: ${levelName}</h2>
+            <img src="/levels/${levelName}.png" height="230"><br><br>
+
             <p class="output"></p>
-            ${(SaveData.highScore > 0) ? "<h1>Your high score: " + SaveData.highScore + "</h1>" : ""}
-            <p>Press arrow/wsad keys to choose controls for player</p>
+            ${(SaveData[levelName + "HighScore"] > 0) ? "<h1>Your high score: " + SaveData[levelName + "HighScore"] + "</h1>" : ""}
+            <p>Press arrow/wsad keys or move controller to add player</p>
             <button onclick="window.attemptStartingGame()">Play</button>
             <br>
             <div class="connected-players"></div>
@@ -67,6 +69,7 @@ function createPreGamePanel() {
         }
     });
 }
+window.createPreGamePanel = createPreGamePanel;
 
 window.updatePlayersOnPregameDisplay = () => {
     const connectedPlayersElement = document.querySelector(".connected-players");
