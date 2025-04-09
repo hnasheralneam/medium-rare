@@ -1,8 +1,10 @@
 let socket = io();
+window.socket = socket;
 
 // Join room
 let userInfo = JSON.parse(localStorage.getItem("userInfo"));
 userInfo.location = "lobby";
+window.isLeader = false;
 
 if (typeof userInfo.nickname == "undefined") location.href = window.location.origin;
 
@@ -16,7 +18,7 @@ socket.on("here is socketid", (socketid) => {
    localStorage.setItem("userInfo", JSON.stringify(userInfo));
    socket.emit("user data updated", userInfo, oldSocketId);
 
-   if (userInfo.usertype == "leader") socket.emit("leader connecting to room", userInfo);
+   if (userInfo.usertype == "leader") socket.emit("leaderConnectingToRoom", userInfo);
    else {
       document.querySelector(".waiting-text").textContent = "";
       socket.emit("player joining lobby", userInfo, userInfo.socketid);
@@ -24,7 +26,7 @@ socket.on("here is socketid", (socketid) => {
 });
 
 // for all multiplayer games gameid must exist
-window.gameid = userInfo.roomname;
+window.roomid = userInfo.roomname;
 
 socket.emit("get roomcode", userInfo.roomname);
 socket.on("here is roomcode", (roomcode) => {
@@ -96,28 +98,69 @@ function updateUsersList(users) {
 }
 
 // Add start button for leader
-function leaderStart() {
+async function leaderInit() {
    let levelName = document.querySelector(".level-select-dropdown").value;
    console.log("Starting game with level: " + levelName);
+   window.isLeader = true;
    window.levelName = levelName;
-   window.game.init(levelName);
+   await window.game.init(window.levelName);
+   console.log(window.levelName)
    window.createPreGamePanel();
    document.querySelector(".multiplayer-lobby").remove();
+   socket.emit("initGameDetails", {
+      roomid: window.roomid,
+      levelName: window.levelName,
+      grid: window.game.grid.cells
+   });
 }
 if (userInfo.usertype == "leader") {
    document.querySelector(".leader-options").classList.remove("hidden");
 }
 
-// Latency test
 
+
+
+
+// actual game stuff
+socket.on("gameInitialized", ({ levelName }) => {
+   if (window.isLeader) return;
+   window.levelName = levelName;
+   window.game.init();
+});
+
+// should probably send player list to init it
+socket.on("gameStarted", () => {
+   if (window.isLeader) return;
+   document.querySelector(".multiplayer-lobby").remove();
+   window.game.start();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Latency test
 let latency;
 let sent = new Date();
-// socket.emit("test latency");
+socket.emit("test latency");
 
 socket.on("latency tested", () => {
    let received = new Date();
    latency = received - sent;
-   // ("latency: " + latency / 1000);
+   ("latency: " + latency / 1000);
 });
 
 
@@ -134,3 +177,9 @@ socket.on("lobby chat message", ({ message, nickname }) => {
    messageEl.textContent = `${nickname}: ${message}`;
    document.querySelector(".messages").append(messageEl);
 });
+
+
+
+
+// Random id
+// window.crypto.randomUUID()

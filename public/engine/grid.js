@@ -1,4 +1,4 @@
-import { /*Cell,*/ Tile } from "./tile.js";
+import { Tile } from "./tile.js";
 
 export class Grid {
     /**
@@ -9,11 +9,6 @@ export class Grid {
         this.width = width;
         this.height = height;
         this.cells = new Array(width * height);
-        this.players = [];
-    }
-
-    addPlayer(player) {
-        this.players.push(player);
     }
 
     inBounds(x, y) {
@@ -56,6 +51,8 @@ export class Grid {
         const tile = this.tileAt(tx, ty);
         const func = tile.proto.onInteract;
         if (func === undefined) return;
+        // this could make multiplayer difficult (what is it doing by itself? how do we know? will it update server itself, or should it be a callback sort of thing?)
+        // should be fine if accessing tile from remote
         func(tile, player, "interact");
     }
 
@@ -69,5 +66,46 @@ export class Grid {
             const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
             this.cells[i] = new Tile(id, { x, y }, extra);
         }
+    }
+}
+
+export class RemoteGrid extends Grid {
+    constructor(width, height) {
+        super(width, height);
+    }
+
+
+    async checkMovement(player, dx, dy) {
+        await this.renewCellData();
+        return super.checkMovement(player, dx, dy);
+    }
+
+    async movePlayer(player, dx, dy) {
+        await this.renewCellData();
+        let result = super.movePlayer(player, dx, dy);
+        return result;
+    }
+
+    async interact(player) {
+        console.log("before:" + JSON.stringify(this.cells))
+        await this.renewCellData();
+        console.log("after:" + JSON.stringify(this.cells))
+        let results = super.interact(player);
+        this.updateRemoteCellData();
+        return results;
+    }
+
+    async renewCellData() {
+        window.socket.emitWithAck("getCellData", window.roomid).then((data) => {
+            this.cells = data;
+        });
+        return this.cells;
+    }
+
+    async updateRemoteCellData() {
+        window.socket.emit("setCellData", {
+            roomid: window.roomid,
+            grid: this.cells
+        });
     }
 }

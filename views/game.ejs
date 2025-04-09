@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/styles/shared.css">
 
     <!-- uncomment before commit (because you'll definitly remember) -->
-    <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
+    <!-- <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script> -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -46,10 +46,16 @@
         <div class="fullscreen-modal multiplayer-lobby">
             <div class="main">
                 <h2 class="roomcode-display">Room Code: </h2>
-                <p class="waiting-text">Waiting to be let in</p>
-                <ul class="waiting"></ul>
-                <p>In the room</p>
-                <ul class="inRoom"></ul>
+                <div style="display: grid; grid-template-columns: auto auto;">
+                    <div>
+                        <p>In the room</p>
+                        <ul class="inRoom"></ul>
+                    </div>
+                    <div>
+                        <p class="waiting-text">Waiting to be let in</p>
+                        <ul class="waiting"></ul>
+                    </div>
+                </div>
                 <div class="leader-options hidden">
                     <form action="">
                         <label for="level-selection">Choose level</label>
@@ -59,7 +65,7 @@
                             <option value="huge">Huge</option>
                         </select>
                     </form>
-                    <button onclick="leaderStart()">Start game</button>
+                    <button onclick="leaderInit()">startGame</button>
                 </div>
             </div>
             <br>

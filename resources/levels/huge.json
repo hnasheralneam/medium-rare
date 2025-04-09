@@ -23,7 +23,7 @@
    ],
    "width": 11,
    "height": 9,
-   "minPlayers": 2,
+   "minPlayers": 1,
    "maxPlayers": 4,
    "menuOptions": ["salad"],
    "timeSeconds": 100,

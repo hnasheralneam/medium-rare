@@ -1,5 +1,5 @@
 import { Game } from "./engine/game.js";
-import { SaveData, clearSave } from "./storage.js";
+import { SaveData } from "./storage.js";
 import { ImageCache } from "./engine/image-cache.js";
 import { showAlerts, createAlert, hideAlerts } from "./alertSystem.js";
 
@@ -48,17 +48,24 @@ else if (!window.multiplayer) {
 }
 
 function createPreGamePanel() {
+    console.log("creating pregame panel")
     const preGamePanel = document.querySelector(".pre-game");
     preGamePanel.classList.remove("hidden");
     preGamePanel.innerHTML = `
         <div>
-            <h2>Level: ${levelName}</h2>
-            <img src="/levels/${levelName}.png" height="230"><br><br>
+            <h2>Level: ${window.levelName}</h2>
+            <img src="/levels/${window.levelName}.png" height="230"><br><br>
 
             <p class="output"></p>
-            ${(SaveData[levelName + "HighScore"] > 0) ? "<h1>Your high score: " + SaveData[levelName + "HighScore"] + "</h1>" : ""}
-            <p>Press arrow/wsad keys or move controller to add player</p>
-            <button onclick="window.attemptStartingGame()">Play</button>
+            ${(SaveData[window.levelName + "HighScore"] > 0 && !window.multiplayer) ? "<h1>Your high score: " + SaveData[window.levelName + "HighScore"] + "</h1>" : ""}
+            ${
+                window.multiplayer ? `
+                    <p>Are you ready yet?</p>
+                ` : `
+                    <p>Press arrow/wsad keys or move controller to add player</p>
+                    <button onclick="window.attemptStartingGame()">Play</button>
+                `
+            }
             <br>
             <div class="connected-players"></div>
         </div>
@@ -73,9 +80,9 @@ window.createPreGamePanel = createPreGamePanel;
 
 window.updatePlayersOnPregameDisplay = () => {
     const connectedPlayersElement = document.querySelector(".connected-players");
-    connectedPlayersElement.innerHTML = "";
+    if (connectedPlayersElement) connectedPlayersElement.innerHTML = "";
+    else return;
 
-    const allPlayers = [...Game.keyboardPlayerInputMaps, ...Game.gamepadPlayerIndexs];
     const pendingPlayers = Game.pendingPlayers;
     // fix style, keep side-by-side
     for (let i = 0; i < pendingPlayers.length; i++) {

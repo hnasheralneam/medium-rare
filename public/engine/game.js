@@ -1,9 +1,9 @@
 import * as G from "./graphics.js";
-import { Grid } from "./grid.js";
-import { Player, InputPlayer, GamepadPlayer } from "./player.js";
+import { Grid, RemoteGrid } from "./grid.js";
+import { Player, KeyboardPlayer, GamepadPlayer } from "./player.js";
 import { ImageCache } from "./image-cache.js";
 import { OrderHandler } from "./orderHandler.js";
-import { SaveData, clearSave } from "../storage.js";
+import { SaveData } from "../storage.js";
 
 let inputMaps = [
     {
@@ -18,12 +18,12 @@ let inputMaps = [
         KeyA: "left",
         KeyS: "down",
         KeyD: "right",
-        KeyX: "interact",
         KeyQ: "interact",
         KeyE: "interact"
     }
 ];
 let playerSprites = ["player", "player2", "player3", "player4"];
+window.levelNames = ["square", "wide", "huge"]
 
 // before game starts
 window.addEventListener("gamepadconnected", (e) => {
@@ -64,7 +64,6 @@ export const Game = {
         score: 0
     },
     busy: false,
-    levelNames: ["square", "wide", "huge"],
     gamepadPlayerIndexs: [],
     keyboardPlayerInputMaps: [],
     initialized: false,
@@ -97,8 +96,13 @@ export const Game = {
     },
 
 
-    async init(levelName) {
-        this.level = await this.getLevelData(levelName);
+    async init() {
+        this.level = await this.getLevelData(window.levelName);
+        this.grid = window.multiplayer ? new RemoteGrid(this.level.width, this.level.height) : new Grid(this.level.width, this.level.height);
+        this.grid.loadData(this.level.layout, this.level.extra);
+        this.initialized = true;
+        console.log("has been initialized")
+        return;
     },
 
     async start(levelName) {
@@ -108,8 +112,6 @@ export const Game = {
         console.log("Started game");
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
 
-        this.grid = new Grid(this.level.width, this.level.height);
-        this.grid.loadData(this.level.layout, this.level.extra);
 
         let j = 0;
         for (const pendingPlayer of this.pendingPlayers) {
@@ -123,14 +125,13 @@ export const Game = {
                     pendingPlayer.sprite
                 );
                 this.players.push(player);
-                this.grid.addPlayer(player);
 
                 setInterval(() => {
                     player.handleGamepad(this.grid);
                 }, 50);
             }
             else if (pendingPlayer.type == "keyboard") {
-                player = new InputPlayer(
+                player = new KeyboardPlayer(
                     this.keyboardPlayerInputMaps[j],
                     this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
                     this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
@@ -140,7 +141,6 @@ export const Game = {
             }
             if (player) {
                 this.players.push(player);
-                this.grid.addPlayer(player);
             }
         }
 
@@ -149,7 +149,7 @@ export const Game = {
         this.keydownHandle = (e) => {
             for (let i = 0; i < this.players.length; i++) {
                 const player = this.players[i];
-                if (player.constructor.name === "InputPlayer") {
+                if (player.constructor.name === "KeyboardPlayer") {
                     player.keyPressed(e, this.grid);
                     if (player.anim === 1) this.notifyRedraw();
                 }
@@ -163,6 +163,15 @@ export const Game = {
         this.initControlsDisplay();
         this.display();
         this.startTimer();
+
+
+        if (window.multiplayer && window.isLeader) {
+            window.socket.emit("startGame", {
+                roomid: window.roomid,
+                message: window.levelName,
+                time: Date.now()
+            });
+        }
     },
 
     async getLevelData(levelName) {
@@ -300,6 +309,7 @@ export const Game = {
     },
 
     notifyRedraw() {
+        // should be called for all players when multiplayer
         if (this.busy) return;
         this.busy = true;
         window.requestAnimationFrame(() => this.loop());

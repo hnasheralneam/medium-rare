@@ -6,8 +6,8 @@ async function showLevelPicker() {
     let levelPicker = document.querySelector(".level-picker-contents");
     levelPicker.classList.remove("hidden");
 
-    for (const i in Game.levelNames) {
-        let levelName = Game.levelNames[i];
+    for (const i in window.levelNames) {
+        let levelName = window.levelNames[i];
         let level = await Game.getLevelData(levelName);
         let levelElement = document.createElement("div");
         levelElement.style.margin = "0 4rem";

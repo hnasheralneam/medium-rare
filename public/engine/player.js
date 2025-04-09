@@ -59,6 +59,7 @@ export class Player {
      * @param { import("./grid.js").Grid } grid
      */
     handleAction(action, grid) {
+        // needs syncing for multiplayer
         if (action === "interact") {
             if (this.anim > 0.5) return;
             grid.interact(this);
@@ -68,16 +69,12 @@ export class Player {
             if (move === undefined) {
                 return;
             }
-            // if (grid.checkMovement(this, move[0], move[1]) && this.anim !== 0) {
-            //     //this.pendingActions.offer(action);
-            //     return;
-            // };
             const [sx, sy] = this.smoothPos();
             if (move[0] > 0.1)
                 this.flipped = true;
             else if (move[0] < -0.1)
                 this.flipped = false;
-
+            // needs syncing for multiplayer
             if (grid.movePlayer(this, move[0], move[1])) {
                 this.anim = 1;
                 this.lastPos[0] = sx;
@@ -87,7 +84,16 @@ export class Player {
     }
 }
 
-export class InputPlayer extends Player {
+export class RemotePlayer extends Player {
+    id;
+
+    constructor(id, x, y, sprite) {
+        super(x, y, sprite);
+        this.id = id;
+    }
+}
+
+export class KeyboardPlayer extends Player {
     #listener_function;
     inputMap;
 

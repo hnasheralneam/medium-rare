@@ -111,16 +111,6 @@ io.on("connection", (socket) => {
             usertype: "leader"
         });
     });
-    // "load" the game before actually starting
-    socket.on("init game data", ({roomid, levelName, grid}) => {
-        let index = rooms.findIndex(room => room.info.name == roomid);
-        rooms[index]["data"] = {
-            paused: true,
-            level: levelName,
-            grid: grid
-        }
-
-    });
     socket.on("get roomcode", (roomid) => {
         let indexInRooms = rooms.findIndex(room => room.info.name == roomid);
         let room = rooms[indexInRooms];
@@ -149,7 +139,7 @@ io.on("connection", (socket) => {
         else socket.emit("no such room", "room does not exist");
     });
 
-    socket.on("leader connecting to room", (userInfo) => {
+    socket.on("leaderConnectingToRoom", (userInfo) => {
         let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
         if (indexInRooms == -1) {
             console.error("Room does not exist!");
@@ -201,6 +191,54 @@ io.on("connection", (socket) => {
     // Lobby chat
     socket.on("lobby chat message", (messageInfo, room) => {
         io.in(room).emit("lobby chat message", messageInfo);
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Actual code stuff
+    // "load" the game before actually starting
+    socket.on("initGameDetails", ({ roomid, levelName, grid }) => {
+        let index = rooms.findIndex(room => room.info.name == roomid);
+        console.log("here is your levename" + levelName);
+        rooms[index]["data"] = {
+            paused: true,
+            level: levelName,
+            grid: grid
+        };
+        io.in(roomid).emit("gameInitialized", {
+            levelName: rooms[index]["data"]["level"]
+        });
+    });
+    // startGame
+    socket.on("startGame", ({ roomid, levelName }) => {
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        io.in(roomid).emit("gameStarted", {
+            levelName: rooms[index]["data"]["level"]
+        });
+    });
+    socket.on("getCellData", (roomid) => {
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        return new Promise((resolve) => {
+            resolve(rooms[index]["data"]["grid"]);
+        });
+    });
+    socket.on("setCellData", ({roomid, grid}) => {
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        rooms[index]["data"]["grid"] = grid;
+        console.log(rooms[index]["data"]["grid"])
     });
 });
 
