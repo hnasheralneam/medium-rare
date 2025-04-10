@@ -24,14 +24,6 @@ export class Grid {
         return this.cells[x + y * this.width];
     }
 
-    // checkMovement(player, dx, dy) {
-    //     const nx = player.pos[0] + dx;
-    //     const ny = player.pos[1] + dy;
-    //     if (!this.inBounds(nx, ny)) return false;
-    //     if (this.tileAt(nx, ny).proto.solid) return false;
-    //     return true;
-    // }
-
     movePlayer(player, dx, dy) {
         player.vel[0] = dx;
         player.vel[1] = dy;
@@ -44,12 +36,6 @@ export class Grid {
         return true;
     }
 
-    setPlayerPosition(player, x, y) {
-        player.pos[0] = x;
-        player.pos[1] = y;
-        return true;
-    }
-
     interact(player) {
         const tx = player.pos[0] + player.vel[0];
         const ty = player.pos[1] + player.vel[1];
@@ -57,13 +43,10 @@ export class Grid {
         const tile = this.tileAt(tx, ty);
         const func = tile.proto.onInteract;
         if (func === undefined) return;
-        // this could make multiplayer difficult (what is it doing by itself? how do we know? will it update server itself, or should it be a callback sort of thing?)
-        // should be fine if accessing tile from remote
         func(tile, player, "interact");
     }
 
     loadData(numMap, extraData) {
-        // if (numMap.length !== this.width * this.height) throw new Error("Mismatched data length"); // should never happen
         for (let i = 0; i < (this.width * this.height); i++) {
             const x = i % this.width;
             const y = Math.floor(i / this.width);
@@ -80,12 +63,6 @@ export class RemoteGrid extends Grid {
         super(width, height);
     }
 
-
-    // async checkMovement(player, dx, dy) {
-    //     await this.renewCellData();
-    //     return super.checkMovement(player, dx, dy);
-    // }
-
     async movePlayer(player, dx, dy) {
         await this.renewCellData();
         let result = super.movePlayer(player, dx, dy);
@@ -98,6 +75,13 @@ export class RemoteGrid extends Grid {
         let results = super.interact(player);
         this.updateRemoteCellData();
         return results;
+    }
+
+
+    setPlayerPosition(player, x, y) {
+        player.pos[0] = x;
+        player.pos[1] = y;
+        return true;
     }
 
     // multiplayer

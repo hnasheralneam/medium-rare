@@ -104,7 +104,7 @@ function updateUsersList(users) {
 // Add start button for leader
 async function leaderInit() {
    let levelName = document.querySelector(".level-select-dropdown").value;
-   console.log("Initializing game with level: " + levelName);
+   console.info("Initializing game with level: " + levelName);
    window.isLeader = true;
    window.levelName = levelName;
    await window.game.init(window.levelName);
@@ -141,12 +141,22 @@ socket.on("gameStarted", async () => {
 });
 
 // make sure the player is not on this computer
-socket.on("playerMoved", (player) => {
+// socket.on("playerMoved", (player) => {
+//    let playerIndex = window.game.players.findIndex(item => item.id === player.id);
+//    if (playerIndex == -1) return;
+//    let remotePlayer = window.game.players[playerIndex];
+//    if (remotePlayer.constructor.name == "RemotePlayer") {
+//       window.game.players[playerIndex].setPosition(player.pos, window.game.grid);
+//    }
+// });
+
+
+socket.on("movePlayer", (player) => {
    let playerIndex = window.game.players.findIndex(item => item.id === player.id);
    if (playerIndex == -1) return;
    let remotePlayer = window.game.players[playerIndex];
    if (remotePlayer.constructor.name == "RemotePlayer") {
-      window.game.players[playerIndex].setPosition(player.pos, window.game.grid);
+      window.game.players[playerIndex].move(player.lastMove, window.game.grid);
    }
 });
 

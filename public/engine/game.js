@@ -67,6 +67,7 @@ export const Game = {
     gamepadPlayerIndexs: [],
     keyboardPlayerInputMaps: [],
     initialized: false,
+    playerIndex: 0,
 
     addGamepadPlayer(index) {
         let id = window.crypto.randomUUID();
@@ -74,7 +75,8 @@ export const Game = {
             type: "gamepad",
             sprite: getRandomSprite(),
             index: index,
-            id: id
+            id: id,
+            pos: this.getNextPos()
         };
         this.pendingPlayers.push(pendingPlayer);
         this.gamepadPlayerIndexs.push(index);
@@ -84,7 +86,8 @@ export const Game = {
             window.socket.emit("addPlayer", {
                 roomid: window.roomid,
                 id: id,
-                sprite: pendingPlayer.sprite
+                sprite: pendingPlayer.sprite,
+                startPos: pendingPlayer.pos
             });
         }
     },
@@ -96,7 +99,9 @@ export const Game = {
                 type: "keyboard",
                 sprite: getRandomSprite(),
                 inputMap: inputMap,
-                id: id
+                id: id,
+                mapIndex: inputMapIndex,
+                pos: this.getNextPos()
             };
             this.pendingPlayers.push(pendingPlayer);
             this.keyboardPlayerInputMaps.push(inputMap);
@@ -106,14 +111,20 @@ export const Game = {
                 window.socket.emit("addPlayer", {
                     roomid: window.roomid,
                     id: id,
-                    sprite: pendingPlayer.sprite
+                    sprite: pendingPlayer.sprite,
+                    startPos: pendingPlayer.pos
                 });
             }
         }
     },
     // for pre-game players specifically
     getPlayerCount() {
-        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
+        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length; // should also count remote players
+    },
+    getNextPos() {
+        let pos = this.level.playerPositions[this.playerIndex];
+        this.playerIndex++;
+        return pos;
     },
 
 
@@ -129,24 +140,27 @@ export const Game = {
         if (!this.initialized) {
             await this.init(levelName);
         }
-        console.log("Started game");
+        console.info("Started game");
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
 
 
-        // get remote users if multiplayer
-        let j = 0;
         for (const pendingPlayer of this.pendingPlayers) {
-            this.addPlayer(pendingPlayer, j);
+            this.addPlayer(pendingPlayer);
         }
+
+        // get remote users if multiplayer
         let callback = (data) => {
             for (const player of data.players) {
                 if (this.players.some((item) => item.id == player.id)) continue;
-                window.game.addPlayer({
+                this.addPlayer({
                     type: "remote",
                     sprite: player.sprite,
-                    id: player.id
+                    id: player.id,
+                    pos: player.startPos
                 });
+                this.playerIndex++;
             }
+            this.notifyRedraw();
         };
         if (window.multiplayer) socket.emit("getPlayers", window.roomid, callback);
 
@@ -181,14 +195,13 @@ export const Game = {
         }
     },
 
-    addPlayer(pendingPlayer, j) {
+    addPlayer(pendingPlayer) {
         let player;
         if (pendingPlayer.type == "gamepad") {
             let index = this.gamepadPlayerIndexs[pendingPlayer.index];
             player = new GamepadPlayer(
                 index,
-                this.level.playerPositions[index][0],
-                this.level.playerPositions[index][1],
+                pendingPlayer.pos,
                 pendingPlayer.sprite,
                 pendingPlayer.id
             );
@@ -200,19 +213,15 @@ export const Game = {
         }
         else if (pendingPlayer.type == "keyboard") {
             player = new KeyboardPlayer(
-                this.keyboardPlayerInputMaps[j],
-                this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
-                this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
+                this.keyboardPlayerInputMaps[pendingPlayer.mapIndex],
+                pendingPlayer.pos,
                 pendingPlayer.sprite,
-                pendingPlayer.id
+                pendingPlayer.id,
             );
-            j++;
         }
         else if (pendingPlayer.type == "remote") {
             player = new RemotePlayer(
-                // this should be fixed, but like later
-                this.level.playerPositions[0][0],
-                this.level.playerPositions[0][1],
+                pendingPlayer.pos,
                 pendingPlayer.sprite,
                 pendingPlayer.id
             );

@@ -12,7 +12,9 @@ const easing = x => x ** 3;
 export class Player {
     #listener_function;
 
-    constructor(x, y, sprite, id) {
+    constructor(pos, sprite, id) {
+        let x = pos[0];
+        let y = pos[1];
         this.sprite = sprite;
         this.item = null;
         this.pos = [x, y];
@@ -83,14 +85,24 @@ export class Player {
                 this.anim = 1;
                 this.lastPos[0] = sx;
                 this.lastPos[1] = sy;
+
+                // multiplayer sync
+                // it's doing this recursivly!
+                if (window.multiplayer && this.constructor.name != "RemotePlayer") {
+                    window.socket.emit("playerMoved", {
+                        roomid: window.roomid,
+                        playerid: this.id,
+                        move: action
+                    });
+                }
             }
         }
     }
 }
 
 export class RemotePlayer extends Player {
-    constructor(x, y, sprite, id) {
-        super(x, y, sprite, id);
+    constructor(pos, sprite, id) {
+        super(pos, sprite, id);
     }
 
     setPosition(pos, grid) {
@@ -102,14 +114,19 @@ export class RemotePlayer extends Player {
             Game.notifyRedraw();
         }
     }
+
+    move(action, grid) {
+        this.handleAction(action, grid);
+        window.game.notifyRedraw();
+    }
 }
 
 export class KeyboardPlayer extends Player {
     #listener_function;
     inputMap;
 
-    constructor(inputMap, x, y, sprite, id) {
-        super(x, y, sprite, id);
+    constructor(inputMap, pos, sprite, id) {
+        super(pos, sprite, id);
         this.inputMap = inputMap;
     }
 
@@ -126,8 +143,8 @@ export class GamepadPlayer extends Player {
     #listener_function;
     gamepadIndex;
 
-    constructor(gamepadIndex, x, y, sprite, id) {
-        super(x, y, sprite, id);
+    constructor(gamepadIndex, pos, sprite, id) {
+        super(pos, sprite, id);
         this.gamepadIndex = gamepadIndex;
         this.interactPressed = false;
         this.lastMove = Date.now();
