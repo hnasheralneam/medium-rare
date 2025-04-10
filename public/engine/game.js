@@ -1,6 +1,6 @@
 import * as G from "./graphics.js";
 import { Grid, RemoteGrid } from "./grid.js";
-import { Player, KeyboardPlayer, GamepadPlayer } from "./player.js";
+import { Player, KeyboardPlayer, GamepadPlayer, RemotePlayer } from "./player.js";
 import { ImageCache } from "./image-cache.js";
 import { OrderHandler } from "./orderHandler.js";
 import { SaveData } from "../storage.js";
@@ -101,7 +101,6 @@ export const Game = {
         this.grid = window.multiplayer ? new RemoteGrid(this.level.width, this.level.height) : new Grid(this.level.width, this.level.height);
         this.grid.loadData(this.level.layout, this.level.extra);
         this.initialized = true;
-        console.log("has been initialized")
         return;
     },
 
@@ -115,34 +114,20 @@ export const Game = {
 
         let j = 0;
         for (const pendingPlayer of this.pendingPlayers) {
-            let player;
-            if (pendingPlayer.type == "gamepad") {
-                let index = this.gamepadPlayerIndexs[pendingPlayer.index];
-                player = new GamepadPlayer(
-                    index,
-                    this.level.playerPositions[index][0],
-                    this.level.playerPositions[index][1],
-                    pendingPlayer.sprite
-                );
-                this.players.push(player);
-
-                setInterval(() => {
-                    player.handleGamepad(this.grid);
-                }, 50);
-            }
-            else if (pendingPlayer.type == "keyboard") {
-                player = new KeyboardPlayer(
-                    this.keyboardPlayerInputMaps[j],
-                    this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
-                    this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
-                    pendingPlayer.sprite
-                );
-                j++;
-            }
-            if (player) {
-                this.players.push(player);
-            }
+            this.addPlayer(pendingPlayer, j);
         }
+        let callback = (data) => {
+            console.log("we are recivieing the players")
+            for (const player of data.players) {
+                window.game.addPlayer({
+                    type: "remote",
+                    sprite: player.sprite,
+                    id: player.id
+                });
+            }
+        };
+        if (window.multiplayer) socket.emit("getPlayers", window.roomid, callback);
+
 
         this.orderHandler = new OrderHandler(this.level.menuOptions);
 
@@ -171,6 +156,63 @@ export const Game = {
                 message: window.levelName,
                 time: Date.now()
             });
+        }
+    },
+
+    addPlayer(pendingPlayer, j) {
+        let player;
+        if (pendingPlayer.type == "gamepad") {
+            let index = this.gamepadPlayerIndexs[pendingPlayer.index];
+            player = new GamepadPlayer(
+                index,
+                this.level.playerPositions[index][0],
+                this.level.playerPositions[index][1],
+                pendingPlayer.sprite
+            );
+            this.players.push(player);
+
+            setInterval(() => {
+                player.handleGamepad(this.grid);
+            }, 50);
+
+            window.socket.emit("addPlayer", {
+                roomid: window.roomid,
+                id: player.getId(),
+                sprite: pendingPlayer.sprite
+            });
+        }
+        else if (pendingPlayer.type == "keyboard") {
+            player = new KeyboardPlayer(
+                this.keyboardPlayerInputMaps[j],
+                this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
+                this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
+                pendingPlayer.sprite
+            );
+            j++;
+
+        // should be fixed now
+        //          v
+            if (window.multiplayer) {
+                console.log("we are sending the new player to the server (for serveing)")
+                window.socket.emit("addPlayer", {
+                    roomid: window.roomid,
+                    id: player.getId(),
+                    sprite: pendingPlayer.sprite
+                });
+            }
+        }
+        else if (pendingPlayer.type == "remote") {
+            player = new RemotePlayer(
+                // this should be fixed, but like later
+                this.level.playerPositions[0][0],
+                this.level.playerPositions[0][1],
+                pendingPlayer.sprite,
+                pendingPlayer.id
+            );
+        }
+        if (player) {
+            console.log("the player has just been jcreated")
+            this.players.push(player);
         }
     },
 

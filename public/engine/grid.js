@@ -24,13 +24,13 @@ export class Grid {
         return this.cells[x + y * this.width];
     }
 
-    checkMovement(player, dx, dy) {
-        const nx = player.pos[0] + dx;
-        const ny = player.pos[1] + dy;
-        if (!this.inBounds(nx, ny)) return false;
-        if (this.tileAt(nx, ny).proto.solid) return false;
-        return true;
-    }
+    // checkMovement(player, dx, dy) {
+    //     const nx = player.pos[0] + dx;
+    //     const ny = player.pos[1] + dy;
+    //     if (!this.inBounds(nx, ny)) return false;
+    //     if (this.tileAt(nx, ny).proto.solid) return false;
+    //     return true;
+    // }
 
     movePlayer(player, dx, dy) {
         player.vel[0] = dx;
@@ -41,6 +41,12 @@ export class Grid {
         if (this.tileAt(nx, ny).proto.solid) return false;
         player.pos[0] = nx;
         player.pos[1] = ny;
+        return true;
+    }
+
+    setPlayerPosition(player, x, y) {
+        player.pos[0] = x;
+        player.pos[1] = y;
         return true;
     }
 
@@ -57,14 +63,14 @@ export class Grid {
     }
 
     loadData(numMap, extraData) {
-        if (numMap.length !== this.width * this.height) throw new Error("Mismatched data length");
-        for (let i = 0; i < numMap.length; i++) {
+        // if (numMap.length !== this.width * this.height) throw new Error("Mismatched data length"); // should never happen
+        for (let i = 0; i < (this.width * this.height); i++) {
             const x = i % this.width;
             const y = Math.floor(i / this.width);
             const id = numMap[i];
             const extraRaw = extraData[i];
             const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
-            this.cells[i] = new Tile(id, { x, y }, extra);
+            this.cells[i] = new Tile(id, { x, y }, extra); // ininted from within Tile
         }
     }
 }
@@ -75,31 +81,51 @@ export class RemoteGrid extends Grid {
     }
 
 
-    async checkMovement(player, dx, dy) {
-        await this.renewCellData();
-        return super.checkMovement(player, dx, dy);
-    }
+    // async checkMovement(player, dx, dy) {
+    //     await this.renewCellData();
+    //     return super.checkMovement(player, dx, dy);
+    // }
 
     async movePlayer(player, dx, dy) {
         await this.renewCellData();
         let result = super.movePlayer(player, dx, dy);
+        this.updateRemotePlayer(player.id, player.pos);
         return result;
     }
 
     async interact(player) {
-        console.log("before:" + JSON.stringify(this.cells))
         await this.renewCellData();
-        console.log("after:" + JSON.stringify(this.cells))
         let results = super.interact(player);
         this.updateRemoteCellData();
         return results;
     }
 
+    // multiplayer
+    reloadData(objectCells) { // is in the format of cells that were tiles, but had methods stripped in transit
+        // for (let i = 0; i < (this.width * this.height); i++) {
+        //     const x = i % this.width;
+        //     const y = Math.floor(i / this.width);
+        //     const id = numMap[i];
+        //     const extraRaw = extraData[i];
+        //     const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
+        //     this.cells[i] = new Tile(id, { x, y }, extra); // initialized from within Tile
+        // }
+        // console.log(objectCells)
+        return;
+    }
+
     async renewCellData() {
-        window.socket.emitWithAck("getCellData", window.roomid).then((data) => {
-            this.cells = data;
+        let self = this;
+        let old = this.cells;
+        window.socket.emit("getCellData", window.roomid, (data) => {
+            if (old == data) {
+                console.log("same thing");
+                return;
+            }
+            self.cells = data;
         });
-        return this.cells;
+        // console.log("getting the data")
+        return this.reloadData(this.cells);
     }
 
     async updateRemoteCellData() {
@@ -107,5 +133,15 @@ export class RemoteGrid extends Grid {
             roomid: window.roomid,
             grid: this.cells
         });
+        // console.log("setting the data!")
+    }
+
+    async updateRemotePlayer(id, pos) {
+        window.socket.emit("updatePlayerData", {
+            roomid: window.roomid,
+            playerid: id,
+            pos: pos
+        });
+        // console.log("setting the data!")
     }
 }

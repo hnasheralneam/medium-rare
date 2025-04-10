@@ -1,5 +1,4 @@
 import { Game } from "./game.js";
-import { Queue } from "../utils/queue.js";
 
 const movements = {
     up: [0, -1],
@@ -21,6 +20,11 @@ export class Player {
         this.vel = [0, 0];
         this.anim = 0;
         this.flipped = false;
+        this.id = window.crypto.randomUUID();
+    }
+
+    getId() {
+        return this.id;
     }
 
     smoothPos() {
@@ -85,11 +89,20 @@ export class Player {
 }
 
 export class RemotePlayer extends Player {
-    id;
-
-    constructor(id, x, y, sprite) {
+    constructor(x, y, sprite, id) {
         super(x, y, sprite);
+        console.log("created a remote player")
         this.id = id;
+    }
+
+    setPosition(pos, grid) {
+        const [sx, sy] = this.smoothPos();
+        if (grid.setPlayerPosition(this, pos[0], pos[1])) {
+            this.anim = 1;
+            this.lastPos[0] = sx;
+            this.lastPos[1] = sy;
+            Game.notifyRedraw();
+        }
     }
 }
 

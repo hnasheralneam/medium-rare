@@ -100,11 +100,10 @@ function updateUsersList(users) {
 // Add start button for leader
 async function leaderInit() {
    let levelName = document.querySelector(".level-select-dropdown").value;
-   console.log("Starting game with level: " + levelName);
+   console.log("Initializing game with level: " + levelName);
    window.isLeader = true;
    window.levelName = levelName;
    await window.game.init(window.levelName);
-   console.log(window.levelName)
    window.createPreGamePanel();
    document.querySelector(".multiplayer-lobby").remove();
    socket.emit("initGameDetails", {
@@ -129,13 +128,38 @@ socket.on("gameInitialized", ({ levelName }) => {
 });
 
 // should probably send player list to init it
-socket.on("gameStarted", () => {
+socket.on("gameStarted", async () => {
    if (window.isLeader) return;
    document.querySelector(".multiplayer-lobby").remove();
+   // when the game starts, it should get the players (but like before actually starting the game so the players get initialized, though it should actually be okay if we add them later)
+
    window.game.start();
 });
 
+// make sure the player is not on this computer
+socket.on("playerMoved", (player) => {
+   let playerIndex = window.game.players.findIndex(item => item.id === player.id);
+   if (playerIndex == -1) return;
+   console.log(player, playerIndex, window.game.players[playerIndex])
+   let remotePlayer = window.game.players[playerIndex];
+   if (remotePlayer.constructor.name == "RemotePlayer") {
+      console.log("okay so you're like qualified and everything")
+      window.game.players[playerIndex].setPosition(player.pos, window.game.grid);
+   }
+});
 
+// socket.on("havePlayers", (players) => {
+//    console.log("we are recivieing the players")
+//    for (const player of players) {
+//       window.game.addPlayer({
+//          type: "remote",
+//          sprite: player.sprite,
+//          id: player.id, // hi!
+
+//          // game no work!
+//       });
+//    }
+// });
 
 
 

@@ -8,9 +8,12 @@ export const CuttingBoard = {
     init: (self, _data) => {
         self.item = null;
     },
+    reinit(self, item) {
+        self.item = item;
+    },
     /**
      * @param { Tile } self
-     * @param { Player } player 
+     * @param { Player } player
      */
     onInteract: (self, player, _key) => {
         if (player.item === null) {

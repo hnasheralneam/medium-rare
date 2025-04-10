@@ -48,7 +48,6 @@ else if (!window.multiplayer) {
 }
 
 function createPreGamePanel() {
-    console.log("creating pregame panel")
     const preGamePanel = document.querySelector(".pre-game");
     preGamePanel.classList.remove("hidden");
     preGamePanel.innerHTML = `

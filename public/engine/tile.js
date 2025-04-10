@@ -142,25 +142,18 @@ const tileNameList = [
 // Updated thing
 export class Tile {
     constructor(id, pos, data) {
-        // const num = id;
-        // if (id >= 10) {
-        //     id = getNthDigit(id, 0);
-        // }
+        this.create(id, pos, data); // should recreate if multiplayer
+    }
+
+    create(id, pos, data) {
         const name = tileNameList[id];
-        // if (name == "Crate") {
-        //     let type = getNthDigit(num, 1);
-        //     data = type;
-        // }
         if (name === undefined) throw new Error(`Invalid tile ID: ${id}`);
         const proto = Tiles[name];
         if (proto === undefined) throw new Error(`Unrecognized tile: ${name}`);
         this.x = pos.x;
         this.y = pos.y;
+        // this is how it creates the sub-object (like counter or cutting board)
         this.proto = proto;
-        proto.init(this, data);
+        proto.init(this, data); // there should be a reinit method on counter and cuttingboard... hmmmm
     }
-}
-
-function getNthDigit(num, index) {
-    return parseInt((num + "")[index]); // jank method
 }

@@ -212,33 +212,58 @@ io.on("connection", (socket) => {
     // "load" the game before actually starting
     socket.on("initGameDetails", ({ roomid, levelName, grid }) => {
         let index = rooms.findIndex(room => room.info.name == roomid);
-        console.log("here is your levename" + levelName);
+        // console.log("here is your levename" + levelName);
         rooms[index]["data"] = {
             paused: true,
             level: levelName,
-            grid: grid
+            grid: grid,
+            players: []
         };
         io.in(roomid).emit("gameInitialized", {
             levelName: rooms[index]["data"]["level"]
         });
     });
-    // startGame
     socket.on("startGame", ({ roomid, levelName }) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[index]) return;
         io.in(roomid).emit("gameStarted", {
             levelName: rooms[index]["data"]["level"]
         });
     });
-    socket.on("getCellData", (roomid) => {
+    socket.on("getCellData", (roomid, callback) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
-        return new Promise((resolve) => {
-            resolve(rooms[index]["data"]["grid"]);
-        });
+        if (!rooms[index]) return;
+        callback(rooms[index]["data"]["grid"]);
     });
     socket.on("setCellData", ({roomid, grid}) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[index]) return;
         rooms[index]["data"]["grid"] = grid;
-        console.log(rooms[index]["data"]["grid"])
+    });
+    socket.on("addPlayer", ({roomid, id, sprite}) => {
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[index]) return;
+        rooms[index]["data"]["players"].push({
+            id: id,
+            sprite: sprite,
+            pos: [0, 0] // update this
+        });
+    });
+    socket.on("getPlayers", (roomid, callback) => {
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[index]) return;
+        // console.log(rooms[index]["data"]["players"])
+        callback({
+            players: rooms[index]["data"]["players"]
+        });
+    });
+    socket.on("updatePlayerData", ({ roomid, playerid, pos }) => {
+        let roomIndex = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[roomIndex]) return;
+        let playerIndex = rooms[roomIndex]["data"]["players"].findIndex(player => player.id === playerid);
+        rooms[roomIndex]["data"]["players"][playerIndex].pos = pos;
+        // announce to all other players that stuff is happening
+        io.in(roomid).emit("playerMoved", rooms[roomIndex]["data"]["players"][playerIndex]);
     });
 });
 

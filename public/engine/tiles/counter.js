@@ -8,15 +8,18 @@ export const Counter = {
     init: (self, _data) => {
         self.item = null;
     },
+    reinit(self, item) {
+        self.item = item;
+    },
     /**
      * @param { Tile } self
-     * @param { Player } player 
+     * @param { Player } player
      */
     onInteract: (self, player, _key) => {
         if (self.item === null) {
             if (player.item === null) return;
             self.item = player.releaseItem();
-        } 
+        }
         else {
             if (player.item !== null) {
                 const result = Recipes.using(player.item, self.item);
