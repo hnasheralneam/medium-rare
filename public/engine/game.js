@@ -69,28 +69,49 @@ export const Game = {
     initialized: false,
 
     addGamepadPlayer(index) {
+        let id = window.crypto.randomUUID();
         let pendingPlayer = {
             type: "gamepad",
             sprite: getRandomSprite(),
-            index: index
+            index: index,
+            id: id
         };
         this.pendingPlayers.push(pendingPlayer);
         this.gamepadPlayerIndexs.push(index);
         window.updatePlayersOnPregameDisplay();
+
+        if (window.multiplayer) {
+            window.socket.emit("addPlayer", {
+                roomid: window.roomid,
+                id: id,
+                sprite: pendingPlayer.sprite
+            });
+        }
     },
     addKeyboardPlayer(inputMapIndex) {
+        let id = window.crypto.randomUUID();
         let inputMap = inputMaps[inputMapIndex];
         if (!this.keyboardPlayerInputMaps.includes(inputMap)) {
             let pendingPlayer = {
                 type: "keyboard",
                 sprite: getRandomSprite(),
-                inputMap: inputMap
+                inputMap: inputMap,
+                id: id
             };
             this.pendingPlayers.push(pendingPlayer);
             this.keyboardPlayerInputMaps.push(inputMap);
             window.updatePlayersOnPregameDisplay();
+
+            if (window.multiplayer) {
+                window.socket.emit("addPlayer", {
+                    roomid: window.roomid,
+                    id: id,
+                    sprite: pendingPlayer.sprite
+                });
+            }
         }
     },
+    // for pre-game players specifically
     getPlayerCount() {
         return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
     },
@@ -112,13 +133,14 @@ export const Game = {
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
 
 
+        // get remote users if multiplayer
         let j = 0;
         for (const pendingPlayer of this.pendingPlayers) {
             this.addPlayer(pendingPlayer, j);
         }
         let callback = (data) => {
-            console.log("we are recivieing the players")
             for (const player of data.players) {
+                if (this.players.some((item) => item.id == player.id)) continue;
                 window.game.addPlayer({
                     type: "remote",
                     sprite: player.sprite,
@@ -167,39 +189,24 @@ export const Game = {
                 index,
                 this.level.playerPositions[index][0],
                 this.level.playerPositions[index][1],
-                pendingPlayer.sprite
+                pendingPlayer.sprite,
+                pendingPlayer.id
             );
             this.players.push(player);
 
             setInterval(() => {
                 player.handleGamepad(this.grid);
             }, 50);
-
-            window.socket.emit("addPlayer", {
-                roomid: window.roomid,
-                id: player.getId(),
-                sprite: pendingPlayer.sprite
-            });
         }
         else if (pendingPlayer.type == "keyboard") {
             player = new KeyboardPlayer(
                 this.keyboardPlayerInputMaps[j],
                 this.level.playerPositions[j + this.gamepadPlayerIndexs.length][0],
                 this.level.playerPositions[j + this.gamepadPlayerIndexs.length][1],
-                pendingPlayer.sprite
+                pendingPlayer.sprite,
+                pendingPlayer.id
             );
             j++;
-
-        // should be fixed now
-        //          v
-            if (window.multiplayer) {
-                console.log("we are sending the new player to the server (for serveing)")
-                window.socket.emit("addPlayer", {
-                    roomid: window.roomid,
-                    id: player.getId(),
-                    sprite: pendingPlayer.sprite
-                });
-            }
         }
         else if (pendingPlayer.type == "remote") {
             player = new RemotePlayer(
@@ -211,7 +218,6 @@ export const Game = {
             );
         }
         if (player) {
-            console.log("the player has just been jcreated")
             this.players.push(player);
         }
     },

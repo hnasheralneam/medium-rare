@@ -21,8 +21,8 @@
          <div class="inner">
             <p>Multiplayer Room</p>
             <br>
-            <button onclick="openModal('join')">Join</button>
-            <button onclick="openModal('create')">Create</button>
+            <button onclick="openModal('join'); document.querySelector('.roomcode').focus()">Join</button>
+            <button onclick="openModal('create'); document.querySelector('.name-create').focus()">Create</button>
          </div>
       </div>
    </div>
@@ -37,7 +37,7 @@
                <h2>Room Code</h2>
                <input class="roomcode" type="text" name="roomcode" required>
                <h3>Nickname</h3>
-               <input class="nickname" type="text" name="nickname" required><br>
+               <input class="nickname name-join" type="text" name="nickname" required><br>
                <input type="submit" value="Let's go!">
             </form>
             <br><br><br>
@@ -55,7 +55,7 @@
             <button class="close-modal" onclick="openModal('create')">X</button>
             <form class="create-form" action="" onsubmit="return createRoom(event)">
                <h2>Nickname</h2>
-               <input class="nickname" type="text" name="nickname" required><br>
+               <input class="nickname name-create" type="text" name="nickname" required><br>
                <input type="submit" value="Let's do it!">
             </form>
          </div>

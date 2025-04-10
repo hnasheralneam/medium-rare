@@ -12,7 +12,7 @@ const easing = x => x ** 3;
 export class Player {
     #listener_function;
 
-    constructor(x, y, sprite) {
+    constructor(x, y, sprite, id) {
         this.sprite = sprite;
         this.item = null;
         this.pos = [x, y];
@@ -20,7 +20,7 @@ export class Player {
         this.vel = [0, 0];
         this.anim = 0;
         this.flipped = false;
-        this.id = window.crypto.randomUUID();
+        this.id = id;
     }
 
     getId() {
@@ -90,9 +90,7 @@ export class Player {
 
 export class RemotePlayer extends Player {
     constructor(x, y, sprite, id) {
-        super(x, y, sprite);
-        console.log("created a remote player")
-        this.id = id;
+        super(x, y, sprite, id);
     }
 
     setPosition(pos, grid) {
@@ -110,8 +108,8 @@ export class KeyboardPlayer extends Player {
     #listener_function;
     inputMap;
 
-    constructor(inputMap, x, y, sprite) {
-        super(x, y, sprite);
+    constructor(inputMap, x, y, sprite, id) {
+        super(x, y, sprite, id);
         this.inputMap = inputMap;
     }
 
@@ -128,8 +126,8 @@ export class GamepadPlayer extends Player {
     #listener_function;
     gamepadIndex;
 
-    constructor(gamepadIndex, x, y, sprite) {
-        super(x, y, sprite);
+    constructor(gamepadIndex, x, y, sprite, id) {
+        super(x, y, sprite, id);
         this.gamepadIndex = gamepadIndex;
         this.interactPressed = false;
         this.lastMove = Date.now();

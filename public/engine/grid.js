@@ -118,10 +118,6 @@ export class RemoteGrid extends Grid {
         let self = this;
         let old = this.cells;
         window.socket.emit("getCellData", window.roomid, (data) => {
-            if (old == data) {
-                console.log("same thing");
-                return;
-            }
             self.cells = data;
         });
         // console.log("getting the data")

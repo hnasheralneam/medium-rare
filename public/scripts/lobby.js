@@ -28,11 +28,15 @@ socket.on("here is socketid", (socketid) => {
 // for all multiplayer games gameid must exist
 window.roomid = userInfo.roomname;
 
+let gamecode;
 socket.emit("get roomcode", userInfo.roomname);
 socket.on("here is roomcode", (roomcode) => {
+   gamecode = roomcode;
    document.querySelector(".roomcode-display").textContent = "Room Code: " + roomcode;
 });
-
+function copyRoomCode() {
+   navigator.clipboard.writeText(gamecode);
+}
 
 
 
@@ -140,26 +144,12 @@ socket.on("gameStarted", async () => {
 socket.on("playerMoved", (player) => {
    let playerIndex = window.game.players.findIndex(item => item.id === player.id);
    if (playerIndex == -1) return;
-   console.log(player, playerIndex, window.game.players[playerIndex])
    let remotePlayer = window.game.players[playerIndex];
    if (remotePlayer.constructor.name == "RemotePlayer") {
-      console.log("okay so you're like qualified and everything")
       window.game.players[playerIndex].setPosition(player.pos, window.game.grid);
    }
 });
 
-// socket.on("havePlayers", (players) => {
-//    console.log("we are recivieing the players")
-//    for (const player of players) {
-//       window.game.addPlayer({
-//          type: "remote",
-//          sprite: player.sprite,
-//          id: player.id, // hi!
-
-//          // game no work!
-//       });
-//    }
-// });
 
 
 
