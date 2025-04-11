@@ -15,12 +15,19 @@ export const Crate = {
     sourceImage: "crate.png",
     solid: true,
     init: (self, data) => {
-        self.data = {};
-        if (data !== null)
-            self.data.items = [data.item];
-        // this should not be an option
-        else
-            self.data.items = ["tomato", "lettuce"];
+        if (data && data.items) {
+            self.data = data;
+        }
+        else {
+            self.data = {};
+            if (data !== null)
+                self.data.items = [data.item];
+            // this should not be an option
+            else {
+                console.warn("program committed failure (crate.js)");
+                self.data.items = ["tomato", "lettuce"];
+            }
+        }
     },
     /**
      * @param { Tile } self

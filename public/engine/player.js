@@ -105,16 +105,6 @@ export class RemotePlayer extends Player {
         super(pos, sprite, id);
     }
 
-    setPosition(pos, grid) {
-        const [sx, sy] = this.smoothPos();
-        if (grid.setPlayerPosition(this, pos[0], pos[1])) {
-            this.anim = 1;
-            this.lastPos[0] = sx;
-            this.lastPos[1] = sy;
-            Game.notifyRedraw();
-        }
-    }
-
     move(action, grid) {
         this.handleAction(action, grid);
         window.game.notifyRedraw();
@@ -127,7 +117,6 @@ export class KeyboardPlayer extends Player {
 
     constructor(inputMap, pos, sprite, id) {
         super(pos, sprite, id);
-        console.log(inputMap);
         this.inputMap = inputMap;
     }
 

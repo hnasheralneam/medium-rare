@@ -113,7 +113,7 @@ async function leaderInit() {
    socket.emit("initGameDetails", {
       roomid: window.roomid,
       levelName: window.levelName,
-      grid: window.game.grid.cells
+      grid: window.game.grid.exportData()
    });
 }
 if (userInfo.usertype == "leader") {

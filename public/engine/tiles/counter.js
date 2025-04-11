@@ -5,12 +5,14 @@ import { Recipes } from "../item.js";
 export const Counter = {
     sourceImage: "counter.png",
     solid: true,
-    init: (self, _data) => {
-        self.data = {};
-        self.data.item = null;
-    },
-    reinit(self, item) {
-        self.data.item = item;
+    init: (self, data) => {
+        if (data) {
+            self.data = data;
+        }
+        else {
+            self.data = {};
+            self.data.item = null;
+        }
     },
     /**
      * @param { Tile } self

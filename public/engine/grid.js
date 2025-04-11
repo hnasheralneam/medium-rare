@@ -1,5 +1,5 @@
 import { Tile } from "./tile.js";
-
+import { Item } from "./item.js";
 export class Grid {
     /**
      * @param { number } width
@@ -53,24 +53,8 @@ export class Grid {
             const id = numMap[i];
             const extraRaw = extraData[i];
             const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
-            this.cells[i] = new Tile(id, { x, y }, extra); // ininted from within Tile
+            this.cells[i] = new Tile(id, { x, y }, extra);
         }
-    }
-
-    exportData() {
-        let data = [];
-        for (const cell of this.cells) {
-            console.log(cell.proto)
-            data.push({
-                // tile data
-                x: cell.x,
-                y: cell.y,
-                proto: cell.proto,
-                data: cell.data || "no data"
-            });
-        }
-        console.log(JSON.stringify(data));
-        return data;
     }
 }
 
@@ -82,7 +66,6 @@ export class RemoteGrid extends Grid {
     async movePlayer(player, dx, dy) {
         await this.renewCellData();
         let result = super.movePlayer(player, dx, dy);
-        this.updateRemotePlayer(player.id, player.pos);
         return result;
     }
 
@@ -94,50 +77,53 @@ export class RemoteGrid extends Grid {
     }
 
 
-    setPlayerPosition(player, x, y) {
-        player.pos[0] = x;
-        player.pos[1] = y;
-        return true;
-    }
 
-    // multiplayer
-    reloadData(objectCells) { // is in the format of cells that were tiles, but had methods stripped in transit
-        // for (let i = 0; i < (this.width * this.height); i++) {
-        //     const x = i % this.width;
-        //     const y = Math.floor(i / this.width);
-        //     const id = numMap[i];
-        //     const extraRaw = extraData[i];
-        //     const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
-        //     this.cells[i] = new Tile(id, { x, y }, extra); // initialized from within Tile
-        // }
-        // console.log(objectCells)
+    // data managmenet
+    exportData() {
+        let data = [];
+        for (const cell of this.cells) {
+            data.push({
+                // tile data
+                id: cell.id,
+                x: cell.x,
+                y: cell.y,
+                data: cell.data || "no data",
+            });
+        }
+        return data;
+    }
+    importData(cells) {
+        for (let i = 0; i < (this.width * this.height); i++) {
+            const x = i % this.width; // so maybe don't send them?
+            const y = Math.floor(i / this.width); // so maybe don't send them?
+            const cell = cells[i];
+            const data = cell.data;
+            // restore items
+            if (data && data.item) {
+                let item = Item.fromName(data.item.proto.name);
+                // restore attributes
+                for (const [key, value] of Object.entries(data.item.data)) {
+                    item.setAttr(key, value);
+                }
+                data.item = item;
+            }
+            this.cells[i] = new Tile(cell.id, { x, y }, data);
+        }
         return;
     }
 
     async renewCellData() {
-        let self = this;
         let old = this.cells;
         window.socket.emit("getCellData", window.roomid, (data) => {
-            self.cells = data;
+            if (old == data) return;
+            this.importData(data);
         });
-        // console.log("getting the data")
-        return this.reloadData(this.cells);
+        return;
     }
-
     async updateRemoteCellData() {
         window.socket.emit("setCellData", {
             roomid: window.roomid,
-            grid: this.cells
+            grid: this.exportData()
         });
-        // console.log("setting the data!")
-    }
-
-    async updateRemotePlayer(id, pos) {
-        window.socket.emit("updatePlayerData", {
-            roomid: window.roomid,
-            playerid: id,
-            pos: pos
-        });
-        // console.log("setting the data!")
     }
 }

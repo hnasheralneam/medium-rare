@@ -1,50 +1,48 @@
-import * as G from "./graphics.js";
-import { Grid, RemoteGrid } from "./grid.js";
-import { Player, KeyboardPlayer, GamepadPlayer, RemotePlayer } from "./player.js";
-import { ImageCache } from "./image-cache.js";
-import { OrderHandler } from "./orderHandler.js";
-import { SaveData } from "../storage.js";
+import*as G from "./graphics.js";
+import {Grid, RemoteGrid} from "./grid.js";
+import {Player, KeyboardPlayer, GamepadPlayer, RemotePlayer} from "./player.js";
+import {ImageCache} from "./image-cache.js";
+import {OrderHandler} from "./orderHandler.js";
+import {SaveData} from "../storage.js";
 
-let inputMaps = [
-    {
-        ArrowUp: "up",
-        ArrowDown: "down",
-        ArrowLeft: "left",
-        ArrowRight: "right",
-        Period: "interact"
-    },
-    {
-        KeyW: "up",
-        KeyA: "left",
-        KeyS: "down",
-        KeyD: "right",
-        KeyQ: "interact",
-        KeyE: "interact"
-    }
-];
+let inputMaps = [{
+    ArrowUp: "up",
+    ArrowDown: "down",
+    ArrowLeft: "left",
+    ArrowRight: "right",
+    Period: "interact"
+}, {
+    KeyW: "up",
+    KeyA: "left",
+    KeyS: "down",
+    KeyD: "right",
+    KeyQ: "interact",
+    KeyE: "interact"
+}];
 let playerSprites = ["player", "player2", "player3", "player4"];
 window.levelNames = ["square", "wide", "huge"]
 
-// before game starts
+// these are only available before the game starts
 window.addEventListener("gamepadconnected", (e) => {
     Game.addGamepadPlayer(e.gamepad.index);
-});
+}
+);
 document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
 function keyboardPlayerConnectionListener(e) {
     const key = e.code;
     switch (key) {
-        case "KeyW":
-        case "KeyA":
-        case "KeyS":
-        case "KeyD":
-            Game.addKeyboardPlayer(1);
-            break;
-        case "ArrowUp":
-        case "ArrowLeft":
-        case "ArrowDown":
-        case "ArrowRight":
-            Game.addKeyboardPlayer(0);
-            break;
+    case "KeyW":
+    case "KeyA":
+    case "KeyS":
+    case "KeyD":
+        Game.addKeyboardPlayer(1);
+        break;
+    case "ArrowUp":
+    case "ArrowLeft":
+    case "ArrowDown":
+    case "ArrowRight":
+        Game.addKeyboardPlayer(0);
+        break;
     }
 }
 
@@ -119,7 +117,8 @@ export const Game = {
     },
     // for pre-game players specifically
     getPlayerCount() {
-        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length; // should also count remote players
+        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
+        // should also count remote players
     },
     getNextPos() {
         let pos = this.level.playerPositions[this.playerIndex] || this.level.playerPositions[0];
@@ -127,10 +126,9 @@ export const Game = {
         return pos;
     },
 
-
     async init() {
         this.level = await this.getLevelData(window.levelName);
-        this.grid = window.multiplayer ? new RemoteGrid(this.level.width, this.level.height) : new Grid(this.level.width, this.level.height);
+        this.grid = window.multiplayer ? new RemoteGrid(this.level.width,this.level.height) : new Grid(this.level.width,this.level.height);
         this.grid.loadData(this.level.layout, this.level.extra);
         this.initialized = true;
         return;
@@ -143,7 +141,6 @@ export const Game = {
         console.info("Started game");
         document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
 
-
         for (const pendingPlayer of this.pendingPlayers) {
             this.addPlayer(pendingPlayer);
         }
@@ -151,7 +148,8 @@ export const Game = {
         // get remote users if multiplayer
         let callback = (data) => {
             for (const player of data.players) {
-                if (this.players.some((item) => item.id == player.id)) continue;
+                if (this.players.some( (item) => item.id == player.id))
+                    continue;
                 this.addPlayer({
                     type: "remote",
                     sprite: player.sprite,
@@ -161,9 +159,10 @@ export const Game = {
                 this.playerIndex++;
             }
             this.notifyRedraw();
-        };
-        if (window.multiplayer) socket.emit("getPlayers", window.roomid, callback);
-
+        }
+        ;
+        if (window.multiplayer)
+            socket.emit("getPlayers", window.roomid, callback);
 
         this.orderHandler = new OrderHandler(this.level.menuOptions);
 
@@ -172,19 +171,20 @@ export const Game = {
                 const player = this.players[i];
                 if (player.constructor.name === "KeyboardPlayer") {
                     player.keyPressed(e, this.grid);
-                    if (player.anim === 1) this.notifyRedraw();
+                    if (player.anim === 1)
+                        this.notifyRedraw();
                 }
             }
 
             // this will be called only when the listener is set
             this.display();
-        };
+        }
+        ;
         document.body.addEventListener("keydown", this.keydownHandle);
 
         this.initControlsDisplay();
         this.display();
         this.startTimer();
-
 
         if (window.multiplayer && window.isLeader) {
             window.socket.emit("startGame", {
@@ -199,32 +199,17 @@ export const Game = {
         let player;
         if (pendingPlayer.type == "gamepad") {
             let index = this.gamepadPlayerIndexs[pendingPlayer.index];
-            player = new GamepadPlayer(
-                index,
-                pendingPlayer.pos,
-                pendingPlayer.sprite,
-                pendingPlayer.id
-            );
+            player = new GamepadPlayer(index,pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id);
             this.players.push(player);
 
-            setInterval(() => {
+            setInterval( () => {
                 player.handleGamepad(this.grid);
-            }, 50);
-        }
-        else if (pendingPlayer.type == "keyboard") {
-            player = new KeyboardPlayer(
-                pendingPlayer.inputMap,
-                pendingPlayer.pos,
-                pendingPlayer.sprite,
-                pendingPlayer.id,
-            );
-        }
-        else if (pendingPlayer.type == "remote") {
-            player = new RemotePlayer(
-                pendingPlayer.pos,
-                pendingPlayer.sprite,
-                pendingPlayer.id
-            );
+            }
+            , 50);
+        } else if (pendingPlayer.type == "keyboard") {
+            player = new KeyboardPlayer(pendingPlayer.inputMap,pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id,);
+        } else if (pendingPlayer.type == "remote") {
+            player = new RemotePlayer(pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id);
         }
         if (player) {
             this.players.push(player);
@@ -233,17 +218,15 @@ export const Game = {
 
     async getLevelData(levelName) {
         const url = `/resources/levels/${levelName}.json`;
-        return await fetch(url)
-            .then(x => x.text())
-            .then(y => {
-                return JSON.parse(y);
-            });
+        return await fetch(url).then(x => x.text()).then(y => {
+            return JSON.parse(y);
+        }
+        );
     },
 
     end() {
         document.body.removeEventListener("keydown", this.keydownHandle);
         clearInterval(this.timer);
-
 
         const postGamePanel = document.querySelector(".post-game");
         postGamePanel.classList.remove("hidden");
@@ -264,36 +247,41 @@ export const Game = {
             if (e.key == "Enter") {
                 location.reload();
             }
-        });
+        }
+        );
     },
 
     startTimer() {
         let timeLeft = this.level.timeSeconds;
         document.querySelector(".timer").textContent = timeLeft + " seconds | 0 Points";
-        this.timer = setInterval(() => {
-            if (this.paused) return;
+        this.timer = setInterval( () => {
+            if (this.paused)
+                return;
             if (timeLeft <= 0) {
                 this.end();
                 return;
             }
             timeLeft--;
             document.querySelector(".timer").textContent = timeLeft + " seconds | " + this.stats.score + " Points";
-        }, 1000);
+        }
+        , 1000);
     },
 
     resume() {
-        if (window.multiplayer) socket.emit("pause", {
-            roomid: window.roomid,
-            paused: false
-        });
+        if (window.multiplayer)
+            socket.emit("pause", {
+                roomid: window.roomid,
+                paused: false
+            });
         this.paused = false;
     },
 
     pause() {
-        if (window.multiplayer) socket.emit("pause", {
-            roomid: window.roomid,
-            paused: true
-        });
+        if (window.multiplayer)
+            socket.emit("pause", {
+                roomid: window.roomid,
+                paused: true
+            });
         this.paused = true;
     },
 
@@ -337,37 +325,19 @@ export const Game = {
 
         G.clear("#000");
         for (const cell of this.grid.cells) {
-            G.drawImage(
-                ImageCache.getTile(cell.proto.sourceImage),
-                cell.x * csize,
-                cell.y * csize
-            );
+            G.drawImage(ImageCache.getTile(cell.proto.sourceImage), cell.x * csize, cell.y * csize);
             if (cell.data && cell.data.item !== null && cell.data.item !== undefined) {
-                G.drawImage(
-                    ImageCache.getItem(cell.data.item.src()),
-                    cell.x * csize,
-                    cell.y * csize
-                );
+                G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
             }
         }
         for (const player of this.players) {
             const pos = player.smoothPos();
-            if (player.flipped) G.drawMirroredImage(
-                ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"),
-                pos[0] * csize,
-                pos[1] * csize
-            );
-            else G.drawImage(
-                ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"),
-                pos[0] * csize,
-                pos[1] * csize
-            );
+            if (player.flipped)
+                G.drawMirroredImage(ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"), pos[0] * csize, pos[1] * csize);
+            else
+                G.drawImage(ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"), pos[0] * csize, pos[1] * csize);
             if (player.item !== null) {
-                G.drawImage(
-                    ImageCache.getItem(player.item.src()),
-                    pos[0] * csize,
-                    (pos[1] - 1) * csize
-                );
+                G.drawImage(ImageCache.getItem(player.item.src()), pos[0] * csize, (pos[1] - 1) * csize);
             }
         }
         G.restore();
@@ -375,19 +345,22 @@ export const Game = {
 
     notifyRedraw() {
         // should be called for all players when multiplayer
-        if (this.busy) return;
+        if (this.busy)
+            return;
         this.busy = true;
-        window.requestAnimationFrame(() => this.loop());
+        window.requestAnimationFrame( () => this.loop());
     },
 
     loop() {
-        if (!this.busy) return;
+        if (!this.busy)
+            return;
         this.busy = false;
         for (const player of this.players) {
-            if (player.tickAnim()) this.busy = true;
+            if (player.tickAnim())
+                this.busy = true;
         }
         this.display();
-        window.requestAnimationFrame(() => this.loop());
+        window.requestAnimationFrame( () => this.loop());
     }
 };
 
