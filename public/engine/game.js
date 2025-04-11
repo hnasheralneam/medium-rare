@@ -1,139 +1,23 @@
-import*as G from "./graphics.js";
+import * as G from "./graphics.js";
 import {Grid, RemoteGrid} from "./grid.js";
 import {Player, KeyboardPlayer, GamepadPlayer, RemotePlayer} from "./player.js";
 import {ImageCache} from "./image-cache.js";
 import {OrderHandler} from "./orderHandler.js";
 import {SaveData} from "../storage.js";
+import { PlayerHandler } from "./playerHandler.js";
 
-let inputMaps = [{
-    ArrowUp: "up",
-    ArrowDown: "down",
-    ArrowLeft: "left",
-    ArrowRight: "right",
-    Period: "interact"
-}, {
-    KeyW: "up",
-    KeyA: "left",
-    KeyS: "down",
-    KeyD: "right",
-    KeyQ: "interact",
-    KeyE: "interact"
-}];
-let playerSprites = ["player", "player2", "player3", "player4"];
-window.levelNames = ["square", "wide", "huge"]
-
-// these are only available before the game starts
-window.addEventListener("gamepadconnected", (e) => {
-    Game.addGamepadPlayer(e.gamepad.index);
-}
-);
-document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
-function keyboardPlayerConnectionListener(e) {
-    const key = e.code;
-    switch (key) {
-    case "KeyW":
-    case "KeyA":
-    case "KeyS":
-    case "KeyD":
-        Game.addKeyboardPlayer(1);
-        break;
-    case "ArrowUp":
-    case "ArrowLeft":
-    case "ArrowDown":
-    case "ArrowRight":
-        Game.addKeyboardPlayer(0);
-        break;
-    }
-}
-document.body.addEventListener("touchstart", () => {
-    let touchPad = document.createElement("div");
-    touchPad.classList.add("touchpad");
-    touchPad.innerHTML = `
-
-    `;
-    // then insert the html elemnt
-    // the id for the touchpad player can be generated here and inserted into the function calls for this (handleTouchInput(id, action)), where they will be routed to the correct player
-});
-
-function getRandomSprite() {
-    return playerSprites[Math.floor(Math.random() * playerSprites.length)];
-}
+window.levelNames = ["square", "wide", "huge"];
 
 export const Game = {
-    /** @type { Player[] } */
-    players: [],
-    pendingPlayers: [],
-    /** @type { Grid } */
-    grid: null,
+    players: [], // Player array
+    grid: null, // Grid / RemoteGrid
     keydownHandle: null,
     paused: false,
     stats: {
         score: 0
     },
     busy: false,
-    gamepadPlayerIndexs: [],
-    keyboardPlayerInputMaps: [],
     initialized: false,
-    playerIndex: 0,
-
-    addGamepadPlayer(index) {
-        let id = window.crypto.randomUUID();
-        let pendingPlayer = {
-            type: "gamepad",
-            sprite: getRandomSprite(),
-            index: index,
-            id: id,
-            pos: this.getNextPos()
-        };
-        this.pendingPlayers.push(pendingPlayer);
-        this.gamepadPlayerIndexs.push(index);
-        window.updatePlayersOnPregameDisplay();
-
-        if (window.multiplayer) {
-            window.socket.emit("addPlayer", {
-                roomid: window.roomid,
-                id: id,
-                sprite: pendingPlayer.sprite,
-                startPos: pendingPlayer.pos
-            });
-        }
-    },
-    addKeyboardPlayer(inputMapIndex) {
-        let id = window.crypto.randomUUID();
-        let inputMap = inputMaps[inputMapIndex];
-        if (!this.keyboardPlayerInputMaps.includes(inputMap)) {
-            let pendingPlayer = {
-                type: "keyboard",
-                sprite: getRandomSprite(),
-                inputMap: inputMap,
-                id: id,
-                mapIndex: inputMapIndex,
-                pos: this.getNextPos()
-            };
-            this.pendingPlayers.push(pendingPlayer);
-            this.keyboardPlayerInputMaps.push(inputMap);
-            window.updatePlayersOnPregameDisplay();
-
-            if (window.multiplayer) {
-                window.socket.emit("addPlayer", {
-                    roomid: window.roomid,
-                    id: id,
-                    sprite: pendingPlayer.sprite,
-                    startPos: pendingPlayer.pos
-                });
-            }
-        }
-    },
-    // for pre-game players specifically
-    getPlayerCount() {
-        return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
-        // should also count remote players
-    },
-    getNextPos() {
-        let pos = this.level.playerPositions[this.playerIndex] || this.level.playerPositions[0];
-        this.playerIndex++;
-        return pos;
-    },
 
     async init() {
         this.level = await this.getLevelData(window.levelName);
@@ -148,9 +32,9 @@ export const Game = {
             await this.init(levelName);
         }
         console.info("Started game");
-        document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
+        PlayerHandler.gameStarted();
 
-        for (const pendingPlayer of this.pendingPlayers) {
+        for (const pendingPlayer of PlayerHandler.pendingPlayers) {
             this.addPlayer(pendingPlayer);
         }
 

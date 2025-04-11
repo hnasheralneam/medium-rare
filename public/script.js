@@ -2,6 +2,7 @@ import { Game } from "./engine/game.js";
 import { SaveData } from "./storage.js";
 import { ImageCache } from "./engine/image-cache.js";
 import { showAlerts, createAlert, hideAlerts } from "./alertSystem.js";
+import { PlayerHandler } from "./engine/playerHandler.js";
 
 await ImageCache.init();
 
@@ -16,7 +17,7 @@ if (!window.multiplayer) {
 }
 
 window.attemptStartingGame = () => {
-    if (Game.getPlayerCount() >= Game.level.minPlayers && Game.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
+    if (PlayerHandler.getPlayerCount() >= Game.level.minPlayers && PlayerHandler.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
         document.querySelector(".pre-game").classList.add("hidden");
         document.removeEventListener("keypress", gameStartListener);
         window.startGame(levelName);
@@ -82,7 +83,7 @@ window.updatePlayersOnPregameDisplay = () => {
     if (connectedPlayersElement) connectedPlayersElement.innerHTML = "";
     else return;
 
-    const pendingPlayers = Game.pendingPlayers;
+    const pendingPlayers = PlayerHandler.pendingPlayers;
     // fix style, keep side-by-side
     for (let i = 0; i < pendingPlayers.length; i++) {
         const player = pendingPlayers[i];
