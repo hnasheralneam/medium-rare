@@ -66,7 +66,8 @@ export class Player {
      * @param { import("./grid.js").Grid } grid
      */
     handleAction(action, grid) {
-        // multiplayer sync is happening over in grid.js
+        if (Game.paused) return;
+        // multiplayer sync for interact is happening over in grid.js
         if (action === "interact") {
             if (this.anim > 0.5) return;
             grid.interact(this);
@@ -193,5 +194,11 @@ export class GamepadPlayer extends Player {
         if (action === null) return;
         this.handleAction(action, grid);
         Game.notifyRedraw();
+    }
+}
+
+export class TouchPlayer extends Player {
+    constructor(pos, sprite, id) {
+        super(pos, sprite, id);
     }
 }

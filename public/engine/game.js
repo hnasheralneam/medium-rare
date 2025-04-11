@@ -1,6 +1,6 @@
 import * as G from "./graphics.js";
 import {Grid, RemoteGrid} from "./grid.js";
-import {Player, KeyboardPlayer, GamepadPlayer, RemotePlayer} from "./player.js";
+import { KeyboardPlayer, GamepadPlayer, TouchPlayer, RemotePlayer } from "./player.js";
 import {ImageCache} from "./image-cache.js";
 import {OrderHandler} from "./orderHandler.js";
 import {SaveData} from "../storage.js";
@@ -92,7 +92,7 @@ export const Game = {
         let player;
         if (pendingPlayer.type == "gamepad") {
             let index = this.gamepadPlayerIndexs[pendingPlayer.index];
-            player = new GamepadPlayer(index,pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id);
+            player = new GamepadPlayer(index,pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
             this.players.push(player);
 
             setInterval( () => {
@@ -100,9 +100,11 @@ export const Game = {
             }
             , 50);
         } else if (pendingPlayer.type == "keyboard") {
-            player = new KeyboardPlayer(pendingPlayer.inputMap,pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id,);
+            player = new KeyboardPlayer(pendingPlayer.inputMap, pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
+        } else if (pendingPlayer.type == "touch") {
+            player = new TouchPlayer(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id)
         } else if (pendingPlayer.type == "remote") {
-            player = new RemotePlayer(pendingPlayer.pos,pendingPlayer.sprite,pendingPlayer.id);
+            player = new RemotePlayer(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
         }
         if (player) {
             this.players.push(player);
@@ -168,36 +170,6 @@ export const Game = {
         this.paused = true;
     },
 
-    initControlsDisplay() {
-        // this isn't working anymore
-        let controlsElement = document.querySelector(".controls");
-        let index = 0;
-        for (let player of this.players) {
-            index++;
-            let playerElement = document.createElement("div");
-            playerElement.classList.add("player-controls-parent");
-            playerElement.innerHTML = `
-                <div>
-                    <h2>Player ${index}</h2>
-                    <img src="/sprites/${player.sprite}/idle.png">
-                </div>
-                <div class="controls-map"></div>
-                <br>
-            `;
-            let controlsMapElement = playerElement.querySelector(".controls-map");
-            for (let key in player.inputMap) {
-                let controlElement = document.createElement("div");
-                controlElement.classList.add("control");
-                controlElement.innerHTML = `
-                    <span>${player.inputMap[key]} - </span>
-                    <span>${key}</span>
-                `;
-                controlsMapElement.appendChild(controlElement);
-            }
-            controlsElement.appendChild(playerElement);
-        }
-    },
-
     display() {
         const csize = 32;
         const offset = {
@@ -244,6 +216,56 @@ export const Game = {
         }
         this.display();
         window.requestAnimationFrame( () => this.loop());
+    },
+
+
+
+
+
+
+
+
+
+
+    initControlsDisplay() {
+        // this isn't working anymore
+        let controlsElement = document.querySelector(".controls");
+        let index = 0;
+        for (let player of this.players) {
+            index++;
+            let playerElement = document.createElement("div");
+            playerElement.classList.add("player-controls-parent");
+            playerElement.innerHTML = `
+                <div>
+                    <h2>Player ${index}</h2>
+                    <img src="/sprites/${player.sprite}/idle.png">
+                </div>
+                <div class="controls-map"></div>
+                <br>
+            `;
+            let controlsMapElement = playerElement.querySelector(".controls-map");
+            for (let key in player.inputMap) {
+                let controlElement = document.createElement("div");
+                controlElement.classList.add("control");
+                controlElement.innerHTML = `
+                    <span>${player.inputMap[key]} - </span>
+                    <span>${key}</span>
+                `;
+                controlsMapElement.appendChild(controlElement);
+            }
+            controlsElement.appendChild(playerElement);
+        }
+    },
+    handleTouchInput(action, playerId) {
+        let player = this.players.find((obj) => obj.id == playerId);
+        console.log(player, action)
+        if (player) {
+            player.handleAction(action, this.grid);
+            this.notifyRedraw();
+        }
+        else {
+            console.error("missing player");
+        }
     }
 };
 

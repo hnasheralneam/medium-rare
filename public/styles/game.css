@@ -243,3 +243,15 @@ canvas {
    margin-top: 1rem;
    image-rendering: pixelated;
 }
+
+
+.touchpad {
+   position: fixed;
+   right: 0;
+   bottom: 0;
+   margin: 2rem;
+   padding: 2rem;
+   border-radius: 1rem;
+   background-color: #eee;
+   border: solid .2rem #bbb;
+}

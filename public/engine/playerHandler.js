@@ -25,11 +25,24 @@ function keyboardPlayerConnectionListener(e) {
    }
 }
 document.body.addEventListener("touchstart", () => {
+   const id = window.crypto.randomUUID();
    let touchPad = document.createElement("div");
    touchPad.classList.add("touchpad");
    touchPad.innerHTML = `
-
-    `;
+      <button onclick="window.game.handleTouchInput('interact', '${id}')">interact</button>
+      <div>
+         <button onclick="window.game.handleTouchInput('up', '${id}')">up</button>
+      </div>
+      <div>
+         <button onclick="window.game.handleTouchInput('left', '${id}')">left</button>
+         <button onclick="window.game.handleTouchInput('right', '${id}')">right</button>
+      </div>
+      <div>
+         <button onclick="window.game.handleTouchInput('down', '${id}')">down</button>
+      </div>
+   `;
+   document.body.append(touchPad);
+   PlayerHandler.addTouchPlayer(id);
    // then insert the html elemnt
    // the id for the touchpad player can be generated here and inserted into the function calls for this (handleTouchInput(id, action)), where they will be routed to the correct player
 });
@@ -99,7 +112,6 @@ export const PlayerHandler = {
          });
       }
    },
-
    addKeyboardPlayer(inputMapIndex) {
       let id = window.crypto.randomUUID();
       let inputMap = inputMaps[inputMapIndex];
@@ -125,6 +137,25 @@ export const PlayerHandler = {
             });
          }
       }
-   }
+   },
+   addTouchPlayer(id) {
+      console.log("creating touchpad player")
+      let pendingPlayer = {
+         type: "touch",
+         sprite: getRandomSprite(),
+         id: id,
+         pos: this.getNextPos()
+      };
+      this.pendingPlayers.push(pendingPlayer);
+      // window.updatePlayersOnPregameDisplay();
 
+      if (window.multiplayer) {
+         window.socket.emit("addPlayer", {
+            roomid: window.roomid,
+            id: id,
+            sprite: pendingPlayer.sprite,
+            startPos: pendingPlayer.pos
+         });
+      }
+   }
 }
