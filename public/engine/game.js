@@ -122,7 +122,7 @@ export const Game = {
         return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length; // should also count remote players
     },
     getNextPos() {
-        let pos = this.level.playerPositions[this.playerIndex];
+        let pos = this.level.playerPositions[this.playerIndex] || this.level.playerPositions[0];
         this.playerIndex++;
         return pos;
     },
@@ -213,7 +213,7 @@ export const Game = {
         }
         else if (pendingPlayer.type == "keyboard") {
             player = new KeyboardPlayer(
-                this.keyboardPlayerInputMaps[pendingPlayer.mapIndex],
+                pendingPlayer.inputMap,
                 pendingPlayer.pos,
                 pendingPlayer.sprite,
                 pendingPlayer.id,
@@ -282,10 +282,18 @@ export const Game = {
     },
 
     resume() {
+        if (window.multiplayer) socket.emit("pause", {
+            roomid: window.roomid,
+            paused: false
+        });
         this.paused = false;
     },
 
     pause() {
+        if (window.multiplayer) socket.emit("pause", {
+            roomid: window.roomid,
+            paused: true
+        });
         this.paused = true;
     },
 
@@ -334,9 +342,9 @@ export const Game = {
                 cell.x * csize,
                 cell.y * csize
             );
-            if (cell.item !== null && cell.item !== undefined) {
+            if (cell.data && cell.data.item !== null && cell.data.item !== undefined) {
                 G.drawImage(
-                    ImageCache.getItem(cell.item.src()),
+                    ImageCache.getItem(cell.data.item.src()),
                     cell.x * csize,
                     cell.y * csize
                 );

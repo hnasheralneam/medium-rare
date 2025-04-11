@@ -133,3 +133,5 @@ function togglePause() {
         settingsPanel.classList.remove("hidden");
     }
 }
+
+window.togglePause = togglePause;

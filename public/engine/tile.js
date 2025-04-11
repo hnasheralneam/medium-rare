@@ -57,7 +57,7 @@ const CellMap = [
         src: "counter",
         solid: true,
         init: (cell) => {
-            cell.item = cell.extra !== undefined ? cell.extra[0] : null;
+            cell.data.item = cell.extra !== undefined ? cell.extra[0] : null;
         },
         /**
          * @param { Player } player
@@ -65,19 +65,19 @@ const CellMap = [
          */
         interact: (player, cell) => {
             const playerHasItem = player.item !== null;
-            const counterHasItem = cell.item !== null;
+            const counterHasItem = cell.data.item !== null;
             if (playerHasItem && counterHasItem) {
-                const result = Recipes.using(player.item, cell.item);
+                const result = Recipes.using(player.item, cell.data.item);
                 if (result === null) return;
-                cell.item = result;
+                cell.data.item = result;
                 player.deleteItem();
                 return;
             }
             if (playerHasItem === counterHasItem) return;
-            if (cell.item === null) cell.item = player.releaseItem();
+            if (cell.data.item === null) cell.data.item = player.releaseItem();
             else {
-                player.giveItem(cell.item);
-                cell.item = null;
+                player.giveItem(cell.data.item);
+                cell.data.item = null;
             }
         }
     },
@@ -87,16 +87,16 @@ const CellMap = [
         solid: true,
         init: () => {},
         interact: (player, cell) => {
-            if (cell.item == null || cell.item == undefined) {
-                cell.item = player.releaseItem();
+            if (cell.data.item == null || cell.data.item == undefined) {
+                cell.data.item = player.releaseItem();
             }
             else if (!player.hasItem()) {
-                if (cell.item.proto.cuttable) {
-                    if (cell.item.attr("cutted")) {
-                        player.giveItem(cell.item);
-                        cell.item = null;
+                if (cell.data.item.proto.cuttable) {
+                    if (cell.data.item.attr("cutted")) {
+                        player.giveItem(cell.data.item);
+                        cell.data.item = null;
                     }
-                    else cell.item.setAttr("cutted", true);
+                    else cell.data.item.setAttr("cutted", true);
                 }
             }
         }
@@ -139,10 +139,11 @@ const tileNameList = [
     "Delivery"
 ];
 
-// Updated thing
+// has 3 attributes: x: int, y: int, proto: Object
+// each tile has 3 attributes: sourceImage: string, solid: boolean, data: object
 export class Tile {
     constructor(id, pos, data) {
-        this.create(id, pos, data); // should recreate if multiplayer
+        this.create(id, pos, data);
     }
 
     create(id, pos, data) {
@@ -154,6 +155,6 @@ export class Tile {
         this.y = pos.y;
         // this is how it creates the sub-object (like counter or cutting board)
         this.proto = proto;
-        proto.init(this, data); // there should be a reinit method on counter and cuttingboard... hmmmm
+        proto.init(this, data);
     }
 }

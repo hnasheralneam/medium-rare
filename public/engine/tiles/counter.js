@@ -6,30 +6,31 @@ export const Counter = {
     sourceImage: "counter.png",
     solid: true,
     init: (self, _data) => {
-        self.item = null;
+        self.data = {};
+        self.data.item = null;
     },
     reinit(self, item) {
-        self.item = item;
+        self.data.item = item;
     },
     /**
      * @param { Tile } self
      * @param { Player } player
      */
     onInteract: (self, player, _key) => {
-        if (self.item === null) {
+        if (self.data.item === null) {
             if (player.item === null) return;
-            self.item = player.releaseItem();
+            self.data.item = player.releaseItem();
         }
         else {
             if (player.item !== null) {
-                const result = Recipes.using(player.item, self.item);
+                const result = Recipes.using(player.item, self.data.item);
                 if (result === null) return;
-                self.item = result;
+                self.data.item = result;
                 player.deleteItem();
                 return;
             }
-            player.giveItem(self.item);
-            self.item = null;
+            player.giveItem(self.data.item);
+            self.data.item = null;
         }
     }
 };

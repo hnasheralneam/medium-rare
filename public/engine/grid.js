@@ -8,7 +8,7 @@ export class Grid {
     constructor(width, height) {
         this.width = width;
         this.height = height;
-        this.cells = new Array(width * height);
+        this.cells = new Array(width * height); // why not a 2d array?!?
     }
 
     inBounds(x, y) {
@@ -55,6 +55,22 @@ export class Grid {
             const extra = (extraRaw === 0 || extraRaw === undefined) ? null : extraRaw;
             this.cells[i] = new Tile(id, { x, y }, extra); // ininted from within Tile
         }
+    }
+
+    exportData() {
+        let data = [];
+        for (const cell of this.cells) {
+            console.log(cell.proto)
+            data.push({
+                // tile data
+                x: cell.x,
+                y: cell.y,
+                proto: cell.proto,
+                data: cell.data || "no data"
+            });
+        }
+        console.log(JSON.stringify(data));
+        return data;
     }
 }
 

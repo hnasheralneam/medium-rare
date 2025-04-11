@@ -6,10 +6,11 @@ export const CuttingBoard = {
     sourceImage: "cuttingboard.png",
     solid: true,
     init: (self, _data) => {
-        self.item = null;
+        self.data = {};
+        self.data.item = null;
     },
     reinit(self, item) {
-        self.item = item;
+        self.data.item = item;
     },
     /**
      * @param { Tile } self
@@ -18,20 +19,20 @@ export const CuttingBoard = {
     onInteract: (self, player, _key) => {
         if (player.item === null) {
             /** @type { Item } */
-            const item = self.item;
+            const item = self.data.item;
             if (item === null) return;
             if (!item.attr("cutted")) {
                 item.setAttr("cutted", true);
             }
             else {
                 player.giveItem(item);
-                self.item = null;
+                self.data.item = null;
             }
         }
         else {
-            if (self.item !== null) return;
+            if (self.data.item !== null) return;
             if (!player.item.proto.cuttable) return;
-            self.item = player.releaseItem();
+            self.data.item = player.releaseItem();
         }
     }
 };

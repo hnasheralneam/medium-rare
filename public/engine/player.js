@@ -127,6 +127,7 @@ export class KeyboardPlayer extends Player {
 
     constructor(inputMap, pos, sprite, id) {
         super(pos, sprite, id);
+        console.log(inputMap);
         this.inputMap = inputMap;
     }
 

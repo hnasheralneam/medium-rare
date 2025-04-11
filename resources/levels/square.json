@@ -20,14 +20,11 @@
    "width": 7,
    "height": 7,
    "minPlayers": 1,
-   "maxPlayers": 4,
-   "comment": "// temorarily raised limit from 2",
+   "maxPlayers": 2,
    "menuOptions": ["salad"],
    "timeSeconds": 60,
    "playerPositions": [
       [5, 3],
-      [3, 3],
-      [5, 4],
-      [3, 4]
+      [3, 3]
    ]
 }

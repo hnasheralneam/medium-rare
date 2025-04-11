@@ -15,10 +15,12 @@ export const Crate = {
     sourceImage: "crate.png",
     solid: true,
     init: (self, data) => {
+        self.data = {};
         if (data !== null)
-            self.items = [data.item];
+            self.data.items = [data.item];
+        // this should not be an option
         else
-            self.items = ["tomato", "lettuce"];
+            self.data.items = ["tomato", "lettuce"];
     },
     /**
      * @param { Tile } self
@@ -26,7 +28,7 @@ export const Crate = {
      */
     onInteract: (self, player, _key) => {
         if (player.item !== null) return;
-        const material = Item.fromName(pickRandom(self.items));
+        const material = Item.fromName(pickRandom(self.data.items));
         player.giveItem(material);
     }
 };

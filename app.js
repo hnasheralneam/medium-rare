@@ -8,7 +8,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const uuid = require("uuid");
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3030;
 
 app.use(express.static("public"));
 app.use(express.static("assets"));
@@ -98,12 +98,7 @@ io.on("connection", (socket) => {
                 code: Math.floor(100000 + Math.random() * 900000),
                 open: true
             },
-            users: [],
-            data: {
-                paused: false,
-                level: null,
-                grid: null
-            }
+            users: []
         });
         socket.emit("room created", {
             socketid: socket.id,
@@ -212,6 +207,7 @@ io.on("connection", (socket) => {
     // "load" the game before actually starting
     socket.on("initGameDetails", ({ roomid, levelName, grid }) => {
         let index = rooms.findIndex(room => room.info.name == roomid);
+        // if (!rooms[index]) return;
         rooms[index]["data"] = {
             paused: true,
             level: levelName,
@@ -223,10 +219,23 @@ io.on("connection", (socket) => {
         });
     });
     socket.on("startGame", ({ roomid, levelName }) => {
+        console.log("222");
         let index = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[index]) return;
+        startGameTimer(roomid, () => { io.in(roomid).emit("gameOver"); });
         io.in(roomid).emit("gameStarted", {
             levelName: rooms[index]["data"]["level"]
+        });
+    });
+    socket.on("pause", ({ roomid, paused }) => {
+        console.log("231");
+        let index = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[index]) return;
+
+        setPauseState(roomid, paused);
+        io.in(roomid).emit("pause", {
+            paused: paused,
+            timeSeconds: rooms[index]["data"]["timeSeconds"]
         });
     });
     socket.on("getCellData", (roomid, callback) => {
@@ -256,13 +265,6 @@ io.on("connection", (socket) => {
             players: rooms[index]["data"]["players"]
         });
     });
-    // socket.on("updatePlayerData", ({ roomid, playerid, pos }) => {
-    //     let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-    //     if (!rooms[roomIndex]) return;
-    //     let playerIndex = rooms[roomIndex]["data"]["players"].findIndex(player => player.id === playerid);
-    //     rooms[roomIndex]["data"]["players"][playerIndex].pos = pos;
-    //     io.in(roomid).emit("playerMoved", rooms[roomIndex]["data"]["players"][playerIndex]);
-    // });
     socket.on("playerMoved", ({ roomid, playerid, move }) => {
         let roomIndex = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[roomIndex]) return;
@@ -281,6 +283,29 @@ app.get("/multi/:roomname/waiting-room", (req, res) => {
     res.render("waiting");
 });
 
+function startGameTimer(roomid, gameOverCallback) {
+    console.log("287");
+    let roomIndex = rooms.findIndex(room => room.info.name === roomid);
+    if (!roomIndex) return;
+    let timeLeft = rooms[roomIndex]["data"]["timeSeconds"];
+    rooms[roomIndex]["data"]["timer"] = setInterval(() => {
+        if (rooms[roomIndex]["data"]["paused"]) return;
+        if (timeLeft <= 0) {
+            // this.end();
+            clearInterval(rooms[roomIndex]["data"]["timer"]);
+            gameOverCallback();
+            return;
+        }
+        timeLeft--;
+    }, 1000);
+}
+
+function setPauseState(roomid, state) {
+    console.log("304");
+    let roomIndex = rooms.findIndex(room => room.info.name === roomid);
+    if (!roomIndex || !state) return;
+    rooms[roomIndex]["data"]["paused"] = state;
+}
 
 
 // Start server
