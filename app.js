@@ -238,15 +238,20 @@ io.on("connection", (socket) => {
             timeSeconds: rooms[index]["data"]["timeSeconds"]
         });
     });
-    socket.on("getCellData", (roomid, callback) => {
+    socket.on("getGridData", (roomid, callback) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[index]) return;
         callback(rooms[index]["data"]["grid"]);
     });
-    socket.on("setCellData", ({roomid, grid}) => {
+    socket.on("setGridData", ({roomid, grid}) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[index]) return;
         rooms[index]["data"]["grid"] = grid;
+    });
+    socket.on("setCellData", ({ roomid, cell, index }) => {
+        let roomIndex = rooms.findIndex(room => room.info.name === roomid);
+        if (!rooms[roomIndex]) return;
+        rooms[roomIndex]["data"]["grid"][index] = cell;
     });
     socket.on("addPlayer", ({roomid, id, sprite, startPos}) => {
         let index = rooms.findIndex(room => room.info.name === roomid);

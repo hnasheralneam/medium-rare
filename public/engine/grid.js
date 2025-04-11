@@ -41,9 +41,13 @@ export class Grid {
         const ty = player.pos[1] + player.vel[1];
         if (!this.inBounds(tx, ty)) return;
         const tile = this.tileAt(tx, ty);
+        // this will be annoying to transfer, it's per-tile
+        // maybe just send updated versions of the player instead? tile already handled by grid sync
         const func = tile.proto.onInteract;
         if (func === undefined) return;
         func(tile, player, "interact");
+        player.updateRemote();
+        return tile;
     }
 
     loadData(numMap, extraData) {
@@ -64,16 +68,16 @@ export class RemoteGrid extends Grid {
     }
 
     async movePlayer(player, dx, dy) {
-        await this.renewCellData();
+        await this.renewGridData();
         let result = super.movePlayer(player, dx, dy);
         return result;
     }
 
     async interact(player) {
-        await this.renewCellData();
-        let results = super.interact(player);
-        this.updateRemoteCellData();
-        return results;
+        await this.renewGridData();
+        let tile = super.interact(player);
+        if (!tile) return;
+        this.updateRemoteCell(tile);
     }
 
 
@@ -82,48 +86,62 @@ export class RemoteGrid extends Grid {
     exportData() {
         let data = [];
         for (const cell of this.cells) {
-            data.push({
-                // tile data
-                id: cell.id,
-                x: cell.x,
-                y: cell.y,
-                data: cell.data || "no data",
-            });
+            data.push(this.exportCell(cell));
         }
         return data;
+    }
+    exportCell(cell) {
+        return {
+            // tile data
+            id: cell.id,
+            x: cell.x,
+            y: cell.y,
+            data: cell.data || "no data",
+        }
     }
     importData(cells) {
         for (let i = 0; i < (this.width * this.height); i++) {
             const x = i % this.width; // so maybe don't send them?
             const y = Math.floor(i / this.width); // so maybe don't send them?
             const cell = cells[i];
-            const data = cell.data;
-            // restore items
-            if (data && data.item) {
-                let item = Item.fromName(data.item.proto.name);
-                // restore attributes
-                for (const [key, value] of Object.entries(data.item.data)) {
-                    item.setAttr(key, value);
-                }
-                data.item = item;
-            }
-            this.cells[i] = new Tile(cell.id, { x, y }, data);
+            this.cells[i] = new Tile(cell.id, { x, y }, this.importCell(cell));
         }
         return;
     }
+    importCell(cell) {
+        const data = cell.data;
+        // restore items
+        if (data && data.item) {
+            let item = Item.fromName(data.item.proto.name);
+            // restore attributes
+            for (const [key, value] of Object.entries(data.item.data)) {
+                item.setAttr(key, value);
+            }
+            data.item = item;
+        }
+        return data;
+    }
 
-    async renewCellData() {
+
+    async renewGridData() {
         let old = this.cells;
-        window.socket.emit("getCellData", window.roomid, (data) => {
+        window.socket.emit("getGridData", window.roomid, (data) => {
             if (old == data) return;
             this.importData(data);
         });
         return;
     }
-    async updateRemoteCellData() {
-        window.socket.emit("setCellData", {
+    async updateRemoteGridData() {
+        window.socket.emit("setGridData", {
             roomid: window.roomid,
             grid: this.exportData()
+        });
+    }
+    async updateRemoteCell(tile) {
+        window.socket.emit("setCellData", {
+            roomid: window.roomid,
+            cell: this.exportCell(tile),
+            index: tile.x + tile.y * this.width
         });
     }
 }

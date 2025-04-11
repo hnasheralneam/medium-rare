@@ -45,6 +45,15 @@ function keyboardPlayerConnectionListener(e) {
         break;
     }
 }
+document.body.addEventListener("touchstart", () => {
+    let touchPad = document.createElement("div");
+    touchPad.classList.add("touchpad");
+    touchPad.innerHTML = `
+
+    `;
+    // then insert the html elemnt
+    // the id for the touchpad player can be generated here and inserted into the function calls for this (handleTouchInput(id, action)), where they will be routed to the correct player
+});
 
 function getRandomSprite() {
     return playerSprites[Math.floor(Math.random() * playerSprites.length)];

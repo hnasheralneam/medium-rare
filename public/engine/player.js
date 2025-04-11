@@ -65,7 +65,7 @@ export class Player {
      * @param { import("./grid.js").Grid } grid
      */
     handleAction(action, grid) {
-        // needs syncing for multiplayer
+        // multiplayer sync is happening over in grid.js
         if (action === "interact") {
             if (this.anim > 0.5) return;
             grid.interact(this);
@@ -80,14 +80,13 @@ export class Player {
                 this.flipped = true;
             else if (move[0] < -0.1)
                 this.flipped = false;
-            // needs syncing for multiplayer
+
             if (grid.movePlayer(this, move[0], move[1])) {
                 this.anim = 1;
                 this.lastPos[0] = sx;
                 this.lastPos[1] = sy;
 
                 // multiplayer sync
-                // it's doing this recursivly!
                 if (window.multiplayer && this.constructor.name != "RemotePlayer") {
                     window.socket.emit("playerMoved", {
                         roomid: window.roomid,
@@ -97,6 +96,16 @@ export class Player {
                 }
             }
         }
+    }
+
+    updateRemote() {
+        window.socket.emit("setPlayer", {
+            roomid: window.roomid,
+            id: this.id,
+            data: {
+                item: this.item
+            }
+        });
     }
 }
 
