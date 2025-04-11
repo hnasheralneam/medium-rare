@@ -10,6 +10,7 @@ const uuid = require("uuid");
 
 const port = process.env.PORT || 3030;
 
+app.use(express.static("new"));
 app.use(express.static("public"));
 app.use(express.static("assets"));
 app.use("/scripts", express.static(__dirname + "/public/scripts/"));
