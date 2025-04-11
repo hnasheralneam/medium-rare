@@ -141,10 +141,8 @@ socket.on("gameStarted", async () => {
 });
 
 socket.on("pause", (paused, timeSeconds) => {
-   window.game.paused = paused;
-   window.togglePause();
+   window.togglePause(true);
    window.game.level.timeSeconds = timeSeconds;
-   console.log("paused " + JSON.parse(paused))
 });
 
 socket.on("movePlayer", (player) => {
@@ -153,6 +151,17 @@ socket.on("movePlayer", (player) => {
    let remotePlayer = window.game.players[playerIndex];
    if (remotePlayer.constructor.name == "RemotePlayer") {
       window.game.players[playerIndex].move(player.lastMove, window.game.grid);
+   }
+});
+
+socket.on("givePlayerItem", (data) => {
+   let id = data.id;
+   let item = data.item;
+   let playerIndex = window.game.players.findIndex(player => player.id === id);
+   if (playerIndex == -1) return;
+   let remotePlayer = window.game.players[playerIndex];
+   if (remotePlayer.constructor.name == "RemotePlayer") {
+      window.game.players[playerIndex].give(item);
    }
 });
 

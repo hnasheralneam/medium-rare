@@ -1,4 +1,5 @@
 import { Game } from "./game.js";
+import { Item } from "./item.js";
 
 const movements = {
     up: [0, -1],
@@ -117,6 +118,21 @@ export class RemotePlayer extends Player {
     move(action, grid) {
         this.handleAction(action, grid);
         window.game.notifyRedraw();
+    }
+
+    // not an instance of item! it's json
+    give(itemJSON) {
+        if (itemJSON) {
+            let item = Item.fromName(itemJSON.proto.name);
+            // restore attributes
+            for (const [key, value] of Object.entries(itemJSON.data)) {
+                item.setAttr(key, value);
+            }
+            this.giveItem(item);
+        }
+        else {
+            this.releaseItem();
+        }
     }
 }
 

@@ -41,8 +41,6 @@ export class Grid {
         const ty = player.pos[1] + player.vel[1];
         if (!this.inBounds(tx, ty)) return;
         const tile = this.tileAt(tx, ty);
-        // this will be annoying to transfer, it's per-tile
-        // maybe just send updated versions of the player instead? tile already handled by grid sync
         const func = tile.proto.onInteract;
         if (func === undefined) return;
         func(tile, player, "interact");
@@ -94,8 +92,8 @@ export class RemoteGrid extends Grid {
         return {
             // tile data
             id: cell.id,
-            x: cell.x,
-            y: cell.y,
+            x: cell.x, // may not need to send
+            y: cell.y, // may not need to send
             data: cell.data || "no data",
         }
     }
@@ -104,7 +102,8 @@ export class RemoteGrid extends Grid {
             const x = i % this.width; // so maybe don't send them?
             const y = Math.floor(i / this.width); // so maybe don't send them?
             const cell = cells[i];
-            this.cells[i] = new Tile(cell.id, { x, y }, this.importCell(cell));
+            // this.cells[i] = new Tile(cell.id, { x, y }, this.importCell(cell));
+            this.cells[i].create(cell.id, { x, y }, this.importCell(cell));
         }
         return;
     }

@@ -15,11 +15,10 @@ if (!window.multiplayer) {
     Game.init(window.levelName);
 }
 
-let pressListener;
 window.attemptStartingGame = () => {
     if (Game.getPlayerCount() >= Game.level.minPlayers && Game.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
         document.querySelector(".pre-game").classList.add("hidden");
-        clearInterval(pressListener);
+        document.removeEventListener("keypress", gameStartListener);
         window.startGame(levelName);
     }
     else {
@@ -69,11 +68,12 @@ function createPreGamePanel() {
             <div class="connected-players"></div>
         </div>
     `;
-    pressListener = document.addEventListener("keypress", (e) => {
-        if (e.key == "Enter") {
-            window.attemptStartingGame();
-        }
-    });
+    document.addEventListener("keypress", gameStartListener);
+}
+function gameStartListener(e) {
+    if (e.key == "Enter") {
+        window.attemptStartingGame();
+    }
 }
 window.createPreGamePanel = createPreGamePanel;
 
@@ -118,20 +118,47 @@ window.updatePlayersOnPregameDisplay = () => {
 let settingsPanel = document.querySelector(".settings");
 let playPauseButton = document.querySelector(".play-pause");
 let continueButton = document.querySelector(".continue");
-playPauseButton.addEventListener("click", togglePause);
-continueButton.addEventListener("click", togglePause);
+playPauseButton.addEventListener("click", () => {
+    togglePause(false);
+});
+continueButton.addEventListener("click", () => {
+    togglePause(false);
+});
 
-function togglePause() {
+function togglePause(fromRemote) {
     if (Game.paused) {
-        Game.resume();
-        playPauseButton.textContent = "Pause";
-        settingsPanel.classList.add("hidden");
+        if ((window.multiplayer && fromRemote) || !window.multiplayer) {
+            console.log("resume")
+            Game.resume();
+            playPauseButton.textContent = "Pause";
+            settingsPanel.classList.add("hidden");
+        }
+
+        if (window.multiplayer && !fromRemote) {
+            socket.emit("pause", {
+                roomid: window.roomid,
+                paused: false
+            });
+        }
     }
     else {
-        Game.pause();
-        playPauseButton.textContent = "Play";
-        settingsPanel.classList.remove("hidden");
+        if ((window.multiplayer && fromRemote) || !window.multiplayer) {
+            console.log("pausing")
+            Game.pause();
+            playPauseButton.textContent = "Play";
+            settingsPanel.classList.remove("hidden");
+        }
+
+        if (window.multiplayer && !fromRemote) {
+            socket.emit("pause", {
+                roomid: window.roomid,
+                paused: true
+            });
+        }
     }
 }
 
-window.togglePause = togglePause;
+window.togglePause = (fromRemote) => {
+    console.log("fromRemote:" + fromRemote)
+    togglePause(fromRemote);
+};

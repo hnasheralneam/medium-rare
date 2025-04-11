@@ -277,20 +277,10 @@ export const Game = {
     },
 
     resume() {
-        if (window.multiplayer)
-            socket.emit("pause", {
-                roomid: window.roomid,
-                paused: false
-            });
         this.paused = false;
     },
 
     pause() {
-        if (window.multiplayer)
-            socket.emit("pause", {
-                roomid: window.roomid,
-                paused: true
-            });
         this.paused = true;
     },
 
