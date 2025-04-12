@@ -258,15 +258,17 @@ io.on("connection", (socket) => {
 
 
     // players
-    socket.on("addPlayer", ({roomid, id, sprite, startPos}) => {
+    socket.on("addPlayer", ({roomid, id, sprite, pos}) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[index]) return;
-        rooms[index]["data"]["players"].push({
+        let player = {
             id: id,
             sprite: sprite,
-            startPos: startPos,
+            pos: pos,
             lastMove: ""
-        });
+        };
+        rooms[index]["data"]["players"].push(player);
+        io.in(roomid).emit("playerAdded", player);
     });
     socket.on("getPlayers", (roomid, callback) => {
         let index = rooms.findIndex(room => room.info.name === roomid);

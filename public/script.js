@@ -17,13 +17,14 @@ if (!window.multiplayer) {
 }
 
 window.attemptStartingGame = () => {
+    if (window.multiplayer && !window.isLeader) return;
     if (PlayerHandler.getPlayerCount() >= Game.level.minPlayers && PlayerHandler.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
         document.querySelector(".pre-game").classList.add("hidden");
         document.removeEventListener("keypress", gameStartListener);
         window.startGame(levelName);
     }
     else {
-        if (Game.getPlayerCount() < Game.level.minPlayers)
+        if (PlayerHandler.getPlayerCount() < Game.level.minPlayers)
             document.querySelector(".output").textContent = `Add at least ${Game.level.minPlayers} player${Game.level.minPlayers > 1 ? "s" : ""}`;
         else {
             document.querySelector(".output").textContent = `Have no more than ${Game.level.maxPlayers} player${Game.level.maxPlayers > 1 ? "s" : ""}`;
@@ -58,10 +59,10 @@ function createPreGamePanel() {
             <p class="output"></p>
             ${(SaveData[window.levelName + "HighScore"] > 0 && !window.multiplayer) ? "<h1>Your high score: " + SaveData[window.levelName + "HighScore"] + "</h1>" : ""}
             ${
-                window.multiplayer ? `
+        window.multiplayer ? (window.isLeader ? `<button onclick="window.attemptStartingGame()">Play</button>` : `
                     <p>Are you ready yet?</p>
-                ` : `
-                    <p>Press arrow/wsad keys or move controller to add player</p>
+                `) : `
+                    <p>Press arrow/wsad keys or move controller or touch screen to add player</p>
                     <button onclick="window.attemptStartingGame()">Play</button>
                 `
             }
@@ -129,9 +130,8 @@ continueButton.addEventListener("click", () => {
 function togglePause(fromRemote) {
     if (Game.paused) {
         if ((window.multiplayer && fromRemote) || !window.multiplayer) {
-            console.log("resume")
             Game.resume();
-            playPauseButton.textContent = "Pause";
+            playPauseButton.querySelector("img").src = "/icons/pause.svg";
             settingsPanel.classList.add("hidden");
         }
 
@@ -144,9 +144,8 @@ function togglePause(fromRemote) {
     }
     else {
         if ((window.multiplayer && fromRemote) || !window.multiplayer) {
-            console.log("pausing")
             Game.pause();
-            playPauseButton.textContent = "Play";
+            playPauseButton.querySelector("img").src = "/icons/play.svg";
             settingsPanel.classList.remove("hidden");
         }
 
@@ -160,6 +159,5 @@ function togglePause(fromRemote) {
 }
 
 window.togglePause = (fromRemote) => {
-    console.log("fromRemote:" + fromRemote)
     togglePause(fromRemote);
 };

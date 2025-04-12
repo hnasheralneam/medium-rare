@@ -1,9 +1,9 @@
 import * as G from "./graphics.js";
-import {Grid, RemoteGrid} from "./grid.js";
+import { Grid, RemoteGrid } from "./grid.js";
 import { KeyboardPlayer, GamepadPlayer, TouchPlayer, RemotePlayer } from "./player.js";
-import {ImageCache} from "./image-cache.js";
-import {OrderHandler} from "./orderHandler.js";
-import {SaveData} from "../storage.js";
+import { ImageCache } from "./image-cache.js";
+import { OrderHandler } from "./orderHandler.js";
+import { SaveData } from "../storage.js";
 import { PlayerHandler } from "./playerHandler.js";
 
 window.levelNames = ["square", "wide", "huge"];
@@ -37,25 +37,6 @@ export const Game = {
         for (const pendingPlayer of PlayerHandler.pendingPlayers) {
             this.addPlayer(pendingPlayer);
         }
-
-        // get remote users if multiplayer
-        let callback = (data) => {
-            for (const player of data.players) {
-                if (this.players.some( (item) => item.id == player.id))
-                    continue;
-                this.addPlayer({
-                    type: "remote",
-                    sprite: player.sprite,
-                    id: player.id,
-                    pos: player.startPos
-                });
-                this.playerIndex++;
-            }
-            this.notifyRedraw();
-        }
-        ;
-        if (window.multiplayer)
-            socket.emit("getPlayers", window.roomid, callback);
 
         this.orderHandler = new OrderHandler(this.level.menuOptions);
 
@@ -91,8 +72,8 @@ export const Game = {
     addPlayer(pendingPlayer) {
         let player;
         if (pendingPlayer.type == "gamepad") {
-            let index = this.gamepadPlayerIndexs[pendingPlayer.index];
-            player = new GamepadPlayer(index,pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
+            let index = pendingPlayer.index;
+            player = new GamepadPlayer(index, pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
             this.players.push(player);
 
             setInterval( () => {
@@ -131,7 +112,7 @@ export const Game = {
             <h1>Your score:  ${Game.stats.score}</h1>
             <span>${Game.stats.score >= SaveData[window.levelName + "HighScore"] ? "New high score!" : ""}</span>
             <p>Completed ${this.orderHandler.completedOrders.length} orders, failed ${this.orderHandler.failedOrders.length} orders</p>
-            <button onclick="location.reload()">Play again</button>
+            ${window.multiplayer ? '' : '<button onclick="location.reload()">Play again</button>'}
             <button onclick="window.location = window.location.origin">Home</button>
         </div>
         `;
@@ -258,7 +239,6 @@ export const Game = {
     },
     handleTouchInput(action, playerId) {
         let player = this.players.find((obj) => obj.id == playerId);
-        console.log(player, action)
         if (player) {
             player.handleAction(action, this.grid);
             this.notifyRedraw();

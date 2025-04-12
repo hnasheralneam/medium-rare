@@ -129,20 +129,23 @@ socket.on("gameInitialized", ({ levelName }) => {
    if (window.isLeader) return;
    window.levelName = levelName;
    window.game.init();
+   window.createPreGamePanel();
+   document.querySelector(".multiplayer-lobby").remove();
 });
 
-// should probably send player list to init it
 socket.on("gameStarted", async () => {
    if (window.isLeader) return;
-   document.querySelector(".multiplayer-lobby").remove();
-   // when the game starts, it should get the players (but like before actually starting the game so the players get initialized, though it should actually be okay if we add them later)
-
+   document.querySelector(".pre-game").classList.add("hidden");
    window.game.start();
 });
 
 socket.on("pause", (paused, timeSeconds) => {
    window.togglePause(true);
    window.game.level.timeSeconds = timeSeconds;
+});
+
+socket.on("playerAdded", (player) => {
+   window.playerHandler.addRemotePlayer(player);
 });
 
 socket.on("movePlayer", (player) => {

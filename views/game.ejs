@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/styles/game.css">
     <link rel="stylesheet" href="/styles/shared.css">
 
-    <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
+    <!-- <script defer src="https://umami.hnasheralneam.dev/script.js" data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script> -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -24,7 +24,9 @@
 
     <div class="timer">60 seconds | 0 Points</div>
     <div class="orders"></div>
-    <div class="play-pause">Pause</div>
+    <div class="play-pause">
+        <img src="../icons/pause.svg" alt="Play/pause">
+    </div>
     <div class="modals">
         <div class="settings modal hidden">
             <h1>Paused</h1>
@@ -64,7 +66,7 @@
                             <option value="huge">Huge</option>
                         </select>
                     </form>
-                    <button onclick="leaderInit()">startGame</button>
+                    <button onclick="leaderInit()">start game</button>
                 </div>
             </div>
             <br>

@@ -2,11 +2,13 @@
 import { Game } from "./game.js";
 
 // these are only available before the game starts
-window.addEventListener("gamepadconnected", (e) => {
+let createdTouchPlayer = false;
+window.addEventListener("gamepadconnected", gamepadPlayerConnectionListener);
+document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
+document.body.addEventListener("touchstart", touchPlayerConnectionListener);
+function gamepadPlayerConnectionListener(e) {
    PlayerHandler.addGamepadPlayer(e.gamepad.index);
 }
-);
-document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
 function keyboardPlayerConnectionListener(e) {
    const key = e.code;
    switch (key) {
@@ -24,28 +26,31 @@ function keyboardPlayerConnectionListener(e) {
          break;
    }
 }
-document.body.addEventListener("touchstart", () => {
+function touchPlayerConnectionListener() {
+   if (window.innerHeight < 800) requestFullscreen();
+   if (createdTouchPlayer) return;
+   createdTouchPlayer = true;
    const id = window.crypto.randomUUID();
    let touchPad = document.createElement("div");
    touchPad.classList.add("touchpad");
    touchPad.innerHTML = `
-      <button onclick="window.game.handleTouchInput('interact', '${id}')">interact</button>
-      <div>
-         <button onclick="window.game.handleTouchInput('up', '${id}')">up</button>
-      </div>
-      <div>
-         <button onclick="window.game.handleTouchInput('left', '${id}')">left</button>
-         <button onclick="window.game.handleTouchInput('right', '${id}')">right</button>
-      </div>
-      <div>
-         <button onclick="window.game.handleTouchInput('down', '${id}')">down</button>
-      </div>
+      <button class="interact" onclick="window.game.handleTouchInput('interact', '${id}')">&#8900;</button>
    `;
+   [{ dir: "up", arrow: "&#8673;" }, { dir: "left", arrow: "&#8672;" }, { dir: "right", arrow: "&#8674;" }, { dir: "down", arrow: "&#8675;" }].forEach(({ dir, arrow }) => {
+      let element = document.createElement("button");
+      element.classList.add("direction");
+      element.classList.add(dir);
+      element.innerHTML = arrow;
+      let handler = () => {
+         Game.handleTouchInput(dir, id);
+      };
+      // element.addEventListener("click", handler);
+      element.addEventListener("touchstart", handler);
+      touchPad.append(element);
+   });
    document.body.append(touchPad);
    PlayerHandler.addTouchPlayer(id);
-   // then insert the html elemnt
-   // the id for the touchpad player can be generated here and inserted into the function calls for this (handleTouchInput(id, action)), where they will be routed to the correct player
-});
+}
 
 function getRandomSprite() {
    return playerSprites[Math.floor(Math.random() * playerSprites.length)];
@@ -74,10 +79,8 @@ export const PlayerHandler = {
    keyboardPlayerInputMaps: [],
    playerIndex: 0,
 
-   // for pre-game players specifically
    getPlayerCount() {
-      return this.gamepadPlayerIndexs.length + this.keyboardPlayerInputMaps.length;
-      // should also count remote players
+      return this.pendingPlayers.length;
    },
    getNextPos() {
       let pos = Game.level.playerPositions[this.playerIndex] || Game.level.playerPositions[0];
@@ -86,8 +89,9 @@ export const PlayerHandler = {
    },
 
    gameStarted() {
-      // should lock everything after this
-      document.body.removeEventListener("keydown", keyboardPlayerConnectionListener);
+      window.removeEventListener("gamepadconnected", gamepadPlayerConnectionListener);
+      document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
+      document.body.removeEventListener("touchstart", touchPlayerConnectionListener);
    },
 
    addGamepadPlayer(index) {
@@ -102,15 +106,7 @@ export const PlayerHandler = {
       this.pendingPlayers.push(pendingPlayer);
       this.gamepadPlayerIndexs.push(index);
       window.updatePlayersOnPregameDisplay();
-
-      if (window.multiplayer) {
-         window.socket.emit("addPlayer", {
-            roomid: window.roomid,
-            id: id,
-            sprite: pendingPlayer.sprite,
-            startPos: pendingPlayer.pos
-         });
-      }
+      this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addKeyboardPlayer(inputMapIndex) {
       let id = window.crypto.randomUUID();
@@ -127,19 +123,10 @@ export const PlayerHandler = {
          this.pendingPlayers.push(pendingPlayer);
          this.keyboardPlayerInputMaps.push(inputMap);
          window.updatePlayersOnPregameDisplay();
-
-         if (window.multiplayer) {
-            window.socket.emit("addPlayer", {
-               roomid: window.roomid,
-               id: id,
-               sprite: pendingPlayer.sprite,
-               startPos: pendingPlayer.pos
-            });
-         }
+         this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
       }
    },
    addTouchPlayer(id) {
-      console.log("creating touchpad player")
       let pendingPlayer = {
          type: "touch",
          sprite: getRandomSprite(),
@@ -147,15 +134,47 @@ export const PlayerHandler = {
          pos: this.getNextPos()
       };
       this.pendingPlayers.push(pendingPlayer);
-      // window.updatePlayersOnPregameDisplay();
+      window.updatePlayersOnPregameDisplay();
+      this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+   },
+   addRemotePlayer(remotePlayer) {
+      // make sure there are no players with same id first
+      let existingPlayer = this.pendingPlayers.find((player) => player.id == remotePlayer.id);
+      if (!existingPlayer) {
+         let player = {
+            type: "remote",
+            sprite: remotePlayer.sprite,
+            id: remotePlayer.id,
+            pos: remotePlayer.pos
+         }
+         this.playerIndex++;
+         this.pendingPlayers.push(player);
+         window.updatePlayersOnPregameDisplay();
+      }
+   },
 
+   emitPlayerAdded(id, sprite, pos) {
       if (window.multiplayer) {
          window.socket.emit("addPlayer", {
             roomid: window.roomid,
             id: id,
-            sprite: pendingPlayer.sprite,
-            startPos: pendingPlayer.pos
+            sprite: sprite,
+            pos: pos
          });
       }
+   }
+}
+window.playerHandler = PlayerHandler;
+
+
+function requestFullscreen() {
+   const element = document.documentElement;
+
+   if (element.requestFullscreen) {
+      element.requestFullscreen();
+   } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen();
+   } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
    }
 }
