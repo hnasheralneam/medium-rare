@@ -1,8 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+
 * {
    padding: 0;
    margin: 0;
    box-sizing: border-box;
    overflow: hidden;
+   font-family: "Pixelify Sans"
 }
 
 canvas {
@@ -158,7 +161,9 @@ canvas {
    }
 }
 
-
+.roomcode-display {
+   font-family: sans-serif;
+}
 
 
 /* order styles */
@@ -222,6 +227,13 @@ canvas {
    display: flex;
    justify-content: center;
    align-items: center;
+   max-height: 100vh;
+}
+
+.pre-game div.inner {
+   max-height: 100vh;
+   width: 100vw;
+   overflow: auto;
 }
 
 .post-game div, .pre-game div {
@@ -328,5 +340,16 @@ canvas {
    .play-pause img {
       height: 4rem;
       width: 4rem;
+   }
+}
+
+@media (prefers-color-scheme: dark) {
+   .pre-game, .post-game {
+      background-color: #333;
+      color: #eee;
+   }
+
+   .pregame-player {
+      background-color: #222;
    }
 }

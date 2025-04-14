@@ -4,6 +4,7 @@
 
 .level-picker {
    font-family: sans-serif;
+   overflow: auto;
 }
 
 .level-picker-element {
@@ -20,12 +21,7 @@
    font-size: 1.1rem;
 }
 
-
-
-
-
-
-
+/* Multiplayer menu */
 .multiplayer-menu {
    position: fixed;
    right: 0;
@@ -39,9 +35,13 @@
    text-align: center;
    border-radius: 1.5em;
    background-color: #e6e6e6;
-   padding: 2rem 6rem;
+   padding: 1.5rem 5rem;
    margin: .5rem auto;
    box-shadow: 0 .2rem .4rem #bbb;
+}
+
+.multiplayer-menu p {
+   font-size: 1.2rem;
 }
 
 .join-room, .create-room {
@@ -107,4 +107,27 @@
 
 .multiplayer-menu button:active {
    background-color: #f6f6f6;
+}
+
+@media (prefers-color-scheme: dark) {
+   .level-picker, .multiplayer-menu .inner, .join-room div, .create-room div {
+      background-color: #333;
+      color: #eee;
+   }
+
+   .join-room, .create-room {
+      background-color: #22222260;
+   }
+
+   .modal-content {
+      box-shadow: 0 .2em .5em #000;
+   }
+   .modal-content:hover {
+      box-shadow: 0 .8em 1.5em #000;
+   }
+
+
+   .multiplayer-menu .inner {
+   box-shadow: 0 .2rem .4rem #000;
+   }
 }

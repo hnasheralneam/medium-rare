@@ -54,6 +54,16 @@ export function drawMirroredImage(image, x, y) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+export function drawText(text, x, y) {
+    const [dx, dy] = lastModifier();
+    ctx.font = "10px Pixelify Sans, sans-serif";
+    ctx.fillStyle = "#fff";
+    ctx.strokeStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.strokeText(text, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
+    ctx.fillText(text, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
+}
+
 export function fillRect(x, y, w, h) {
     const [dx, dy] = lastModifier();
     ctx.fillRect(x + Math.round(canvas.width / 2) + dx, y + Math.round(canvas.height / 2) + dy, w, h);

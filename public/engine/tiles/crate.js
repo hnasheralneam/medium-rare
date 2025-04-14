@@ -22,9 +22,8 @@ export const Crate = {
             self.data = {};
             if (data !== null)
                 self.data.items = [data.item];
-            // this should not be an option
             else {
-                console.warn("program committed failure (crate.js)");
+                console.warn("Error: Crate items not defined (crate.js)");
                 self.data.items = ["tomato", "lettuce"];
             }
         }

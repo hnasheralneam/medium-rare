@@ -65,7 +65,6 @@ socket.on("joined room", (data) => {
       roomname: data.roomname,
       usertype: data.usertype,
       location: "home"
-      // pos added later
    }));
 
    attachScript("scripts/waitingRoom.js");

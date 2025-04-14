@@ -9,8 +9,8 @@ import { PlayerHandler } from "./playerHandler.js";
 window.levelNames = ["square", "wide", "huge"];
 
 export const Game = {
-    players: [], // Player array
-    grid: null, // Grid / RemoteGrid
+    players: [],
+    grid: null,
     keydownHandle: null,
     paused: false,
     stats: {
@@ -32,29 +32,17 @@ export const Game = {
             await this.init(levelName);
         }
         console.info("Started game");
-        PlayerHandler.gameStarted();
 
+        // stop accepting new players
+        PlayerHandler.gameStarted();
+        // players
         for (const pendingPlayer of PlayerHandler.pendingPlayers) {
             this.addPlayer(pendingPlayer);
         }
+        this.startHandlingKeyboardInput();
+
 
         this.orderHandler = new OrderHandler(this.level.menuOptions);
-
-        this.keydownHandle = (e) => {
-            for (let i = 0; i < this.players.length; i++) {
-                const player = this.players[i];
-                if (player.constructor.name === "KeyboardPlayer") {
-                    player.keyPressed(e, this.grid);
-                    if (player.anim === 1)
-                        this.notifyRedraw();
-                }
-            }
-
-            // this will be called only when the listener is set
-            this.display();
-        }
-        ;
-        document.body.addEventListener("keydown", this.keydownHandle);
 
         this.initControlsDisplay();
         this.display();
@@ -67,6 +55,21 @@ export const Game = {
                 time: Date.now()
             });
         }
+    },
+
+    startHandlingKeyboardInput() {
+        this.keydownHandle = (e) => {
+            for (let i = 0; i < this.players.length; i++) {
+                const player = this.players[i];
+                if (player.constructor.name === "KeyboardPlayer") {
+                    player.keyPressed(e, this.grid);
+                    if (player.anim === 1)
+                        this.notifyRedraw();
+                }
+            }
+        }
+            ;
+        document.body.addEventListener("keydown", this.keydownHandle);
     },
 
     addPlayer(pendingPlayer) {
@@ -83,7 +86,7 @@ export const Game = {
         } else if (pendingPlayer.type == "keyboard") {
             player = new KeyboardPlayer(pendingPlayer.inputMap, pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
         } else if (pendingPlayer.type == "touch") {
-            player = new TouchPlayer(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id)
+            player = new TouchPlayer(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
         } else if (pendingPlayer.type == "remote") {
             player = new RemotePlayer(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
         }
@@ -96,8 +99,7 @@ export const Game = {
         const url = `/resources/levels/${levelName}.json`;
         return await fetch(url).then(x => x.text()).then(y => {
             return JSON.parse(y);
-        }
-        );
+        });
     },
 
     end() {
@@ -133,11 +135,11 @@ export const Game = {
         this.timer = setInterval( () => {
             if (this.paused)
                 return;
+            timeLeft--;
             if (timeLeft <= 0) {
                 this.end();
                 return;
             }
-            timeLeft--;
             document.querySelector(".timer").textContent = timeLeft + " seconds | " + this.stats.score + " Points";
         }
         , 1000);
@@ -162,7 +164,11 @@ export const Game = {
         G.clear("#000");
         for (const cell of this.grid.cells) {
             G.drawImage(ImageCache.getTile(cell.proto.sourceImage), cell.x * csize, cell.y * csize);
-            if (cell.data && cell.data.item !== null && cell.data.item !== undefined) {
+            if (cell.data && cell.data.item) {
+                if (cell.data.item.attr("hasPlate")) {
+                    console.log(cell.data.item.proto.name)
+                    G.drawImage(ImageCache.getPlate(), cell.x * csize, cell.y * csize);
+                }
                 G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
             }
         }
@@ -173,6 +179,8 @@ export const Game = {
             else
                 G.drawImage(ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"), pos[0] * csize, pos[1] * csize);
             if (player.item !== null) {
+                if (player.item.attr("hasPlate"))
+                    G.drawImage(ImageCache.getPlate(), pos[0] * csize, (pos[1] - 1) * csize);
                 G.drawImage(ImageCache.getItem(player.item.src()), pos[0] * csize, (pos[1] - 1) * csize);
             }
         }
@@ -180,7 +188,6 @@ export const Game = {
     },
 
     notifyRedraw() {
-        // should be called for all players when multiplayer
         if (this.busy)
             return;
         this.busy = true;
@@ -200,16 +207,8 @@ export const Game = {
     },
 
 
-
-
-
-
-
-
-
-
+    // shows player controls in the pause menu
     initControlsDisplay() {
-        // this isn't working anymore
         let controlsElement = document.querySelector(".controls");
         let index = 0;
         for (let player of this.players) {

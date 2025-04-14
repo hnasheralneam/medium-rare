@@ -61,10 +61,6 @@ export class Player {
         return this.item !== null;
     }
 
-    /**
-     * @param { String } action
-     * @param { import("./grid.js").Grid } grid
-     */
     handleAction(action, grid) {
         if (Game.paused) return;
         // multiplayer sync for interact is happening over in grid.js
@@ -121,7 +117,6 @@ export class RemotePlayer extends Player {
         window.game.notifyRedraw();
     }
 
-    // not an instance of item! it's json
     give(itemJSON) {
         if (itemJSON) {
             let item = Item.fromName(itemJSON.proto.name);

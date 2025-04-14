@@ -15,6 +15,9 @@ export const ImageCache = {
     getTile(name) {
         return getChecked(`../tiles/${name}`);
     },
+    getPlate() {
+        return this.getItem("plate");
+    },
     getSprite(name, frame) {
         return getChecked(`../sprites/${name}/${frame}.png`);
     },

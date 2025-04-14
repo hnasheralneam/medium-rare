@@ -1,7 +1,6 @@
 // this is only for pre-game players!
 import { Game } from "./game.js";
 
-// these are only available before the game starts
 let createdTouchPlayer = false;
 window.addEventListener("gamepadconnected", gamepadPlayerConnectionListener);
 document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
@@ -44,7 +43,6 @@ function touchPlayerConnectionListener() {
       let handler = () => {
          Game.handleTouchInput(dir, id);
       };
-      // element.addEventListener("click", handler);
       element.addEventListener("touchstart", handler);
       touchPad.append(element);
    });
@@ -138,7 +136,6 @@ export const PlayerHandler = {
       this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addRemotePlayer(remotePlayer) {
-      // make sure there are no players with same id first
       let existingPlayer = this.pendingPlayers.find((player) => player.id == remotePlayer.id);
       if (!existingPlayer) {
          let player = {

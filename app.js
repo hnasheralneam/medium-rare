@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -193,18 +195,9 @@ io.on("connection", (socket) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+    // =========================================
     // Actual code stuff
+    // =========================================
     // "load" the game before actually starting
     socket.on("initGameDetails", ({ roomid, levelName, grid }) => {
         let index = rooms.findIndex(room => room.info.name == roomid);
@@ -238,7 +231,6 @@ io.on("connection", (socket) => {
         });
     });
 
-
     // grids/cells
     socket.on("getGridData", (roomid, callback) => {
         let index = rooms.findIndex(room => room.info.name === roomid);
@@ -255,7 +247,6 @@ io.on("connection", (socket) => {
         if (!rooms[roomIndex]) return;
         rooms[roomIndex]["data"]["grid"][index] = cell;
     });
-
 
     // players
     socket.on("addPlayer", ({roomid, id, sprite, pos}) => {

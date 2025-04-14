@@ -209,9 +209,3 @@ socket.on("lobby chat message", ({ message, nickname }) => {
    messageEl.textContent = `${nickname}: ${message}`;
    document.querySelector(".messages").append(messageEl);
 });
-
-
-
-
-// Random id
-// window.crypto.randomUUID()

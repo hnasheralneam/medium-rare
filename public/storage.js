@@ -6,7 +6,7 @@ const saveDataRaw = {
 };
 const saveDataHandler = {
     get(target, prop, _) {
-        // for scores
+        // for per-level scores, which are undefined by default
         if (target[prop] == null) {
             target[prop] = 0;
         }

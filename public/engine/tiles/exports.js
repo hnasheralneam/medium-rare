@@ -5,6 +5,7 @@ import { Counter } from "./counter.js";
 import { Crate } from "./crate.js";
 import { CuttingBoard } from "./cutting-board.js";
 import { Delivery } from "./delivery.js";
+import { PlatePlace } from "./plateplace.js";
 
 export {
     Floor,
@@ -13,5 +14,6 @@ export {
     Counter,
     Crate,
     CuttingBoard,
-    Delivery
+    Delivery,
+    PlatePlace
 };

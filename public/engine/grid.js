@@ -1,29 +1,21 @@
 import { Tile } from "./tile.js";
 import { Item } from "./item.js";
 export class Grid {
-    /**
-     * @param { number } width
-     * @param { height } height
-     */
     constructor(width, height) {
         this.width = width;
         this.height = height;
-        this.cells = new Array(width * height); // why not a 2d array?!?
+        this.cells = new Array(width * height);
     }
 
     inBounds(x, y) {
         return (x < this.width && x >= 0) && (y < this.height && y >= 0);
     }
 
-    /**
-     * @param { number } x x coordinate of tile
-     * @param { number } y y coordinate of tile
-     * @return { Tile }
-     */
     tileAt(x, y) {
         return this.cells[x + y * this.width];
     }
 
+    // return true if successful, false otherwise
     movePlayer(player, dx, dy) {
         player.vel[0] = dx;
         player.vel[1] = dy;
@@ -36,11 +28,16 @@ export class Grid {
         return true;
     }
 
-    interact(player) {
+    #getActiveTile(player) {
         const tx = player.pos[0] + player.vel[0];
         const ty = player.pos[1] + player.vel[1];
         if (!this.inBounds(tx, ty)) return;
-        const tile = this.tileAt(tx, ty);
+        return this.tileAt(tx, ty);
+    }
+
+    interact(player) {
+        const tile = this.#getActiveTile(player);
+        if (!tile) return;
         const func = tile.proto.onInteract;
         if (func === undefined) return;
         func(tile, player, "interact");
@@ -79,7 +76,6 @@ export class RemoteGrid extends Grid {
     }
 
 
-
     // data managmenet
     exportData() {
         let data = [];
@@ -102,7 +98,6 @@ export class RemoteGrid extends Grid {
             const x = i % this.width; // so maybe don't send them?
             const y = Math.floor(i / this.width); // so maybe don't send them?
             const cell = cells[i];
-            // this.cells[i] = new Tile(cell.id, { x, y }, this.importCell(cell));
             this.cells[i].create(cell.id, { x, y }, this.importCell(cell));
         }
         return;
@@ -124,7 +119,7 @@ export class RemoteGrid extends Grid {
 
     async renewGridData() {
         let old = this.cells;
-        window.socket.emit("getGridData", window.roomid, (data) => {
+        await window.socket.emit("getGridData", window.roomid, (data) => {
             if (old == data) return;
             this.importData(data);
         });

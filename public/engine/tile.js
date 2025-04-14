@@ -1,17 +1,16 @@
 import * as Tiles from "./tiles/exports.js";
 
 const tileNameList = [
-    "Floor",
+    "Floor", // id = 0
     "Wall",
     "Trash",
     "Crate",
     "Counter",
     "CuttingBoard",
-    "Delivery"
+    "Delivery",
+    "PlatePlace"
 ];
 
-// has 3 attributes: x: int, y: int, proto: Object
-// each tile has 3 attributes: sourceImage: string, solid: boolean, data: object
 export class Tile {
     constructor(id, pos, data) {
         this.id = id;

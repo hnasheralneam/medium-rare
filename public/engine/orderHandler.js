@@ -8,13 +8,10 @@ export class OrderHandler {
     orders = [];
     completedOrders = [];
     failedOrders = [];
-    waitingOrders = 0;
 
     constructor(mealOptions) {
         this.mealOptions = mealOptions;
-        // speed of order generation should be based on each level
-        // handle max
-        // have a waitlist for stuff over the max, add as soon as one is finished/completed
+        // speed of order generation should be defined in the level
         // consider using an array of times instead
         setTimeout(() => { this.attemptAddingOrder(); }, 2000);
         setTimeout(() => { this.attemptAddingOrder(); }, 10000);
@@ -29,7 +26,6 @@ export class OrderHandler {
             return true;
         }
         else {
-            // push to waitlist
             return false;
         }
     }
@@ -41,12 +37,9 @@ export class OrderHandler {
     }
 
     submitOrder(player) {
-        // later make sure that it has a plate
         if (player.item === null) {
             return;
         }
-        // should be fixed
-        // not giving this error, but there are still times the playre cannot submit a food <-- still a problem
         if (this.mealOptions.includes(player.item.name())) {
             let order = this.orders.find(o => o.name == player.item.name());
             if (order) {
@@ -92,7 +85,7 @@ class Order {
             ingredientList.appendChild(element);
         }
         orderElement.appendChild(ingredientList);
-        // add plate image behind later
+
         let foodImage = document.createElement("img");
         foodImage.classList.add("image");
         foodImage.src = `../items/${this.name}.png`;

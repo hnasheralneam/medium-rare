@@ -22,6 +22,11 @@ const ItemList = [
         name: "steak",
         src: (_) => "steak",
         cuttable: false
+    },
+    {
+        name: "plate",
+        src: (_) => "plate",
+        cuttable: false
     }
 ];
 const ItemMap = {};

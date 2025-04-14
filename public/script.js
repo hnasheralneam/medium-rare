@@ -18,7 +18,8 @@ if (!window.multiplayer) {
 
 window.attemptStartingGame = () => {
     if (window.multiplayer && !window.isLeader) return;
-    if (PlayerHandler.getPlayerCount() >= Game.level.minPlayers && PlayerHandler.getPlayerCount() <= Game.level.maxPlayers) { // should be > than min for level and < than max for level
+    let playerCount = PlayerHandler.getPlayerCount();
+    if (playerCount >= Game.level.minPlayers && playerCount <= Game.level.maxPlayers) {
         document.querySelector(".pre-game").classList.add("hidden");
         document.removeEventListener("keypress", gameStartListener);
         window.startGame(levelName);
@@ -52,7 +53,8 @@ function createPreGamePanel() {
     const preGamePanel = document.querySelector(".pre-game");
     preGamePanel.classList.remove("hidden");
     preGamePanel.innerHTML = `
-        <div>
+        <div class="inner">
+            <br>
             <h2>Level: ${window.levelName}</h2>
             <img src="/levels/${window.levelName}.png" height="230"><br><br>
 
@@ -85,7 +87,6 @@ window.updatePlayersOnPregameDisplay = () => {
     else return;
 
     const pendingPlayers = PlayerHandler.pendingPlayers;
-    // fix style, keep side-by-side
     for (let i = 0; i < pendingPlayers.length; i++) {
         const player = pendingPlayers[i];
         const playerElement = document.createElement("div");
