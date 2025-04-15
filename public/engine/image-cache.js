@@ -18,11 +18,14 @@ export const ImageCache = {
     getPlate() {
         return this.getItem("plate");
     },
-    getSprite(name, frame) {
-        return getChecked(`../sprites/${name}/${frame}.png`);
+    getPlayer(name) {
+        return getChecked(`../sprites/${name}.png`);
     },
     getItem(name) {
         return getChecked(`../items/${name}.png`);
+    },
+    getSmall(name) {
+        return getChecked(`../small-items/${name}.png`);
     },
     placeholder() {
         return data["../global/placeholder.png"];

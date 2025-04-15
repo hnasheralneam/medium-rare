@@ -166,18 +166,21 @@ export const Game = {
             G.drawImage(ImageCache.getTile(cell.proto.sourceImage), cell.x * csize, cell.y * csize);
             if (cell.data && cell.data.item) {
                 if (cell.data.item.attr("hasPlate")) {
-                    console.log(cell.data.item.proto.name)
                     G.drawImage(ImageCache.getPlate(), cell.x * csize, cell.y * csize);
                 }
                 G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
+            }
+            if (cell.data && cell.data.items) {
+                G.drawImage(ImageCache.getSmall(cell.data.items[0]), cell.x * csize, cell.y * csize);
             }
         }
         for (const player of this.players) {
             const pos = player.smoothPos();
             if (player.flipped)
-                G.drawMirroredImage(ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"), pos[0] * csize, pos[1] * csize);
+                G.drawMirroredPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
             else
-                G.drawImage(ImageCache.getSprite(player.sprite, player.item === null ? "idle" : "jumping"), pos[0] * csize, pos[1] * csize);
+                G.drawPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
+
             if (player.item !== null) {
                 if (player.item.attr("hasPlate"))
                     G.drawImage(ImageCache.getPlate(), pos[0] * csize, (pos[1] - 1) * csize);
@@ -188,15 +191,13 @@ export const Game = {
     },
 
     notifyRedraw() {
-        if (this.busy)
-            return;
+        if (this.busy) return;
         this.busy = true;
-        window.requestAnimationFrame( () => this.loop());
+        window.requestAnimationFrame(() => this.loop());
     },
 
     loop() {
-        if (!this.busy)
-            return;
+        if (!this.busy) return;
         this.busy = false;
         for (const player of this.players) {
             if (player.tickAnim())
@@ -218,7 +219,7 @@ export const Game = {
             playerElement.innerHTML = `
                 <div>
                     <h2>Player ${index}</h2>
-                    <img src="/sprites/${player.sprite}/idle.png">
+                    <img src="/sprites/old/${player.sprite}.png">
                 </div>
                 <div class="controls-map"></div>
                 <br>

@@ -15,8 +15,9 @@ const port = process.env.PORT || 3030;
 app.use(express.static("new"));
 app.use(express.static("public"));
 app.use(express.static("assets"));
-app.use("/scripts", express.static(__dirname + "/public/scripts/"));
+// app.use("/scripts", express.static(__dirname + "/public/scripts/"));
 app.use("/item/", express.static(__dirname + "/assets/items"));
+app.use("/small-items/", express.static(__dirname + "/assets/small-items"));
 app.use("/resources/", express.static(__dirname + "/resources"));
 app.set("view engine", "ejs");
 

@@ -19,9 +19,13 @@ async function showLevelPicker() {
         function getPeopleImages(count) {
             let people = "";
             for (let i = 0; i < count; i++) {
-                people += `<img src="sprites/player${Math.random() < .5 ? "2" : ""}/idle.png">`;
+                people += `<img src="sprites/old/${randomSprite()}.png">`;
             }
             return people;
+            function randomSprite() {
+                let sprites = ["phil", "bill", "frill", "still"];
+                return sprites[Math.floor(Math.random() * sprites.length)];
+            }
         }
 
         let button = document.createElement("button");

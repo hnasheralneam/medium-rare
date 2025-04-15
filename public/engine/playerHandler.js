@@ -46,7 +46,7 @@ function touchPlayerConnectionListener() {
       element.addEventListener("touchstart", handler);
       touchPad.append(element);
    });
-   document.body.append(touchPad);
+   document.querySelector(".touchpad-container").append(touchPad);
    PlayerHandler.addTouchPlayer(id);
 }
 
@@ -68,7 +68,7 @@ let inputMaps = [{
    KeyQ: "interact",
    KeyE: "interact"
 }];
-let playerSprites = ["player", "player2", "player3", "player4"];
+let playerSprites = ["phil", "bill", "frill", "still", "remi"];
 
 
 export const PlayerHandler = {

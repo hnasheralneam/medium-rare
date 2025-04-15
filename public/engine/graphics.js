@@ -41,10 +41,22 @@ document.body.appendChild(canvas);
 
 
 // Exports
-
 export function drawImage(image, x, y) {
     const [dx, dy] = lastModifier();
     ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
+}
+
+export function drawPlayer(image, x, y, sx, sy) {
+    let imageSize = 32;
+    const [dx, dy] = lastModifier();
+    ctx.drawImage(image, imageSize * sx, imageSize * sy, imageSize, imageSize, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy, imageSize, imageSize);
+}
+export function drawMirroredPlayer(image, x, y, sx, sy) {
+    let imageSize = 32;
+    const [dx, dy] = lastModifier();
+    ctx.scale(-1, 1);
+    ctx.drawImage(image, imageSize * sx, imageSize * sy, imageSize, imageSize, -Math.round(x + canvas.width / 2) - dx - 32, Math.round(y + canvas.height / 2) + dy, imageSize, imageSize);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 export function drawMirroredImage(image, x, y) {

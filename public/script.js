@@ -94,7 +94,7 @@ window.updatePlayersOnPregameDisplay = () => {
         playerElement.innerHTML = `
             <h2>Player ${i + 1}</h2>
             <p>(${player.type})</p>
-            <img src="/sprites/${player.sprite}/${Math.random() > .5 ? "idle" : "jumping"}.png">
+            <img src="/sprites/old/${player.sprite}${Math.random() > .5 ? "" : "-jump"}.png">
             <div class="controls-map"></div>
         `;
         if (player.type == "keyboard") {

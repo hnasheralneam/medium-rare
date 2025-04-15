@@ -7,6 +7,10 @@
    overflow: auto;
 }
 
+.level-picker img {
+   image-rendering: pixelated;
+}
+
 .level-picker-element {
    display: inline-block;
    margin: 2rem;

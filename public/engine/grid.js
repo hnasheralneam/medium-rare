@@ -41,6 +41,7 @@ export class Grid {
         const func = tile.proto.onInteract;
         if (func === undefined) return;
         func(tile, player, "interact");
+        window.game.notifyRedraw();
         if (window.multiplayer) player.updateRemote();
         return tile;
     }
