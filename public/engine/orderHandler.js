@@ -37,9 +37,7 @@ export class OrderHandler {
     }
 
     submitOrder(player) {
-        if (player.item === null) {
-            return;
-        }
+        if (player.item === null || !player.item.attr("hasPlate")) return;
         if (this.mealOptions.includes(player.item.name())) {
             let order = this.orders.find(o => o.name == player.item.name());
             if (order) {

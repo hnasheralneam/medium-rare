@@ -93,7 +93,8 @@ export class Player {
             // should alert all subscribed tiles about disconnect
             this.subscribers.forEach((subscriber) => {
                 // can be paused as well, but through interaction
-                subscriber.interface.disconnect();
+                subscriber.proto.disconnect(subscriber);
+                this.removeSubscriber(subscriber);
             });
 
             // multiplayer sync
@@ -105,9 +106,15 @@ export class Player {
                 });
             }
         }
-        else {
-            console.log("can't move player")
-        }
+    }
+
+    addSubscriber(tile) {
+        if (!this.subscribers.includes(tile))
+            this.subscribers.push(tile);
+    }
+    removeSubscriber(tile) {
+        let index = this.subscribers.indexOf(tile);
+        if (index != -1) this.subscribers.splice(index, 1);
     }
 
     updateRemote() {

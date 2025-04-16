@@ -164,14 +164,23 @@ export const Game = {
         G.clear("#000");
         for (const cell of this.grid.cells) {
             G.drawImage(ImageCache.getTile(cell.proto.sourceImage), cell.x * csize, cell.y * csize);
-            if (cell.data && cell.data.item) {
-                if (cell.data.item.attr("hasPlate")) {
-                    G.drawImage(ImageCache.getPlate(), cell.x * csize, cell.y * csize);
+            if (cell.data) {
+                if (cell.data.item) {
+                    if (cell.data.item.attr("hasPlate")) {
+                        G.drawImage(ImageCache.getPlate(), cell.x * csize, cell.y * csize);
+                    }
+                    G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
+
+                    if (cell.active) {
+                        let total = cell.timeNeededMs;
+                        let part = cell.timeLeft;
+                        G.drawProgressBar(part, total, cell.x * csize, cell.y * csize);
+                    }
                 }
-                G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
-            }
-            if (cell.data && cell.data.items) {
-                G.drawImage(ImageCache.getSmall(cell.data.items[0]), cell.x * csize, cell.y * csize);
+
+                if (cell.data.items) {
+                    G.drawImage(ImageCache.getSmall(cell.data.items[0]), cell.x * csize, cell.y * csize);
+                }
             }
         }
         for (const player of this.players) {

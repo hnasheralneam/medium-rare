@@ -66,6 +66,22 @@ export function drawMirroredImage(image, x, y) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+export function drawProgressBar(remaining, total, x, y) {
+    let progress = total - remaining;
+    let progressPercent = progress / total;
+    let progressBarProgress = progressPercent * 28; // width of progress bar
+
+    const [dx, dy] = lastModifier();
+    x = Math.round(x + canvas.width / 2) + dx;
+    y = Math.round((y + 32) + canvas.height / 2) + dy - 4;
+    let oldColor = ctx.fillStyle;
+    ctx.fillStyle = "#999";
+    ctx.fillRect(x + 2, y, 28, 4);
+    ctx.fillStyle = "#00ff26";
+    ctx.fillRect(x + 2, y, progressBarProgress, 4);
+    ctx.fillStyle = oldColor;
+}
+
 export function drawText(text, x, y) {
     const [dx, dy] = lastModifier();
     ctx.font = "10px Pixelify Sans, sans-serif";

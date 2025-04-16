@@ -111,15 +111,13 @@ export class RemoteGrid extends Grid {
         return {
             // tile data
             id: cell.id,
-            x: cell.x, // may not need to send
-            y: cell.y, // may not need to send
             data: cell.data || "no data",
         }
     }
     importData(cells) {
         for (let i = 0; i < (this.width * this.height); i++) {
-            const x = i % this.width; // so maybe don't send them?
-            const y = Math.floor(i / this.width); // so maybe don't send them?
+            const x = i % this.width;
+            const y = Math.floor(i / this.width);
             const cell = cells[i];
             this.cells[i].create(cell.id, { x, y }, this.importCell(cell));
         }
@@ -151,12 +149,7 @@ export class RemoteGrid extends Grid {
         window.game.notifyRedraw();
         return;
     }
-    // async updateRemoteGridData() {
-    //     window.socket.emit("setGridData", {
-    //         roomid: window.roomid,
-    //         grid: this.exportData()
-    //     });
-    // }
+
     async updateRemoteCell(tile) {
         window.socket.emit("setCellData", {
             roomid: window.roomid,
