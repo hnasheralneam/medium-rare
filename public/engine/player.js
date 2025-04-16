@@ -11,18 +11,18 @@ const movements = {
 const easing = x => x ** 3;
 
 export class Player {
-    #listener_function;
+    item = null;
+    vel = [0, 0];
+    anim = 0;
+    flipped = false;
+    subscribers = [];
 
     constructor(pos, sprite, id) {
         let x = pos[0];
         let y = pos[1];
         this.sprite = sprite;
-        this.item = null;
         this.pos = [x, y];
         this.lastPos = [x, y];
-        this.vel = [0, 0];
-        this.anim = 0;
-        this.flipped = false;
         this.id = id;
     }
 
@@ -70,33 +70,48 @@ export class Player {
         }
         else {
             const move = movements[action];
-            if (move === undefined) {
-                return;
-            }
-            const [sx, sy] = this.smoothPos();
-            if (move[0] > 0.1)
-                this.flipped = true;
-            else if (move[0] < -0.1)
-                this.flipped = false;
+            if (move === undefined) return;
 
-            if (grid.movePlayer(this, move[0], move[1])) {
-                this.anim = 1;
-                this.lastPos[0] = sx;
-                this.lastPos[1] = sy;
+            this.handleMove(move, grid);
+        }
+    }
 
-                // multiplayer sync
-                if (window.multiplayer && this.constructor.name != "RemotePlayer") {
-                    window.socket.emit("playerMoved", {
-                        roomid: window.roomid,
-                        playerid: this.id,
-                        move: action
-                    });
-                }
+    handleMove(move, grid) {
+        const [sx, sy] = this.smoothPos();
+        if (move[0] > 0.1)
+            this.flipped = true;
+        else if (move[0] < -0.1)
+            this.flipped = false;
+
+        grid.setPlayerDirection(this, move[0], move[1]);
+        if (grid.canMovePlayer(this, move[0], move[1])) {
+            grid.movePlayer(this, move[0], move[1]);
+            this.anim = 1;
+            this.lastPos[0] = sx;
+            this.lastPos[1] = sy;
+
+            // should alert all subscribed tiles about disconnect
+            this.subscribers.forEach((subscriber) => {
+                // can be paused as well, but through interaction
+                subscriber.interface.disconnect();
+            });
+
+            // multiplayer sync
+            if (window.multiplayer && this.constructor.name != "RemotePlayer") {
+                window.socket.emit("playerMoved", {
+                    roomid: window.roomid,
+                    playerid: this.id,
+                    move: move
+                });
             }
+        }
+        else {
+            console.log("can't move player")
         }
     }
 
     updateRemote() {
+        if (this.constructor.name == "RemotePlayer") return;
         window.socket.emit("setPlayer", {
             roomid: window.roomid,
             id: this.id,
@@ -113,7 +128,7 @@ export class RemotePlayer extends Player {
     }
 
     move(action, grid) {
-        this.handleAction(action, grid);
+        this.handleMove(action, grid);
         window.game.notifyRedraw();
     }
 
@@ -133,7 +148,6 @@ export class RemotePlayer extends Player {
 }
 
 export class KeyboardPlayer extends Player {
-    #listener_function;
     inputMap;
 
     constructor(inputMap, pos, sprite, id) {
@@ -151,7 +165,6 @@ export class KeyboardPlayer extends Player {
 }
 
 export class GamepadPlayer extends Player {
-    #listener_function;
     gamepadIndex;
 
     constructor(gamepadIndex, pos, sprite, id) {

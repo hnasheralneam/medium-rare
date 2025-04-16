@@ -7,6 +7,7 @@ export class Grid {
         this.cells = new Array(width * height);
     }
 
+    // helper methods
     inBounds(x, y) {
         return (x < this.width && x >= 0) && (y < this.height && y >= 0);
     }
@@ -15,14 +16,22 @@ export class Grid {
         return this.cells[x + y * this.width];
     }
 
-    // return true if successful, false otherwise
-    movePlayer(player, dx, dy) {
+    // other methods
+    // returns true if possible, false otherwise
+    setPlayerDirection(player, dx, dy) {
         player.vel[0] = dx;
         player.vel[1] = dy;
+    }
+    canMovePlayer(player, dx, dy) {
         const nx = player.pos[0] + dx;
         const ny = player.pos[1] + dy;
         if (!this.inBounds(nx, ny)) return false;
         if (this.tileAt(nx, ny).proto.solid) return false;
+        return true;
+    }
+    movePlayer(player, dx, dy) {
+        const nx = player.pos[0] + dx;
+        const ny = player.pos[1] + dy;
         player.pos[0] = nx;
         player.pos[1] = ny;
         return true;
@@ -59,18 +68,31 @@ export class Grid {
 }
 
 export class RemoteGrid extends Grid {
+    upToDate = false;
+    awaitingData = false;
     constructor(width, height) {
         super(width, height);
     }
 
+    setIsUpToDate(bool) {
+        this.upToDate = bool;
+        if (!this.upToDate) {
+            this.awaitingData = true;
+            this.renewGridData();
+        }
+    }
+
     async movePlayer(player, dx, dy) {
-        await this.renewGridData();
-        let result = super.movePlayer(player, dx, dy);
-        return result;
+        // doesn't need to update because players can go through each other (so no moveable barriers)
+        // await this.renewGridData();
+        super.movePlayer(player, dx, dy);
     }
 
     async interact(player) {
-        await this.renewGridData();
+        if (this.awaitingData) setTimeout(() => {
+            this.interact(player);
+        }, 20);
+        this.upToDate = true;
         let tile = super.interact(player);
         if (!tile) return;
         this.updateRemoteCell(tile);
@@ -124,14 +146,17 @@ export class RemoteGrid extends Grid {
             if (old == data) return;
             this.importData(data);
         });
+        this.awaitingData = false;
+        this.upToDate = true;
+        window.game.notifyRedraw();
         return;
     }
-    async updateRemoteGridData() {
-        window.socket.emit("setGridData", {
-            roomid: window.roomid,
-            grid: this.exportData()
-        });
-    }
+    // async updateRemoteGridData() {
+    //     window.socket.emit("setGridData", {
+    //         roomid: window.roomid,
+    //         grid: this.exportData()
+    //     });
+    // }
     async updateRemoteCell(tile) {
         window.socket.emit("setCellData", {
             roomid: window.roomid,

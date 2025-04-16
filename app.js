@@ -247,6 +247,7 @@ io.on("connection", (socket) => {
         let roomIndex = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[roomIndex]) return;
         rooms[roomIndex]["data"]["grid"][index] = cell;
+        io.in(roomid).emit("gridChanged");
     });
 
     // players
@@ -273,7 +274,7 @@ io.on("connection", (socket) => {
         let roomIndex = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[roomIndex]) return;
         let playerIndex = rooms[roomIndex]["data"]["players"].findIndex(player => player.id === playerid);
-        rooms[roomIndex]["data"]["players"][playerIndex].lastMove = move;
+        rooms[roomIndex]["data"]["players"][playerIndex].move = move;
         io.in(roomid).emit("movePlayer", rooms[roomIndex]["data"]["players"][playerIndex]);
     });
     socket.on("setPlayer", ({ roomid, id, data }) => {

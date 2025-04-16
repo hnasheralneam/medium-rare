@@ -147,13 +147,16 @@ socket.on("pause", (paused, timeSeconds) => {
 socket.on("playerAdded", (player) => {
    window.playerHandler.addRemotePlayer(player);
 });
+socket.on("gridChanged", () => {
+   window.game.grid.setIsUpToDate(false);
+});
 
 socket.on("movePlayer", (player) => {
    let playerIndex = window.game.players.findIndex(item => item.id === player.id);
    if (playerIndex == -1) return;
    let remotePlayer = window.game.players[playerIndex];
    if (remotePlayer.constructor.name == "RemotePlayer") {
-      window.game.players[playerIndex].move(player.lastMove, window.game.grid);
+      window.game.players[playerIndex].move(player.move, window.game.grid);
    }
 });
 
