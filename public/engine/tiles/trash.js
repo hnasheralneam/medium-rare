@@ -3,6 +3,7 @@ export const Trash = {
     solid: true,
     init: (_self, _data) => {},
     onInteract: (_self, player, _key) => {
-        player.deleteItem();
+        if (player.item.isContainer()) player.item.emptyContainer();
+        else player.deleteItem();
     }
 };

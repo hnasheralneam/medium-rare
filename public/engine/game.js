@@ -11,7 +11,7 @@ window.levelNames = ["square", "wide", "huge"];
 export const Game = {
     players: [],
     grid: null,
-    keydownHandle: null,
+    keydownHandle: null, // checked if null as a hacky "has game started" check
     paused: false,
     stats: {
         score: 0
@@ -125,8 +125,16 @@ export const Game = {
             if (e.key == "Enter") {
                 location.reload();
             }
-        }
-        );
+        });
+        let replayWithGamepad = setInterval(() => {
+            let gamepads = navigator.getGamepads();
+            gamepads.forEach((gamepad) => {
+                if (gamepad && gamepad.buttons[1].pressed) {
+                    clearInterval(replayWithGamepad);
+                    location.reload();
+                }
+            });
+        }, 30);
     },
 
     startTimer() {
@@ -162,8 +170,27 @@ export const Game = {
         G.pushModifier(-offset.x, -offset.y);
 
         G.clear("#000");
+        // draw cells
         for (const cell of this.grid.cells) {
+            G.drawImage(ImageCache.getTile("floor.png"), cell.x * csize, cell.y * csize);
             G.drawImage(ImageCache.getTile(cell.proto.sourceImage), cell.x * csize, cell.y * csize);
+        }
+        // draw players
+        for (const player of this.players) {
+            const pos = player.smoothPos();
+            if (player.flipped)
+                G.drawMirroredPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
+            else
+                G.drawPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
+
+            if (player.item !== null) {
+                if (player.item.attr("hasPlate"))
+                    G.drawImage(ImageCache.getPlate(), pos[0] * csize, (pos[1] - 1) * csize);
+                G.drawImage(ImageCache.getItem(player.item.src()), pos[0] * csize, (pos[1] - 1) * csize);
+            }
+        }
+        // draw items on cells
+        for (const cell of this.grid.cells) {
             if (cell.data) {
                 if (cell.data.item) {
                     if (cell.data.item.attr("hasPlate")) {
@@ -181,19 +208,6 @@ export const Game = {
                 if (cell.data.items) {
                     G.drawImage(ImageCache.getSmall(cell.data.items[0]), cell.x * csize, cell.y * csize);
                 }
-            }
-        }
-        for (const player of this.players) {
-            const pos = player.smoothPos();
-            if (player.flipped)
-                G.drawMirroredPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
-            else
-                G.drawPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
-
-            if (player.item !== null) {
-                if (player.item.attr("hasPlate"))
-                    G.drawImage(ImageCache.getPlate(), pos[0] * csize, (pos[1] - 1) * csize);
-                G.drawImage(ImageCache.getItem(player.item.src()), pos[0] * csize, (pos[1] - 1) * csize);
             }
         }
         G.restore();

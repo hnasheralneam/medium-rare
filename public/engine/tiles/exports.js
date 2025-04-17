@@ -6,6 +6,7 @@ import { Crate } from "./crate.js";
 import { CuttingBoard } from "./cutting-board.js";
 import { Delivery } from "./delivery.js";
 import { PlatePlace } from "./plateplace.js";
+import { Stove } from "./stove.js";
 
 export {
     Floor,
@@ -15,5 +16,6 @@ export {
     Crate,
     CuttingBoard,
     Delivery,
-    PlatePlace
+    PlatePlace,
+    Stove
 };

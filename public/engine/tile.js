@@ -8,7 +8,8 @@ const tileNameList = [
     "Counter",
     "CuttingBoard",
     "Delivery",
-    "PlatePlace"
+    "PlatePlace",
+    "Stove"
 ];
 
 export class Tile {

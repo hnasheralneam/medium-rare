@@ -43,8 +43,13 @@ document.body.appendChild(canvas);
 // Exports
 export function drawImage(image, x, y) {
     const [dx, dy] = lastModifier();
-    ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
+    ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, (Math.round(y + canvas.height / 2) + dy) - (image.height - 32));
 }
+
+// export function drawImageXOffset(image, x, y) {
+//     const [dx, dy] = lastModifier();
+//     ctx.drawImage(image, Math.round(x + canvas.width / 2) + dx, Math.round(y + canvas.height / 2) + dy);
+// }
 
 export function drawPlayer(image, x, y, sx, sy) {
     let imageSize = 32;

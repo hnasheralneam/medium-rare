@@ -260,22 +260,18 @@ io.on("connection", (socket) => {
             pos: pos,
             lastMove: ""
         };
-        rooms[index]["data"]["players"].push(player);
         io.in(roomid).emit("playerAdded", player);
     });
-    socket.on("getPlayers", (roomid, callback) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
-        callback({
-            players: rooms[index]["data"]["players"]
-        });
+    socket.on("removePlayer", ({roomid, id}) => {
+        io.in(roomid).emit("playerRemoved", id);
     });
     socket.on("playerMoved", ({ roomid, playerid, move }) => {
         let roomIndex = rooms.findIndex(room => room.info.name === roomid);
         if (!rooms[roomIndex]) return;
-        let playerIndex = rooms[roomIndex]["data"]["players"].findIndex(player => player.id === playerid);
-        rooms[roomIndex]["data"]["players"][playerIndex].move = move;
-        io.in(roomid).emit("movePlayer", rooms[roomIndex]["data"]["players"][playerIndex]);
+        io.in(roomid).emit("movePlayer", {
+            id: playerid,
+            move: move
+        });
     });
     socket.on("setPlayer", ({ roomid, id, data }) => {
         let roomIndex = rooms.findIndex(room => room.info.name === roomid);
@@ -286,15 +282,6 @@ io.on("connection", (socket) => {
             item: data.item
         });
     });
-});
-
-app.get("/multi/:roomname", (req, res) => {
-    let roomname = req.params.roomname;
-    res.render("lobby");
-});
-
-app.get("/multi/:roomname/waiting-room", (req, res) => {
-    res.render("waiting");
 });
 
 function startGameTimer(roomid, gameOverCallback) {

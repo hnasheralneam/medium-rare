@@ -147,6 +147,10 @@ socket.on("pause", (paused, timeSeconds) => {
 socket.on("playerAdded", (player) => {
    window.playerHandler.addRemotePlayer(player);
 });
+socket.on("playerRemoved", (id) => {
+   let player = window.playerHandler.pendingPlayers.find((player) => player.id == id);
+   if (player) window.playerHandler.removePlayer(player);
+});
 socket.on("gridChanged", () => {
    window.game.grid.setIsUpToDate(false);
 });

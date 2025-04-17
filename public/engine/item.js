@@ -5,6 +5,7 @@ const ItemList = [
             return self.attr("cutted") ? "tomato-sliced" : "tomato";
         },
         cuttable: true,
+        type: "ingredient"
     },
     {
         name: "lettuce",
@@ -12,21 +13,32 @@ const ItemList = [
             return self.attr("cutted") ? "lettuce-sliced" : "lettuce";
         },
         cuttable: true,
+        type: "ingredient"
     },
     {
         name: "salad",
         src: (_) => "salad",
-        cuttable: false
+        cuttable: false,
+        type: "meal"
     },
     {
         name: "steak",
         src: (_) => "steak",
-        cuttable: false
+        cuttable: false,
+        type: "ingredient"
     },
+    // containers (will contain an array of items)
     {
         name: "plate",
         src: (_) => "plate",
-        cuttable: false
+        cuttable: false,
+        type: "container"
+    },
+    {
+        name: "pot",
+        src: (_) => "pot",
+        cuttable: false,
+        type: "container"
     }
 ];
 const ItemMap = {};
@@ -104,7 +116,24 @@ export class Item {
         return this.proto.name;
     }
 
+    type() {
+        return this.proto.type;
+    }
+
     src() {
         return this.proto.src(this);
+    }
+
+    // containers!
+    isContainer() {
+        return this.proto.type == "container";
+    }
+
+    addItem(item) {
+        this.proto.items.push(item);
+    }
+
+    emptyContainer() {
+        this.proto.items = [];
     }
 }

@@ -92,11 +92,15 @@ window.updatePlayersOnPregameDisplay = () => {
         const playerElement = document.createElement("div");
         playerElement.classList.add("pregame-player");
         playerElement.innerHTML = `
+            <button class="remove"><img src="../icons/close.svg" alt="close"></button>
             <h2>Player ${i + 1}</h2>
             <p>(${player.type})</p>
             <img src="/sprites/old/${player.sprite}${Math.random() > .5 ? "" : "-jump"}.png">
             <div class="controls-map"></div>
         `;
+        playerElement.querySelector(".remove").addEventListener("click", () => {
+            PlayerHandler.removePlayer(player);
+        });
         if (player.type == "keyboard") {
             const controlsMapElement = playerElement.querySelector(".controls-map");
             let title = document.createElement("h3");

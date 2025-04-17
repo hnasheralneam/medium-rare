@@ -25,9 +25,8 @@ export const CuttingBoard = {
             if (self.data.item.attr("cutted")) {
                 player.giveItem(self.data.item);
                 self.data.item = null;
+                return;
             }
-            // this runs if not cut
-            // SHOULD RESET IT ITEM IS PICKED UP
             self.active = !self.active;
             if (self.active) {
                 player.addSubscriber(self);
@@ -64,6 +63,7 @@ export const CuttingBoard = {
         }, 50);
     },
     finishCutting(self) {
+        if (!self.data.item) return;
         self.data.item.setAttr("cutted", true);
         window.game.notifyRedraw();
     },

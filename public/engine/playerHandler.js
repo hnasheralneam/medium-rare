@@ -7,6 +7,18 @@ document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
 document.body.addEventListener("touchstart", touchPlayerConnectionListener);
 function gamepadPlayerConnectionListener(e) {
    PlayerHandler.addGamepadPlayer(e.gamepad.index);
+   let controllerStartGame = setInterval(() => {
+      if (Game.keydownHandle) clearInterval(controllerStartGame);
+      const gamepad = navigator.getGamepads()[e.gamepad.index];
+      if (gamepad === null) {
+         clearInterval(controllerStartGame);
+         return;
+      }
+      if (gamepad.buttons[1].pressed) {
+         window.attemptStartingGame();
+         clearInterval(controllerStartGame);
+      };
+   }, 30);
 }
 function keyboardPlayerConnectionListener(e) {
    const key = e.code;
@@ -73,8 +85,6 @@ let playerSprites = ["phil", "bill", "frill", "still", "remi"];
 
 export const PlayerHandler = {
    pendingPlayers: [],
-   gamepadPlayerIndexs: [],
-   keyboardPlayerInputMaps: [],
    playerIndex: 0,
 
    getPlayerCount() {
@@ -102,14 +112,14 @@ export const PlayerHandler = {
          pos: this.getNextPos()
       };
       this.pendingPlayers.push(pendingPlayer);
-      this.gamepadPlayerIndexs.push(index);
       window.updatePlayersOnPregameDisplay();
       this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addKeyboardPlayer(inputMapIndex) {
       let id = window.crypto.randomUUID();
       let inputMap = inputMaps[inputMapIndex];
-      if (!this.keyboardPlayerInputMaps.includes(inputMap)) {
+      let playerWithMapExists = this.pendingPlayers.find((player) => player.inputMap == inputMap);
+      if (!playerWithMapExists) {
          let pendingPlayer = {
             type: "keyboard",
             sprite: getRandomSprite(),
@@ -119,7 +129,6 @@ export const PlayerHandler = {
             pos: this.getNextPos()
          };
          this.pendingPlayers.push(pendingPlayer);
-         this.keyboardPlayerInputMaps.push(inputMap);
          window.updatePlayersOnPregameDisplay();
          this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
       }
@@ -150,6 +159,19 @@ export const PlayerHandler = {
       }
    },
 
+   removePlayer(player) {
+      let index = this.pendingPlayers.indexOf(player);
+      let removedPos = this.pendingPlayers[index].pos;
+      this.pendingPlayers.splice(index, 1);
+      window.updatePlayersOnPregameDisplay();
+      this.emitPlayerRemoved(player.id);
+      for (let i = this.pendingPlayers.length - 1; i > index; i--) {
+         this.pendingPlayers[i].pos = this.pendingPlayers[i - 1].pos;
+      }
+      this.pendingPlayers[index].pos = removedPos;
+      this.playerIndex--;
+   },
+
    emitPlayerAdded(id, sprite, pos) {
       if (window.multiplayer) {
          window.socket.emit("addPlayer", {
@@ -157,6 +179,14 @@ export const PlayerHandler = {
             id: id,
             sprite: sprite,
             pos: pos
+         });
+      }
+   },
+   emitPlayerRemoved(id) {
+      if (window.multiplayer) {
+         window.socket.emit("removePlayer", {
+            roomid: window.roomid,
+            id: id
          });
       }
    }

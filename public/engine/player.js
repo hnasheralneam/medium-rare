@@ -90,9 +90,7 @@ export class Player {
             this.lastPos[0] = sx;
             this.lastPos[1] = sy;
 
-            // should alert all subscribed tiles about disconnect
             this.subscribers.forEach((subscriber) => {
-                // can be paused as well, but through interaction
                 subscriber.proto.disconnect(subscriber);
                 this.removeSubscriber(subscriber);
             });
@@ -179,7 +177,7 @@ export class GamepadPlayer extends Player {
         this.gamepadIndex = gamepadIndex;
         this.interactPressed = false;
         this.lastMove = Date.now();
-        this.cooldown = 140;
+        this.cooldown = 150;
     }
 
     handleGamepad(grid) {
