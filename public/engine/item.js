@@ -90,6 +90,7 @@ export class Item {
     constructor(proto) {
         this.proto = proto;
         this.data = {};
+        if (this.proto.type == "container") this.items = [];
     }
 
     static fromId(id) {
@@ -129,11 +130,20 @@ export class Item {
         return this.proto.type == "container";
     }
 
+    getItems() {
+        return this.items;
+    }
+
     addItem(item) {
-        this.proto.items.push(item);
+        this.items.push(item);
+        if (this.items.length == 2) {
+            const result = Recipes.using(this.items[0], this.items[1]);
+            if (result === null) return;
+            this.items = [result];
+        }
     }
 
     emptyContainer() {
-        this.proto.items = [];
+        this.items = [];
     }
 }

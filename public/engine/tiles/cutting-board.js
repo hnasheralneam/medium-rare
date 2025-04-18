@@ -1,17 +1,16 @@
 import { Tile } from "../tile.js";
 import { Player } from "../player.js";
-import { Item } from "../item.js";
 
 export const CuttingBoard = {
     sourceImage: "cuttingboard.png",
     solid: true,
     init: (self, data) => {
-        self.active = false;
         if (data) {
             self.data = data;
         }
         else {
             self.data = {};
+            self.data.active = false;
             self.data.item = null;
         }
     },
@@ -27,10 +26,10 @@ export const CuttingBoard = {
                 self.data.item = null;
                 return;
             }
-            self.active = !self.active;
-            if (self.active) {
+            self.data.active = !self.data.active;
+            if (self.data.active) {
                 player.addSubscriber(self);
-                self.lastTick = Date.now();
+                self.data.lastTick = Date.now();
                 self.proto.startCutting(self, player);
             }
             else {
@@ -42,23 +41,24 @@ export const CuttingBoard = {
             if (!player.item.proto.cuttable) return;
             self.data.item = player.releaseItem();
             // time needed to cut
-            self.timeNeededMs = 1400;
-            self.timeLeft = self.timeNeededMs;
+            self.data.timeNeededMs = 1400;
+            self.data.timeLeft = self.data.timeNeededMs;
         }
     },
     startCutting(self, player) {
         let activeInterval = setInterval(() => {
-            if (!self.active) clearInterval(activeInterval);
-            let delta = Date.now() - self.lastTick;
-            self.lastTick = Date.now();
-            self.timeLeft -= delta;
+            if (!self.data.active) clearInterval(activeInterval);
+            let delta = Date.now() - self.data.lastTick;
+            self.data.lastTick = Date.now();
+            self.data.timeLeft -= delta;
             // intensive resource usage
             window.game.notifyRedraw();
 
-            if (self.timeLeft <= 0) {
-                self.active = false;
+            if (self.data.timeLeft <= 0) {
+                self.data.active = false;
                 self.proto.finishCutting(self);
                 player.removeSubscriber(self);
+                if (window.multiplayer) window.game.grid.updateRemoteCell(self);
             }
         }, 50);
     },
@@ -68,6 +68,6 @@ export const CuttingBoard = {
         window.game.notifyRedraw();
     },
     disconnect(self) {
-        self.active = false;
+        self.data.active = false;
     }
 };

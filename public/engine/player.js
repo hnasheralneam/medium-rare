@@ -93,6 +93,7 @@ export class Player {
             this.subscribers.forEach((subscriber) => {
                 subscriber.proto.disconnect(subscriber);
                 this.removeSubscriber(subscriber);
+                if (window.multiplayer) window.game.grid.updateRemoteCell(subscriber);
             });
 
             // multiplayer sync

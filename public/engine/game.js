@@ -123,7 +123,9 @@ export const Game = {
         }
         document.addEventListener("keypress", (e) => {
             if (e.key == "Enter") {
-                location.reload();
+                // going home always?
+                if (!window.multiplayer) location.reload();
+                else window.location = window.location.origin;
             }
         });
         let replayWithGamepad = setInterval(() => {
@@ -131,7 +133,8 @@ export const Game = {
             gamepads.forEach((gamepad) => {
                 if (gamepad && gamepad.buttons[1].pressed) {
                     clearInterval(replayWithGamepad);
-                    location.reload();
+                    if (!window.multiplayer) location.reload();
+                    else window.location = window.location.origin;
                 }
             });
         }, 30);
@@ -184,23 +187,28 @@ export const Game = {
                 G.drawPlayer(ImageCache.getPlayer(player.sprite), pos[0] * csize, pos[1] * csize, player.item === null ? 0 : 1, 0);
 
             if (player.item !== null) {
-                if (player.item.attr("hasPlate"))
-                    G.drawImage(ImageCache.getPlate(), pos[0] * csize, (pos[1] - 1) * csize);
                 G.drawImage(ImageCache.getItem(player.item.src()), pos[0] * csize, (pos[1] - 1) * csize);
+                if (player.item.isContainer()) {
+                    player.item.getItems().forEach((item) => {
+                        G.drawImage(ImageCache.getItem(item.src()), pos[0] * csize, (pos[1] - 1) * csize);
+                    });
+                }
             }
         }
         // draw items on cells
         for (const cell of this.grid.cells) {
             if (cell.data) {
                 if (cell.data.item) {
-                    if (cell.data.item.attr("hasPlate")) {
-                        G.drawImage(ImageCache.getPlate(), cell.x * csize, cell.y * csize);
-                    }
                     G.drawImage(ImageCache.getItem(cell.data.item.src()), cell.x * csize, cell.y * csize);
+                    if (cell.data.item.isContainer()) {
+                        cell.data.item.getItems().forEach((item) => {
+                            G.drawImage(ImageCache.getItem(item.src()), cell.x * csize, cell.y * csize);
+                        });
+                    }
 
-                    if (cell.active) {
-                        let total = cell.timeNeededMs;
-                        let part = cell.timeLeft;
+                    if (cell.data.active) {
+                        let total = cell.data.timeNeededMs;
+                        let part = cell.data.timeLeft;
                         G.drawProgressBar(part, total, cell.x * csize, cell.y * csize);
                     }
                 }

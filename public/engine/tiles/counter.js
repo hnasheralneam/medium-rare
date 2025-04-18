@@ -25,28 +25,25 @@ export const Counter = {
         }
         else {
             if (player.item !== null) {
-                if (
-                    (self.data.item.proto.name == "plate" && player.item.proto.name != "plate")
-                    ||
-                    (self.data.item.proto.name != "plate" && player.item.proto.name == "plate")
-                ) {
+                if (self.data.item.proto.name == player.item.proto.name) return;
+                if (self.data.item.proto.name == "plate" || player.item.proto.name == "plate") {
                     if (player.item.attr("cutted") || RecipeList.find((recipe) => recipe.name == player.item.proto.name)) {
-                        player.item.setAttr("hasPlate", true);
-                        self.data.item = player.releaseItem();
+                        self.data.item.addItem(player.releaseItem());
                         return;
                     }
                     if (self.data.item.attr("cutted") || RecipeList.find((recipe) => recipe.name == self.data.item.proto.name)) {
-                        player.releaseItem();
-                        self.data.item.setAttr("hasPlate", true);
+                        let plate = player.releaseItem();
+                        plate.addItem(self.data.item);
+                        self.data.item = plate;
                         return;
                     }
                 }
-                if (player.item.attr("hasPlate") && self.data.item.attr("hasPlate")) return;
-                let hasPlate = player.item.attr("hasPlate") || self.data.item.attr("hasPlate");
-                const result = Recipes.using(player.item, self.data.item);
+                // no plates
+                let firstItem = player.item;
+                let secondItem = self.data.item;
+                const result = Recipes.using(firstItem, secondItem);
                 if (result === null) return;
                 self.data.item = result;
-                if (hasPlate) self.data.item.setAttr("hasPlate", true);
                 player.deleteItem();
                 return;
             }
