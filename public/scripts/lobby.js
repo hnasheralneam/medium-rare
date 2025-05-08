@@ -1,8 +1,8 @@
-let socket = io();
+export let socket = io();
 window.socket = socket;
 
 // Join room
-let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+export let userInfo = JSON.parse(localStorage.getItem("userInfo"));
 userInfo.location = "lobby";
 window.isLeader = false;
 
@@ -25,7 +25,6 @@ socket.on("here is socketid", (socketid) => {
    }
 });
 
-// for all multiplayer games gameid must exist
 window.roomid = userInfo.roomname;
 
 let gamecode;
@@ -34,9 +33,11 @@ socket.on("here is roomcode", (roomcode) => {
    gamecode = roomcode;
    document.querySelector(".roomcode-display").textContent = "Room Code: " + roomcode;
 });
-function copyRoomCode() {
+document.querySelector(".roomcode-display").addEventListener("click", () => {
    navigator.clipboard.writeText(gamecode);
-}
+});
+
+
 
 
 
@@ -101,96 +102,6 @@ function updateUsersList(users) {
    });
 }
 
-// Add start button for leader
-async function leaderInit() {
-   let levelName = document.querySelector(".level-select-dropdown").value;
-   console.info("Initializing game with level: " + levelName);
-   window.isLeader = true;
-   window.levelName = levelName;
-   await window.game.init(window.levelName);
-   window.createPreGamePanel();
-   document.querySelector(".multiplayer-lobby").remove();
-   socket.emit("initGameDetails", {
-      roomid: window.roomid,
-      levelName: window.levelName,
-      grid: window.game.grid.exportData()
-   });
-}
-if (userInfo.usertype == "leader") {
-   document.querySelector(".leader-options").classList.remove("hidden");
-}
-
-
-
-
-
-// actual game stuff
-socket.on("gameInitialized", ({ levelName }) => {
-   if (window.isLeader) return;
-   window.levelName = levelName;
-   window.game.init();
-   window.createPreGamePanel();
-   document.querySelector(".multiplayer-lobby").remove();
-});
-
-socket.on("gameStarted", async () => {
-   if (window.isLeader) return;
-   document.querySelector(".pre-game").classList.add("hidden");
-   window.game.start();
-});
-
-socket.on("pause", (paused, timeSeconds) => {
-   window.togglePause(true);
-   window.game.level.timeSeconds = timeSeconds;
-});
-
-socket.on("playerAdded", (player) => {
-   window.playerHandler.addRemotePlayer(player);
-});
-socket.on("playerRemoved", (id) => {
-   let player = window.playerHandler.pendingPlayers.find((player) => player.id == id);
-   if (player) window.playerHandler.removePlayer(player);
-});
-socket.on("gridChanged", () => {
-   window.game.grid.setIsUpToDate(false);
-});
-
-socket.on("movePlayer", (player) => {
-   let playerIndex = window.game.players.findIndex(item => item.id === player.id);
-   if (playerIndex == -1) return;
-   let remotePlayer = window.game.players[playerIndex];
-   if (remotePlayer.constructor.name == "RemotePlayer") {
-      window.game.players[playerIndex].move(player.move, window.game.grid);
-   }
-});
-
-socket.on("givePlayerItem", (data) => {
-   let id = data.id;
-   let item = data.item;
-   let playerIndex = window.game.players.findIndex(player => player.id === id);
-   if (playerIndex == -1) return;
-   let remotePlayer = window.game.players[playerIndex];
-   if (remotePlayer.constructor.name == "RemotePlayer") {
-      window.game.players[playerIndex].give(item);
-   }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Latency test
 let latency;
 let sent = new Date();
@@ -203,7 +114,7 @@ socket.on("latency tested", () => {
 });
 
 
-// Lobby chat - html is this
+// Lobby chat
 function sendMessage(event) {
    event.preventDefault();
    let message = document.querySelector(".message-input").value;

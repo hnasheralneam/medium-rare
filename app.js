@@ -5,6 +5,8 @@ const app = express();
 const http = require("http");
 require("ejs");
 const server = http.createServer(app);
+const fs = require('fs/promises'); // <-- Add fs/promises
+const path = require('path');       // <-- Add path
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -21,24 +23,26 @@ app.use("/small-items/", express.static(__dirname + "/assets/small-items"));
 app.use("/resources/", express.static(__dirname + "/resources"));
 app.set("view engine", "ejs");
 
+const { createServer } = require("./public/engine/server.mjs");
+const { serverCommsRemote } = require("./public/engine/comms/ServerCommsRemote.mjs");
 
 
 // Basic page loading
 app.get("/", (_req, res) => {
-    res.render("home");
+   res.render("home");
 });
 
 app.get("/play/:level", (req, res) => {
-    res.render("game", {
-        multiplayer: false,
-        level: req.params.level
-    });
+   res.render("game", {
+      multiplayer: false,
+      level: req.params.level
+   });
 });
 
 app.get("/play", (req, res) => {
-    res.render("game", {
-        multiplayer: true
-    });
+   res.render("game", {
+      multiplayer: true
+   });
 });
 
 
@@ -47,267 +51,248 @@ app.get("/play", (req, res) => {
 // Multiplayer
 let rooms = [];
 io.on("connection", (socket) => {
-    socket.on("test latency", () => {
-        socket.emit("latency tested");
-    });
+   socket.on("test latency", () => {
+      socket.emit("latency tested");
+   });
 
-    let userData = {}
-    socket.on("user data updated", (userInfo, oldSocketId) => {
-        userData = userInfo;
+   let userData = {}
+   socket.on("user data updated", (userInfo, oldSocketId) => {
+      userData = userInfo;
 
-        let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-        if (indexInRooms == -1) {
+      let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+      if (indexInRooms == -1) {
+         console.error("Room does not exist!");
+         return;
+      }
+      let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == oldSocketId);
+      if (indexInUsers != -1) rooms[indexInRooms]["users"][indexInUsers] = userData;
+      io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
+   });
+
+
+   socket.on("disconnect", () => {
+      if (userData.usertype == "leader") {
+         let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+         if (indexInRooms == -1) {
             console.error("Room does not exist!");
             return;
-        }
-        let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == oldSocketId);
-        if (indexInUsers != -1) rooms[indexInRooms]["users"][indexInUsers] = userData;
-        io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
-    });
-
-
-    socket.on("disconnect", () => {
-        if (userData.usertype == "leader") {
-            let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-            if (indexInRooms == -1) {
-                console.error("Room does not exist!");
-                return;
-            }
-            io.in(rooms[indexInRooms]["info"].name).emit("leader left lobby", rooms[indexInRooms]["users"]);
-        }
-        else if (userData.location == "waiting room") {
-            let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-            let leaderData = rooms[indexInRooms]["users"].filter(obj => obj.usertype == "leader");
-            io.to(leaderData[0].socketid).emit("user in waiting room left", socket.id);
-        }
-        else if (userData.location == "lobby") {
-            let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-            if (indexInRooms == -1) {
-                console.error("Room does not exist!");
-                return;
-            }
-            let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == userData.socketid);
-            if (indexInUsers != -1) rooms[indexInRooms]["users"].splice(indexInUsers, 1);
-            io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
-        }
-    });
+         }
+         io.in(rooms[indexInRooms]["info"].name).emit("leader left lobby", rooms[indexInRooms]["users"]);
+      }
+      else if (userData.location == "waiting room") {
+         let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+         let leaderData = rooms[indexInRooms]["users"].filter(obj => obj.usertype == "leader");
+         io.to(leaderData[0].socketid).emit("user in waiting room left", socket.id);
+      }
+      else if (userData.location == "lobby") {
+         let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
+         if (indexInRooms == -1) {
+            console.error("Room does not exist!");
+            return;
+         }
+         let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == userData.socketid);
+         if (indexInUsers != -1) rooms[indexInRooms]["users"].splice(indexInUsers, 1);
+         io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
+      }
+   });
 
 
 
-    socket.on("create room", () => {
-        let roomid = uuid.v4();
-        rooms.push({
-            info: {
-                name: roomid,
-                code: Math.floor(100000 + Math.random() * 900000),
-                open: true
-            },
-            users: []
-        });
-        socket.emit("room created", {
+   socket.on("create room", () => {
+      let roomid = uuid.v4();
+      rooms.push({
+         info: {
+            name: roomid,
+            code: Math.floor(100000 + Math.random() * 900000),
+            open: true
+         },
+         users: []
+      });
+      socket.emit("room created", {
+         socketid: socket.id,
+         roomname: roomid,
+         usertype: "leader"
+      });
+   });
+   socket.on("get roomcode", (roomid) => {
+      let indexInRooms = rooms.findIndex(room => room.info.name == roomid);
+      let room = rooms[indexInRooms];
+      if (typeof (room) == "undefined") {
+         socket.emit("room closed", room);
+         return;
+      }
+      let roomcode = room.info.code;
+
+      socket.emit("here is roomcode", roomcode);
+   });
+   socket.on("get socketid", () => {
+      socket.emit("here is socketid", socket.id);
+   });
+
+   socket.on("join room", (roomcode) => {
+      let room = rooms.find(room => room.info.code == roomcode);
+      if (room && (room.info.open == true)) {
+         socket.emit("joined room", {
             socketid: socket.id,
-            roomname: roomid,
-            usertype: "leader"
-        });
-    });
-    socket.on("get roomcode", (roomid) => {
-        let indexInRooms = rooms.findIndex(room => room.info.name == roomid);
-        let room = rooms[indexInRooms];
-        if (typeof(room) == "undefined") {
-            socket.emit("room closed", room);
-            return;
-        }
-        let roomcode = room.info.code;
+            roomname: room.info.name,
+            usertype: "player"
+         });
+      }
+      else if (room) socket.emit("no such room", "room is closed");
+      else socket.emit("no such room", "room does not exist");
+   });
 
-        socket.emit("here is roomcode", roomcode);
-    });
-    socket.on("get socketid", () => {
-        socket.emit("here is socketid", socket.id);
-    });
+   socket.on("leaderConnectingToRoom", (userInfo) => {
+      let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
+      if (indexInRooms == -1) {
+         console.error("Room does not exist!");
+         return;
+      }
 
-    socket.on("join room", (roomcode) => {
-        let room = rooms.find(room => room.info.code == roomcode);
-        if (room && (room.info.open == true)) {
-            socket.emit("joined room", {
-                socketid: socket.id,
-                roomname: room.info.name,
-                usertype: "player"
-            });
-        }
-        else if (room) socket.emit("no such room", "room is closed");
-        else socket.emit("no such room", "room does not exist");
-    });
+      rooms[indexInRooms]["users"].push(userInfo);
 
-    socket.on("leaderConnectingToRoom", (userInfo) => {
-        let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
-        if (indexInRooms == -1) {
-            console.error("Room does not exist!");
-            return;
-        }
+      socket.join(userInfo.roomname);
+      io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
+   });
+   socket.on("player connecting to room", (userInfo) => {
+      socket.join(userInfo.roomname);
+      io.in(userInfo.roomname).emit("someone in waiting room", userInfo);
+   });
+   socket.on("player joining lobby", (userInfo, socketid) => {
+      // Adds user to socket room
+      let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
+      if (indexInRooms == -1) {
+         console.error("Room does not exist!");
+         return;
+      }
 
-        rooms[indexInRooms]["users"].push(userInfo);
+      socket.join(userInfo.roomname);
 
-        socket.join(userInfo.roomname);
-        io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
-    });
-    socket.on("player connecting to room", (userInfo) => {
-        socket.join(userInfo.roomname);
-        io.in(userInfo.roomname).emit("someone in waiting room", userInfo);
-    });
-    socket.on("player joining lobby", (userInfo, socketid) => {
-        // Adds user to socket room
-        let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
-        if (indexInRooms == -1) {
-            console.error("Room does not exist!");
-            return;
-        }
+      // Sends to all in room
+      io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
+   });
 
-        socket.join(userInfo.roomname);
+   socket.on("let in", (newUser) => {
+      // Finds room and adds new user's data
+      let indexInRooms = rooms.findIndex(room => room.info.name === newUser.roomname);
+      rooms[indexInRooms]["users"].push(newUser);
 
-        // Sends to all in room
-        io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
-    });
+      // Respond only to socket in waiting room
+      io.to(newUser.socketid).emit("you were let in", rooms[indexInRooms]["info"]["name"]);
+   });
+   socket.on("kick", (newUser) => {
+      let indexInRooms = rooms.findIndex(room => room.info.name === newUser.roomname);
+      let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == newUser.socketid);
+      rooms[indexInRooms]["users"].splice(indexInUsers, 1);
 
-    socket.on("let in", (newUser) => {
-        // Finds room and adds new user's data
-        let indexInRooms = rooms.findIndex(room => room.info.name === newUser.roomname);
-        rooms[indexInRooms]["users"].push(newUser);
+      // Sends only to socket to be kicked out
+      io.to(newUser.socketid).emit("you were kicked out");
+      // Sends to all in room
+      io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
+   });
 
-        // Respond only to socket in waiting room
-        io.to(newUser.socketid).emit("you were let in", rooms[indexInRooms]["info"]["name"]);
-    });
-    socket.on("kick", (newUser) => {
-        let indexInRooms = rooms.findIndex(room => room.info.name === newUser.roomname);
-        let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == newUser.socketid);
-        rooms[indexInRooms]["users"].splice(indexInUsers, 1);
-
-        // Sends only to socket to be kicked out
-        io.to(newUser.socketid).emit("you were kicked out");
-        // Sends to all in room
-        io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
-    });
-
-    // Lobby chat
-    socket.on("lobby chat message", (messageInfo, room) => {
-        io.in(room).emit("lobby chat message", messageInfo);
-    });
+   // Lobby chat
+   socket.on("lobby chat message", (messageInfo, room) => {
+      io.in(room).emit("lobby chat message", messageInfo);
+   });
 
 
 
 
 
-    // =========================================
-    // Actual code stuff
-    // =========================================
-    // "load" the game before actually starting
-    socket.on("initGameDetails", ({ roomid, levelName, grid }) => {
-        let index = rooms.findIndex(room => room.info.name == roomid);
-        // if (!rooms[index]) return;
-        rooms[index]["data"] = {
+   // =========================================
+   // Actual code stuff
+   // =========================================
+   // "load" the game before actually starting
+   socket.on("initGameDetails", async ({ roomid, levelName }) => {
+      let index = rooms.findIndex(room => room.info.name == roomid);
+      if (index === -1) return;
+      try {
+         // get level data
+         const filePath = path.join(__dirname, 'resources', 'levels', `${levelName}.json`);
+         const fileContent = await fs.readFile(filePath, 'utf-8');
+         const levelData = JSON.parse(fileContent);
+
+         // create server
+         const roomServer = createServer(serverCommsRemote);
+         roomServer.getComms().giveIoRoomid(io, roomid, roomServer);
+         roomServer.init(levelName, levelData);
+
+         // Store server instance and level data in the room
+         rooms[index]["data"] = {
+            server: roomServer,
+            levelName: levelName,
             paused: true,
-            level: levelName,
-            grid: grid,
             players: []
-        };
-        io.in(roomid).emit("gameInitialized", {
-            levelName: rooms[index]["data"]["level"]
-        });
-    });
-    socket.on("startGame", ({ roomid, levelName }) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
-        startGameTimer(roomid, () => { io.in(roomid).emit("gameOver"); });
-        io.in(roomid).emit("gameStarted", {
-            levelName: rooms[index]["data"]["level"]
-        });
-    });
-    socket.on("pause", ({ roomid, paused }) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
+         };
 
-        setPauseState(roomid, paused);
-        io.in(roomid).emit("pause", {
-            paused: paused,
-            timeSeconds: rooms[index]["data"]["timeSeconds"]
-        });
-    });
+      } catch (error) {
+         console.error(`Error initializing game:`, error);
+      }
+   });
 
-    // grids/cells
-    socket.on("getGridData", (roomid, callback) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
-        callback(rooms[index]["data"]["grid"]);
-    });
-    socket.on("setGridData", ({roomid, grid}) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
-        rooms[index]["data"]["grid"] = grid;
-    });
-    socket.on("setCellData", ({ roomid, cell, index }) => {
-        let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[roomIndex]) return;
-        rooms[roomIndex]["data"]["grid"][index] = cell;
-        io.in(roomid).emit("gridChanged");
-    });
+   socket.on("initPlayers", ({ roomid, players }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].initializePlayers(players);
+   });
 
-    // players
-    socket.on("addPlayer", ({roomid, id, sprite, pos}) => {
-        let index = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[index]) return;
-        let player = {
-            id: id,
-            sprite: sprite,
-            pos: pos,
-            lastMove: ""
-        };
-        io.in(roomid).emit("playerAdded", player);
-    });
-    socket.on("removePlayer", ({roomid, id}) => {
-        io.in(roomid).emit("playerRemoved", id);
-    });
-    socket.on("playerMoved", ({ roomid, playerid, move }) => {
-        let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[roomIndex]) return;
-        io.in(roomid).emit("movePlayer", {
-            id: playerid,
-            move: move
-        });
-    });
-    socket.on("setPlayer", ({ roomid, id, data }) => {
-        let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-        if (!rooms[roomIndex]) return;
+   socket.on("startGame", ({ roomid }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].start();
+   });
 
-        io.in(roomid).emit("givePlayerItem", {
-            id: id,
-            item: data.item
-        });
-    });
+   socket.on("playerActed", ({ roomid, playerid, move, anim }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].handlePlayerAction(playerid, move, anim);
+   });
+
+   socket.on("updatePlayerAnimState", ({ roomid, id, anim }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].updatePlayerAnimState(id, anim);
+   });
+
+   socket.on("pause", ({ roomid }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].pause();
+   });
+   socket.on("resume", ({ roomid }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].resume();
+   });
+
+   socket.on("failOrder", ({ roomid, number }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms[index]["data"]["server"].orderHandler.closeOrder(number, true);
+   });
+
+
+
+   // players
+   socket.on("addPlayer", ({ roomid, id, sprite, pos }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      let player = {
+         id: id,
+         sprite: sprite,
+         pos: pos,
+         lastMove: ""
+      };
+      io.in(roomid).emit("playerAdded", player);
+   });
+   socket.on("removePlayer", ({ roomid, id }) => {
+      io.in(roomid).emit("playerRemoved", id);
+   });
 });
-
-function startGameTimer(roomid, gameOverCallback) {
-    let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-    if (!roomIndex) return;
-    let timeLeft = rooms[roomIndex]["data"]["timeSeconds"];
-    rooms[roomIndex]["data"]["timer"] = setInterval(() => {
-        if (rooms[roomIndex]["data"]["paused"]) return;
-        if (timeLeft <= 0) {
-            // this.end();
-            clearInterval(rooms[roomIndex]["data"]["timer"]);
-            gameOverCallback();
-            return;
-        }
-        timeLeft--;
-    }, 1000);
-}
-
-function setPauseState(roomid, state) {
-    let roomIndex = rooms.findIndex(room => room.info.name === roomid);
-    if (!roomIndex || !state) return;
-    rooms[roomIndex]["data"]["paused"] = state;
-}
 
 
 // Start server
 server.listen(port, () => {
-    console.info("Medium Rare active on port " + port);
+   console.info("Medium Rare active on port " + port);
 });

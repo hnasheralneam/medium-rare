@@ -1,4 +1,4 @@
-import { Game } from "./game.js";
+import { Game } from "../state.js";
 import { Item } from "./item.js";
 
 const movements = {
@@ -40,6 +40,7 @@ export class Player {
     tickAnim() {
         if (this.anim === 0) return false;
         this.anim = Math.max(0, this.anim - 0.06);
+        Game.getComms().updateTickAnim(this.id, this.anim);
         return true;
     }
 
@@ -61,17 +62,23 @@ export class Player {
         return this.item !== null;
     }
 
-    handleAction(action, grid) {
-        if (Game.paused) return;
-        // multiplayer sync for interact is happening over in grid.js
+    setType(type) {
+        this.type = type;
+    }
+
+    getType() {
+        return this.type;
+    }
+
+    handleAction(action, grid, anim, interactCallback) {
         if (action === "interact") {
             if (this.anim > 0.5) return;
-            grid.interact(this);
+            let tile = grid.interact(this);
+            if (tile) interactCallback(tile);
         }
         else {
             const move = movements[action];
             if (move === undefined) return;
-
             this.handleMove(move, grid);
         }
     }
@@ -93,17 +100,7 @@ export class Player {
             this.subscribers.forEach((subscriber) => {
                 subscriber.proto.disconnect(subscriber);
                 this.removeSubscriber(subscriber);
-                if (window.multiplayer) window.game.grid.updateRemoteCell(subscriber);
             });
-
-            // multiplayer sync
-            if (window.multiplayer && this.constructor.name != "RemotePlayer") {
-                window.socket.emit("playerMoved", {
-                    roomid: window.roomid,
-                    playerid: this.id,
-                    move: move
-                });
-            }
         }
     }
 
@@ -116,15 +113,8 @@ export class Player {
         if (index != -1) this.subscribers.splice(index, 1);
     }
 
-    updateRemote() {
-        if (this.constructor.name == "RemotePlayer") return;
-        window.socket.emit("setPlayer", {
-            roomid: window.roomid,
-            id: this.id,
-            data: {
-                item: this.item
-            }
-        });
+    emitPlayerAction(player, action) {
+        Game.getComms().emitPlayerAction(player, action);
     }
 }
 
@@ -135,13 +125,11 @@ export class RemotePlayer extends Player {
 
     move(action, grid) {
         this.handleMove(action, grid);
-        window.game.notifyRedraw();
     }
 
     give(itemJSON) {
         if (itemJSON) {
             let item = Item.fromName(itemJSON.proto.name);
-            // restore attributes
             for (const [key, value] of Object.entries(itemJSON.data)) {
                 item.setAttr(key, value);
             }
@@ -161,12 +149,11 @@ export class KeyboardPlayer extends Player {
         this.inputMap = inputMap;
     }
 
-    keyPressed(e, grid) {
-        if (Game.paused) return;
+    keyPressed(e) {
         const key = e.code;
         const action = this.inputMap[key];
         if (action === undefined) return;
-        this.handleAction(action, grid);
+        this.emitPlayerAction(this, action);
     }
 }
 
@@ -181,8 +168,7 @@ export class GamepadPlayer extends Player {
         this.cooldown = 150;
     }
 
-    handleGamepad(grid) {
-        if (Game.paused) return;
+    handleGamepad() {
         const gamepad = navigator.getGamepads()[this.gamepadIndex];
         if (gamepad === null) return;
         const x = gamepad.axes[0];
@@ -206,8 +192,7 @@ export class GamepadPlayer extends Player {
             }
         }
         if (action === null) return;
-        this.handleAction(action, grid);
-        Game.notifyRedraw();
+        this.emitPlayerAction(this, action);
     }
 }
 

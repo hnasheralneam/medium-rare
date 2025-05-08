@@ -1,14 +1,15 @@
-import { Game } from "../engine/game.js";
+import { getLevelData } from "../levelDataParser.js";
+
+let levelNames = ["square", "wide", "huge"];
 
 showLevelPicker();
 
 async function showLevelPicker() {
     let levelPicker = document.querySelector(".level-picker-contents");
-    levelPicker.classList.remove("hidden");
 
-    for (const i in window.levelNames) {
-        let levelName = window.levelNames[i];
-        let level = await Game.getLevelData(levelName);
+    for (const i in levelNames) {
+        let levelName = levelNames[i];
+        let level = await getLevelData(levelName);
         let levelElement = document.createElement("div");
         levelElement.style.margin = "0 4rem";
         levelElement.classList.add("level-picker-element");
@@ -23,7 +24,7 @@ async function showLevelPicker() {
             }
             return people;
             function randomSprite() {
-                let sprites = ["phil", "bill", "frill", "still"];
+                let sprites = ["phil", "bill", "frill", "still", "jill"];
                 return sprites[Math.floor(Math.random() * sprites.length)];
             }
         }

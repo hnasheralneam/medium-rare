@@ -18,11 +18,18 @@
             const levelName = "<%= level %>";
             window.levelName = levelName;
             window.multiplayer = false;
+            if (window.location.href.at(-1) == "/") {
+                let newURL = window.location.href.slice(0, window.location.href.length - 1);
+                window.location.href = newURL;
+            }
         </script>
     <% } %>
 
 
-    <div class="timer">60 seconds | 0 Points</div>
+    <div class="timer">
+        <span class="time">60 seconds</span> |
+        <span class="points">0 Points</span>
+    </div>
     <div class="orders"></div>
     <div class="play-pause">
         <img src="../icons/pause.svg" alt="Play/pause">
@@ -47,8 +54,8 @@
         </script>
         <div class="fullscreen-modal multiplayer-lobby">
             <div class="main">
-                <h2 class="roomcode-display" onclick="copyRoomCode()">Room Code: </h2>
-                <div style="display: grid; grid-template-columns: auto auto;">
+                <h2 class="roomcode-display">Room Code: </h2>
+                <div class="waiting-players">
                     <div>
                         <p>In the room</p>
                         <ul class="inRoom"></ul>
@@ -67,7 +74,7 @@
                             <option value="huge">Huge</option>
                         </select>
                     </form>
-                    <button onclick="leaderInit()">start game</button>
+                    <button class="start-game-button">start game</button>
                 </div>
             </div>
             <br>
@@ -80,10 +87,13 @@
                 </form>
             </div>
         </div>
+        <script src="/scripts/lobby.js" type="module"></script>
 
-        <script src="/scripts/lobby.js"></script>
+        <script src="/remote.js" type="module"></script>
+        <script src="/engine/multiplayer.js" type="module"></script>
+    <% } else { %>
+        <script src="/local.js" type="module"></script>
     <% } %>
     <script src="/script.js" type="module"></script>
 </body>
-
 </html>

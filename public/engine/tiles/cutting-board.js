@@ -1,4 +1,4 @@
-import { Tile } from "../tile.js";
+import { Tile } from "../tile.mjs";
 import { Player } from "../player.js";
 
 export const CuttingBoard = {
@@ -12,6 +12,9 @@ export const CuttingBoard = {
             self.data = {};
             self.data.active = false;
             self.data.item = null;
+        }
+        if (self.data.active) {
+            self.proto.startCutting(self, undefined);
         }
     },
     /**
@@ -41,7 +44,7 @@ export const CuttingBoard = {
             if (!player.item.proto.cuttable) return;
             self.data.item = player.releaseItem();
             // time needed to cut
-            self.data.timeNeededMs = 1400;
+            self.data.timeNeededMs = 1200;
             self.data.timeLeft = self.data.timeNeededMs;
         }
     },
@@ -52,22 +55,27 @@ export const CuttingBoard = {
             self.data.lastTick = Date.now();
             self.data.timeLeft -= delta;
             // intensive resource usage
-            window.game.notifyRedraw();
+            if (self.serverComms) self.serverComms.emitRedraw();
 
             if (self.data.timeLeft <= 0) {
                 self.data.active = false;
                 self.proto.finishCutting(self);
-                player.removeSubscriber(self);
-                if (window.multiplayer) window.game.grid.updateRemoteCell(self);
+                if (player) player.removeSubscriber(self);
+                if (self.serverComms) self.serverComms.server.handleCellChanged(self);
             }
         }, 50);
     },
     finishCutting(self) {
         if (!self.data.item) return;
         self.data.item.setAttr("cutted", true);
-        window.game.notifyRedraw();
+        if (self.serverComms) self.serverComms.emitRedraw();
     },
     disconnect(self) {
         self.data.active = false;
+        console.log("player disconnected, should update grid")
+        if (self.serverComms) {
+            self.serverComms.server.handleCellChanged(self);
+            self.serverComms.emitRedraw();
+        }
     }
 };

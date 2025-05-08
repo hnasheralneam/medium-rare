@@ -1,0 +1,17 @@
+What's happening with directory? Why so many comms files?
+please look elsewhere for helpful answers
+
+
+Game - name of class that handles displaying and stuff
+Server - name of class that moves players, changes grid stuff
+
+Server - name of the node backend, app.js stuff
+Client - the code running in the users web browser
+
+Local - on the users web browser, used to mean game is local
+Remote - on the server, used to mean game is Remote
+
+GameCommsLocal - comms saved on and used by Game to contact Server (for Local games)
+GameCommsRemote - comms saved on and used by Game to contact Server (for Remote games)
+ServerCommsLocal - commes saved on and used by Server to contact Game (for Local games)
+ServerCommsRemote - comms saved on and used by Server to contact Game (for Remote games)

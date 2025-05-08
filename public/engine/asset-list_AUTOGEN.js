@@ -19,6 +19,7 @@ export const assets = [
     "../sprites/frill.png",
     "../sprites/phil.png",
     "../sprites/still.png",
+    "../sprites/jill.png",
     "../sprites/remi.png",
     "../tiles/counter.png",
     "../tiles/crate.png",

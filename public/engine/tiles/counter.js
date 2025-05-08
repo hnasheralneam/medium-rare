@@ -1,4 +1,4 @@
-import { Tile } from "../tile.js";
+import { Tile } from "../tile.mjs";
 import { Player } from "../player.js";
 import { Recipes, RecipeList } from "../item.js";
 

@@ -1,10 +1,10 @@
 // this is only for pre-game players!
-import { Game } from "./game.js";
+import { DisplayController } from "./displayController.js";
+import { attemptStartingGame, updatePlayersOnPregameDisplay } from "../script.js";
+import { Game } from "../state.js";
 
 let createdTouchPlayer = false;
-window.addEventListener("gamepadconnected", gamepadPlayerConnectionListener);
-document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
-document.body.addEventListener("touchstart", touchPlayerConnectionListener);
+
 function gamepadPlayerConnectionListener(e) {
    PlayerHandler.addGamepadPlayer(e.gamepad.index);
    let controllerStartGame = setInterval(() => {
@@ -15,7 +15,7 @@ function gamepadPlayerConnectionListener(e) {
          return;
       }
       if (gamepad.buttons[1].pressed) {
-         window.attemptStartingGame();
+         attemptStartingGame();
          clearInterval(controllerStartGame);
       };
    }, 30);
@@ -45,8 +45,11 @@ function touchPlayerConnectionListener() {
    let touchPad = document.createElement("div");
    touchPad.classList.add("touchpad");
    touchPad.innerHTML = `
-      <button class="interact" onclick="window.game.handleTouchInput('interact', '${id}')">&#8900;</button>
+      <button class="interact">&#8900;</button>
    `;
+   touchPad.querySelector(".interact").addEventListener("click", () => {
+      Game.handleTouchInput("interact", id);
+   });
    [{ dir: "up", arrow: "&#8673;" }, { dir: "left", arrow: "&#8672;" }, { dir: "right", arrow: "&#8674;" }, { dir: "down", arrow: "&#8675;" }].forEach(({ dir, arrow }) => {
       let element = document.createElement("button");
       element.classList.add("direction");
@@ -58,7 +61,7 @@ function touchPlayerConnectionListener() {
       element.addEventListener("touchstart", handler);
       touchPad.append(element);
    });
-   document.querySelector(".touchpad-container").append(touchPad);
+   DisplayController.addTouchpad(touchPad);
    PlayerHandler.addTouchPlayer(id);
 }
 
@@ -80,23 +83,30 @@ let inputMaps = [{
    KeyQ: "interact",
    KeyE: "interact"
 }];
-let playerSprites = ["phil", "bill", "frill", "still", "remi"];
+let playerSprites = ["phil", "bill", "frill", "still", "jill", "remi"];
 
 
 export const PlayerHandler = {
    pendingPlayers: [],
    playerIndex: 0,
 
+   init(levelData) {
+      this.levelData = levelData;
+      window.addEventListener("gamepadconnected", gamepadPlayerConnectionListener);
+      document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
+      document.body.addEventListener("touchstart", touchPlayerConnectionListener);
+   },
+
    getPlayerCount() {
       return this.pendingPlayers.length;
    },
    getNextPos() {
-      let pos = Game.level.playerPositions[this.playerIndex] || Game.level.playerPositions[0];
+      let pos = this.levelData.playerPositions[this.playerIndex] || this.levelData.playerPositions[0];
       this.playerIndex++;
       return pos;
    },
 
-   gameStarted() {
+   stopAcceptingNewPlayers() {
       window.removeEventListener("gamepadconnected", gamepadPlayerConnectionListener);
       document.body.addEventListener("keydown", keyboardPlayerConnectionListener);
       document.body.removeEventListener("touchstart", touchPlayerConnectionListener);
@@ -112,7 +122,7 @@ export const PlayerHandler = {
          pos: this.getNextPos()
       };
       this.pendingPlayers.push(pendingPlayer);
-      window.updatePlayersOnPregameDisplay();
+      updatePlayersOnPregameDisplay();
       this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addKeyboardPlayer(inputMapIndex) {
@@ -129,7 +139,7 @@ export const PlayerHandler = {
             pos: this.getNextPos()
          };
          this.pendingPlayers.push(pendingPlayer);
-         window.updatePlayersOnPregameDisplay();
+         updatePlayersOnPregameDisplay();
          this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
       }
    },
@@ -141,7 +151,7 @@ export const PlayerHandler = {
          pos: this.getNextPos()
       };
       this.pendingPlayers.push(pendingPlayer);
-      window.updatePlayersOnPregameDisplay();
+      updatePlayersOnPregameDisplay();
       this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addRemotePlayer(remotePlayer) {
@@ -155,53 +165,35 @@ export const PlayerHandler = {
          }
          this.playerIndex++;
          this.pendingPlayers.push(player);
-         window.updatePlayersOnPregameDisplay();
+         updatePlayersOnPregameDisplay();
       }
    },
 
    removePlayer(player) {
-      let index = this.pendingPlayers.indexOf(player);
+      let oldPlayer = this.pendingPlayers.find((obj) => obj.id == player.id);
+      let index = this.pendingPlayers.indexOf(oldPlayer);
       let removedPos = this.pendingPlayers[index].pos;
       this.pendingPlayers.splice(index, 1);
-      window.updatePlayersOnPregameDisplay();
+      updatePlayersOnPregameDisplay();
       this.emitPlayerRemoved(player.id);
       for (let i = this.pendingPlayers.length - 1; i > index; i--) {
          this.pendingPlayers[i].pos = this.pendingPlayers[i - 1].pos;
       }
-      this.pendingPlayers[index].pos = removedPos;
+      if (this.pendingPlayers[index]) this.pendingPlayers[index].pos = removedPos;
       this.playerIndex--;
    },
 
    emitPlayerAdded(id, sprite, pos) {
-      if (window.multiplayer) {
-         window.socket.emit("addPlayer", {
-            roomid: window.roomid,
-            id: id,
-            sprite: sprite,
-            pos: pos
-         });
-      }
+      Game.getComms().emitPlayerAdded(id, sprite, pos);
    },
    emitPlayerRemoved(id) {
-      if (window.multiplayer) {
-         window.socket.emit("removePlayer", {
-            roomid: window.roomid,
-            id: id
-         });
-      }
+      Game.getComms().emitPlayerRemoved(id);
    }
 }
-window.playerHandler = PlayerHandler;
-
 
 function requestFullscreen() {
    const element = document.documentElement;
-
-   if (element.requestFullscreen) {
-      element.requestFullscreen();
-   } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-   } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-   }
+   if (element.requestFullscreen) element.requestFullscreen();
+   else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+   else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
 }

@@ -368,6 +368,17 @@ canvas {
    border-radius: 50% 50% 0 0;
 }
 
+/* Multiplayer lobby */
+.multiplayer-lobby .waiting-players {
+   display: grid;
+   grid-template-columns: auto auto;
+}
+
+
+
+
+
+
 /* Mobile styles */
 @media (max-height: 760px) {
    .orders {
@@ -381,12 +392,23 @@ canvas {
 }
 
 @media (prefers-color-scheme: dark) {
-   .pre-game, .post-game {
-      background-color: #333;
+   .pre-game, .post-game, .multiplayer-lobby, .settings {
+      background-color: #333 !important;
       color: #eee;
+   }
+
+   .settings h1 {
+      color: #aaa;
    }
 
    .pregame-player {
       background-color: #222;
+   }
+
+   button {
+      background-color: #222;
+      color: #fff;
+      border-style: dotted;
+      border-color: #000;
    }
 }

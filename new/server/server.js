@@ -3,7 +3,7 @@ function createServer(comm) {
 
     return {
         handleInput(input) {
-            console.log("server handling:", input);
+            console.info("server handling:", input);
         }
     }
 }

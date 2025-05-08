@@ -19,7 +19,7 @@ const saveDataHandler = {
     }
 }
 
-init();
+if (typeof window != "undefined" && !window.multiplayer) init();
 
 export const SaveData = new Proxy(saveDataRaw, saveDataHandler);
 

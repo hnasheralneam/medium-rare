@@ -86,7 +86,6 @@ export const Recipes = {
 };
 
 export class Item {
-
     constructor(proto) {
         this.proto = proto;
         this.data = {};
@@ -146,4 +145,18 @@ export class Item {
     emptyContainer() {
         this.items = [];
     }
+    isEmpty() {
+        return this.items.length == 0;
+    }
 }
+
+Item.prototype.toJSON = function() {
+    const plain = {
+        proto: { name: this.proto.name, type: this.proto.type },
+        data: this.data
+    };
+    if (this.isContainer() && this.items) {
+        plain.items = this.items.map(subItem => subItem.toJSON());
+    }
+    return plain;
+};

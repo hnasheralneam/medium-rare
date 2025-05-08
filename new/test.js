@@ -1,5 +1,5 @@
 import { Client } from "./client/client.js";
-import { Server } from "./server/server.js";
+import { Server } from "./server/server.mjs";
 import { LocalComm as LocalClientComm } from "./client/comm/local.js";
 import { LocalComm as LocalServerComm } from "./server/comm/local.js";
 
