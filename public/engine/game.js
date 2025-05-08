@@ -14,6 +14,7 @@ class Game {
     keydownHandle = null; // checked if null as a hacky "has game started" check in PlayerHandler
     busy = false;
     comms;
+    started = false;
 
     constructor(comms) {
         this.comms = comms;

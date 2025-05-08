@@ -283,8 +283,7 @@ io.on("connection", (socket) => {
       let player = {
          id: id,
          sprite: sprite,
-         pos: pos,
-         lastMove: ""
+         pos: pos
       };
       io.in(roomid).emit("playerAdded", player);
    });

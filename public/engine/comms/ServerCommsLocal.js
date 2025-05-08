@@ -5,7 +5,6 @@ export const serverCommsLocal = {
       this.server = server;
    },
 
-   // calls init on the games, which will create the shallow grids. pass in levedata
    emitInitGame(levelName, levelData) {
       Game.getComms().onInit(levelData);
    },

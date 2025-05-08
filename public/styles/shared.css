@@ -21,3 +21,23 @@
    opacity: 0;
    pointer-events: none;
 }
+
+
+@media (prefers-color-scheme: dark) {
+   button {
+      background-color: #222;
+      color: #fff;
+      border-style: dotted;
+      border-color: #000;
+      border-width: .2rem;
+      transition: .2s;
+   }
+
+   button:hover {
+      background-color: #292929;
+   }
+
+   button:active {
+      border-color: #555;
+   }
+}

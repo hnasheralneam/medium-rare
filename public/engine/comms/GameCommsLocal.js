@@ -21,6 +21,8 @@ export const gameCommsLocal = {
    },
 
    emitStartGame() {
+      if (Game.started) return;
+      Game.started = true;
       console.info("Starting local game");
       Server.initializePlayers(PlayerHandler.pendingPlayers);
       Server.start();

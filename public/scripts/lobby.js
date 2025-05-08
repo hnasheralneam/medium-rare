@@ -122,6 +122,8 @@ function sendMessage(event) {
    socket.emit("lobby chat message", { message: message, nickname: userInfo.nickname }, userInfo.roomname);
 }
 
+document.querySelector(".message-form").addEventListener("submit", sendMessage);
+
 socket.on("lobby chat message", ({ message, nickname }) => {
    let messageEl = document.createElement("p");
    messageEl.textContent = `${nickname}: ${message}`;

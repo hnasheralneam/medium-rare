@@ -161,10 +161,6 @@ canvas {
    }
 }
 
-.roomcode-display {
-   font-family: sans-serif;
-}
-
 
 /* order styles */
 .orders {
@@ -374,8 +370,29 @@ canvas {
    grid-template-columns: auto auto;
 }
 
+.lobby-container {
+   max-width: 700px;
+   margin: 1rem auto;
+   padding: .5rem 1rem;
+   border: dotted .4rem #000;
+   text-align: center;
+}
 
+.roomcode-display {
+   font-family: sans-serif;
+   margin: .75rem 0;
+}
 
+.leader-options {
+   margin: 2rem;
+   font-size: 1.5rem;
+}
+
+.leader-options button {
+   margin: .5rem;
+   font-size: 1rem;
+   padding: .5rem .75rem;
+}
 
 
 
@@ -403,12 +420,5 @@ canvas {
 
    .pregame-player {
       background-color: #222;
-   }
-
-   button {
-      background-color: #222;
-      color: #fff;
-      border-style: dotted;
-      border-color: #000;
    }
 }

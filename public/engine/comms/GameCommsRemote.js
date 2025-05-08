@@ -30,6 +30,9 @@ export const gameCommsRemote = {
    },
 
    emitStartGame() {
+      if (Game.started) return;
+      Game.started = true;
+
       console.info("Starting remote game");
 
       window.socket.emit("initPlayers", {

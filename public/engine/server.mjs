@@ -26,9 +26,6 @@ class Server {
       this.grid.loadData(this.level.layout, this.level.extra, this.comms);
       this.initialized = true;
       this.comms.emitInitGame(levelName, this.level);
-      OrderHandler.init(this.level.menuOptions, this.comms);
-      this.orderHandler = OrderHandler;
-
       return this.level;
    }
 
@@ -54,6 +51,8 @@ class Server {
 
    async start() {
       this.startTimer();
+      OrderHandler.init(this.level.menuOptions, this.comms);
+      this.orderHandler = OrderHandler;
       this.comms.emitStarted();
    }
 

@@ -1,7 +1,7 @@
 {
   "name": "medium-rare",
   "version": "0.1.0",
-  "description": "Get cook'd",
+  "description": "Multiplayer cooking game",
   "main": "app.js",
   "type": "module",
   "scripts": {
@@ -14,14 +14,15 @@
     "url": "git+https://github.com/hnasheralneam/medium-rare.git"
   },
   "keywords": [
-    "cook"
+    "cooking",
+    "game"
   ],
-  "author": "Kai and Hamza",
+  "authors": ["Kai", "Hamza", "Sai"],
   "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/hnasheralneam/medium-rare/issues"
   },
-  "homepage": "https://github.com/hnasheralneam/medium-rare#readme",
+  "homepage": "https://mediumrare.hnasheralneam.dev",
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.2",
@@ -29,6 +30,6 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.10"
   }
 }

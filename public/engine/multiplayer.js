@@ -1,5 +1,4 @@
 import { createPreGamePanel } from "../script.js";
-import { Server } from "/engine/server.mjs";
 import { PlayerHandler } from "../engine/playerHandler.js";
 import { socket, userInfo } from "../scripts/lobby.js";
 import { Game } from "../state.js";

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="/sprites/player/idle.png">
+    <link rel="icon" type="image/x-icon" href="/sprites/old/phil.png">
     <title>Medium Rare</title>
     <link rel="stylesheet" href="/styles/game.css">
     <link rel="stylesheet" href="/styles/shared.css">
@@ -53,38 +53,39 @@
             window.multiplayer = true;
         </script>
         <div class="fullscreen-modal multiplayer-lobby">
-            <div class="main">
-                <h2 class="roomcode-display">Room Code: </h2>
-                <div class="waiting-players">
-                    <div>
-                        <p>In the room</p>
-                        <ul class="inRoom"></ul>
+            <div class="lobby-container">
+                <div class="main">
+                    <h2 class="roomcode-display">Room Code: </h2>
+                    <div class="waiting-players">
+                        <div>
+                            <p>In the room</p>
+                            <ul class="inRoom"></ul>
+                        </div>
+                        <div>
+                            <p class="waiting-text">Waiting to be let in</p>
+                            <ul class="waiting"></ul>
+                        </div>
                     </div>
-                    <div>
-                        <p class="waiting-text">Waiting to be let in</p>
-                        <ul class="waiting"></ul>
+                    <div class="leader-options hidden">
+                        <form action="">
+                            <label for="level-selection">Choose level: </label>
+                            <select name="level-selection" class="level-select-dropdown">
+                                <option value="square">Square</option>
+                                <option value="wide">Wide</option>
+                                <option value="huge">Huge</option>
+                            </select>
+                        </form>
+                        <button class="start-game-button">start game</button>
                     </div>
                 </div>
-                <div class="leader-options hidden">
-                    <form action="">
-                        <label for="level-selection">Choose level</label>
-                        <select name="level-selection" class="level-select-dropdown">
-                            <option value="square">Square</option>
-                            <option value="wide">Wide</option>
-                            <option value="huge">Huge</option>
-                        </select>
+                <div>
+                    <h2>Chat</h2>
+                    <div class="messages"></div>
+                    <form class="message-form" action="">
+                        <input class="message-input" type="text" name="message" required>
+                        <input type="submit" value="Send">
                     </form>
-                    <button class="start-game-button">start game</button>
                 </div>
-            </div>
-            <br>
-            <div>
-                <h2>Chat</h2>
-                <div class="messages"></div>
-                <form class="message-form" action="" onsubmit="return sendMessage(event)">
-                    <input class="message-input" type="text" name="message" required>
-                    <input type="submit" value="Send">
-                </form>
             </div>
         </div>
         <script src="/scripts/lobby.js" type="module"></script>
