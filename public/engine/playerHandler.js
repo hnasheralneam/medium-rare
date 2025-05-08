@@ -173,6 +173,7 @@ export const PlayerHandler = {
       let oldPlayer = this.pendingPlayers.find((obj) => obj.id == player.id);
       let index = this.pendingPlayers.indexOf(oldPlayer);
       let removedPos = this.pendingPlayers[index].pos;
+      if (oldPlayer.type == "touch") createdTouchPlayer = false;
       this.pendingPlayers.splice(index, 1);
       updatePlayersOnPregameDisplay();
       this.emitPlayerRemoved(player.id);

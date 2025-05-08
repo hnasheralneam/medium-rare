@@ -1,30 +1,32 @@
 #!/usr/bin/env node
 
-const express = require("express");
+import express from "express";
 const app = express();
-const http = require("http");
-require("ejs");
-const server = http.createServer(app);
-const fs = require('fs/promises'); // <-- Add fs/promises
-const path = require('path');       // <-- Add path
+import { createServer as _createServer } from "http";
+import "ejs";
+const server = _createServer(app);
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
-const { Server } = require("socket.io");
+import { Server } from "socket.io";
 const io = new Server(server);
-const uuid = require("uuid");
+import { v4 } from "uuid";
 
 const port = process.env.PORT || 3030;
+
+const dirname = import.meta.dirname;
 
 app.use(express.static("new"));
 app.use(express.static("public"));
 app.use(express.static("assets"));
-// app.use("/scripts", express.static(__dirname + "/public/scripts/"));
-app.use("/item/", express.static(__dirname + "/assets/items"));
-app.use("/small-items/", express.static(__dirname + "/assets/small-items"));
-app.use("/resources/", express.static(__dirname + "/resources"));
+// app.use("/scripts", express.static(dirname + "/public/scripts/"));
+app.use("/item/", express.static(dirname + "/assets/items"));
+app.use("/small-items/", express.static(dirname + "/assets/small-items"));
+app.use("/resources/", express.static(dirname + "/resources"));
 app.set("view engine", "ejs");
 
-const { createServer } = require("./public/engine/server.mjs");
-const { serverCommsRemote } = require("./public/engine/comms/ServerCommsRemote.mjs");
+import { createServer } from "./public/engine/server.mjs";
+import { serverCommsRemote } from "./public/engine/comms/ServerCommsRemote.mjs";
 
 
 // Basic page loading
@@ -99,7 +101,7 @@ io.on("connection", (socket) => {
 
 
    socket.on("create room", () => {
-      let roomid = uuid.v4();
+      let roomid = v4();
       rooms.push({
          info: {
             name: roomid,
@@ -209,8 +211,8 @@ io.on("connection", (socket) => {
       if (index === -1) return;
       try {
          // get level data
-         const filePath = path.join(__dirname, 'resources', 'levels', `${levelName}.json`);
-         const fileContent = await fs.readFile(filePath, 'utf-8');
+         const filePath = join(dirname, 'resources', 'levels', `${levelName}.json`);
+         const fileContent = await readFile(filePath, 'utf-8');
          const levelData = JSON.parse(fileContent);
 
          // create server
