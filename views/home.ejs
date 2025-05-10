@@ -7,11 +7,11 @@
    <title>🏠 | Medium Rare</title>
    <link rel="stylesheet" href="/styles/shared.css">
    <link rel="stylesheet" href="/styles/home.css">
-   <!-- <script defer src="https://umami.hnasheralneam.dev/script.js"
-      data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script> -->
+   <script defer src="https://umami.hnasheralneam.dev/script.js"
+      data-website-id="80d487ab-9425-4b1e-a838-80cbc26119d7"></script>
 </head>
 <body>
-   <div class="level-picker modal">
+   <div class="level-picker">
       <h1>Pick a level (Play alone)</h1>
       <br>
       <hr><br>
@@ -32,8 +32,8 @@
          <div>
             <h1>Join a Room</h1>
             <button class="close-modal" onclick="openModal('join')">X</button>
+            <p class="error-place"></p>
             <form class="join-form" action="" onsubmit="return joinRoom(event)">
-               <p class="error-place"></p>
                <h2>Room Code</h2>
                <input class="roomcode" type="text" name="roomcode" required>
                <h3>Nickname</h3>

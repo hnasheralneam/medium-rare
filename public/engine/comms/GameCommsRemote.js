@@ -83,6 +83,11 @@ export const gameCommsRemote = {
 
    onGameEnd(stats) {
       Game.end(stats);
+      if (window.isLeader) {
+         window.socket.emit("removeGame", {
+            roomid: window.roomid
+         });
+      }
    },
    onIncreaseScore(score) {
       DisplayController.updatePoints(score);

@@ -88,7 +88,8 @@ function kick(newUser) {
 }
 
 function updateUsersList(users) {
-   document.querySelector(".inRoom").innerHTML = "";
+   if (document.querySelector(".inRoom")) document.querySelector(".inRoom").innerHTML = "";
+   else return;
    users.forEach((user) => {
       let listItem = document.createElement("LI");
       listItem.innerHTML = `

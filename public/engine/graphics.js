@@ -1,3 +1,5 @@
+import { Game } from "../state.js";
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -18,7 +20,39 @@ Origin at center of screen
 
 */
 
-const MIN_PIX_COUNT = 256;
+let MIN_PIX_COUNT = 256;
+
+export function zoomOut() {
+    MIN_PIX_COUNT = Math.round(MIN_PIX_COUNT * 1.01);
+    if (MIN_PIX_COUNT > 600) MIN_PIX_COUNT = 600;
+    handleResize();
+    Game.notifyRedraw();
+}
+
+export function zoomIn() {
+    MIN_PIX_COUNT = Math.round(MIN_PIX_COUNT * .99);
+    if (MIN_PIX_COUNT < 100) MIN_PIX_COUNT = 100;
+    handleResize();
+    Game.notifyRedraw();
+}
+
+let lastScrolled = Date.now();
+canvas.addEventListener("wheel", updateZoom);
+
+function updateZoom(event) {
+    if (Date.now() - lastScrolled < 100) return;
+    if (checkScrollDirectionIsUp(event)) zoomIn();
+    else zoomOut();
+}
+
+function checkScrollDirectionIsUp(event) {
+    if (event.wheelDelta) {
+        return event.wheelDelta > 0;
+    }
+    return event.deltaY < 0;
+}
+
+
 
 function handleResize() {
     const width = window.innerWidth;
@@ -73,6 +107,7 @@ export function drawMirroredImage(image, x, y) {
 
 export function drawProgressBar(remaining, total, x, y) {
     let progress = total - remaining;
+    if (progress < 0) progress = 0;
     let progressPercent = progress / total;
     let progressBarProgress = progressPercent * 28; // width of progress bar
 

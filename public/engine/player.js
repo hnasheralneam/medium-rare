@@ -147,12 +147,18 @@ export class KeyboardPlayer extends Player {
     constructor(inputMap, pos, sprite, id) {
         super(pos, sprite, id);
         this.inputMap = inputMap;
+        this.lastMove = Date.now();
+        this.cooldown = 80;
     }
 
     keyPressed(e) {
         const key = e.code;
         const action = this.inputMap[key];
-        if (action === undefined) return;
+        if (action == undefined) return;
+        if (action != "interact") {
+            if (Date.now() - this.lastMove < this.cooldown) return;
+            this.lastMove = Date.now();
+        }
         this.emitPlayerAction(this, action);
     }
 }
@@ -165,7 +171,7 @@ export class GamepadPlayer extends Player {
         this.gamepadIndex = gamepadIndex;
         this.interactPressed = false;
         this.lastMove = Date.now();
-        this.cooldown = 150;
+        this.cooldown = 190;
     }
 
     handleGamepad() {
@@ -191,7 +197,7 @@ export class GamepadPlayer extends Player {
                 this.lastMove = Date.now();
             }
         }
-        if (action === null) return;
+        if (action == null) return;
         this.emitPlayerAction(this, action);
     }
 }

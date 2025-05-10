@@ -3,8 +3,19 @@
 }
 
 .level-picker {
+   position: fixed;
+   top: 0;
+   right: 0;
+   left: 0;
+   bottom: 0;
+   background-color: #e3e3e3;
+   text-align: center;
+   padding: 2.5rem 0;
+
+
    font-family: sans-serif;
    overflow: auto;
+   padding-bottom: 3rem;
 }
 
 .level-picker img {
@@ -14,6 +25,25 @@
 .level-picker-element {
    display: inline-block;
    margin: 2rem;
+}
+
+.level-picker .people-container {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+/* .level-picker .people-container img:hover {
+   transform: rotate(90deg);
+} */
+
+.level-picker .image-container {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin: 1rem auto;
+   width: 15rem;
+   height: 15rem;
 }
 
 .level-picker-element * {
@@ -102,9 +132,23 @@
    border-radius: .4em;
 }
 
+
+@media (max-width: 500px) {
+   .level-picker-element {
+      display: block;
+   }
+
+   .multiplayer-menu .inner {
+      margin: 0;
+      border-radius: 0;
+      box-sizing: border-box;
+      width: 100%;
+   }
+}
+
 @media (prefers-color-scheme: dark) {
    .level-picker, .multiplayer-menu .inner, .join-room div, .create-room div {
-      background-color: #333;
+      background-color: #252525;
       color: #eee;
    }
 
@@ -121,6 +165,8 @@
 
 
    .multiplayer-menu .inner {
-   box-shadow: 0 .2rem .4rem #000;
+      box-shadow: 0 .1rem .6rem #111;
+      border: dotted .35rem #444;
+      border-radius: 0;
    }
 }

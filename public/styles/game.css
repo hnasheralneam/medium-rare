@@ -107,7 +107,7 @@ canvas {
    font-family: sans-serif;
    font-size: 1.5rem;
    font-weight: bold;
-   padding: .2rem;
+   padding: .3rem .6rem;
    user-select: none;
 }
 
@@ -410,7 +410,7 @@ canvas {
 
 @media (prefers-color-scheme: dark) {
    .pre-game, .post-game, .multiplayer-lobby, .settings {
-      background-color: #333 !important;
+      background-color: #252525 !important;
       color: #eee;
    }
 
@@ -420,5 +420,44 @@ canvas {
 
    .pregame-player {
       background-color: #222;
+   }
+
+   .timer {
+      border: dotted .3rem #444;
+   }
+
+   .timer, .play-pause {
+      color: #eee;
+      background-color: #222;
+   }
+
+   .play-pause img {
+      filter: invert(100%);
+   }
+
+   .order {
+      color: #eee;
+      background-color: #222;
+   }
+
+   .orders .time-left {
+      background-color: #444;
+   }
+
+
+   /* touchpad */
+   .touchpad {
+      background-color: #000;
+      border: solid .2rem #333;
+   }
+
+   .touchpad .direction {
+      background-color: #222;
+      box-shadow: inset 0 0 .2rem #555;
+   }
+
+   .touchpad .interact {
+      background-color: #222;
+      box-shadow: inset 0 0 .2rem #555;
    }
 }

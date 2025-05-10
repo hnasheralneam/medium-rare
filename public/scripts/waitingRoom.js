@@ -15,6 +15,6 @@ socket.on("you were let in", (roomname) => {
 });
 
 socket.on("leader left lobby", () => {
-   alert("Leader has left! Sorry, you're being redirected.");
+   alert("Leader has left! You're being redirected.");
    location.reload();
 });

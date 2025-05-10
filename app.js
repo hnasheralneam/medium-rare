@@ -5,8 +5,8 @@ const app = express();
 import { createServer as _createServer } from "http";
 import "ejs";
 const server = _createServer(app);
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 import { Server } from "socket.io";
 const io = new Server(server);
@@ -19,7 +19,6 @@ const dirname = import.meta.dirname;
 app.use(express.static("new"));
 app.use(express.static("public"));
 app.use(express.static("assets"));
-// app.use("/scripts", express.static(dirname + "/public/scripts/"));
 app.use("/item/", express.static(dirname + "/assets/items"));
 app.use("/small-items/", express.static(dirname + "/assets/small-items"));
 app.use("/resources/", express.static(dirname + "/resources"));
@@ -51,7 +50,7 @@ app.get("/play", (req, res) => {
 
 
 // Multiplayer
-let rooms = [];
+let rooms = []; // absoluetly the best, most scalable way
 io.on("connection", (socket) => {
    socket.on("test latency", () => {
       socket.emit("latency tested");
@@ -62,10 +61,7 @@ io.on("connection", (socket) => {
       userData = userInfo;
 
       let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-      if (indexInRooms == -1) {
-         console.error("Room does not exist!");
-         return;
-      }
+      if (indexInRooms == -1) return; // room does not exist
       let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == oldSocketId);
       if (indexInUsers != -1) rooms[indexInRooms]["users"][indexInUsers] = userData;
       io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
@@ -75,10 +71,7 @@ io.on("connection", (socket) => {
    socket.on("disconnect", () => {
       if (userData.usertype == "leader") {
          let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-         if (indexInRooms == -1) {
-            console.error("Room does not exist!");
-            return;
-         }
+         if (indexInRooms == -1) return; // room does not exist
          io.in(rooms[indexInRooms]["info"].name).emit("leader left lobby", rooms[indexInRooms]["users"]);
       }
       else if (userData.location == "waiting room") {
@@ -88,10 +81,7 @@ io.on("connection", (socket) => {
       }
       else if (userData.location == "lobby") {
          let indexInRooms = rooms.findIndex(room => room.info.name === userData.roomname);
-         if (indexInRooms == -1) {
-            console.error("Room does not exist!");
-            return;
-         }
+         if (indexInRooms == -1) return; // room does not exist
          let indexInUsers = rooms[indexInRooms]["users"].findIndex(user => user.socketid == userData.socketid);
          if (indexInUsers != -1) rooms[indexInRooms]["users"].splice(indexInUsers, 1);
          io.in(rooms[indexInRooms]["info"].name).emit("users in lobby updated", rooms[indexInRooms]["users"]);
@@ -106,9 +96,11 @@ io.on("connection", (socket) => {
          info: {
             name: roomid,
             code: Math.floor(100000 + Math.random() * 900000),
-            open: true
+            open: true, // as in open to anyone
+            started: false
          },
-         users: []
+         users: [],
+         data: {}
       });
       socket.emit("room created", {
          socketid: socket.id,
@@ -133,23 +125,23 @@ io.on("connection", (socket) => {
 
    socket.on("join room", (roomcode) => {
       let room = rooms.find(room => room.info.code == roomcode);
-      if (room && (room.info.open == true)) {
+      if (room && (room.info.open == true) && !room.info.started) {
          socket.emit("joined room", {
             socketid: socket.id,
             roomname: room.info.name,
             usertype: "player"
          });
       }
-      else if (room) socket.emit("no such room", "room is closed");
+      else if (room) {
+         if (room.info.open == false) socket.emit("no such room", "room is closed")
+         if (room.info.started) socket.emit("no such room", "game already started");
+      }
       else socket.emit("no such room", "room does not exist");
    });
 
    socket.on("leaderConnectingToRoom", (userInfo) => {
       let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
-      if (indexInRooms == -1) {
-         console.error("Room does not exist!");
-         return;
-      }
+      if (indexInRooms == -1) return; // room does not exist
 
       rooms[indexInRooms]["users"].push(userInfo);
 
@@ -163,10 +155,7 @@ io.on("connection", (socket) => {
    socket.on("player joining lobby", (userInfo, socketid) => {
       // Adds user to socket room
       let indexInRooms = rooms.findIndex(room => room.info.name === userInfo.roomname);
-      if (indexInRooms == -1) {
-         console.error("Room does not exist!");
-         return;
-      }
+      if (indexInRooms == -1) return; // room does not exist
 
       socket.join(userInfo.roomname);
 
@@ -211,8 +200,8 @@ io.on("connection", (socket) => {
       if (index === -1) return;
       try {
          // get level data
-         const filePath = join(dirname, 'resources', 'levels', `${levelName}.json`);
-         const fileContent = await readFile(filePath, 'utf-8');
+         const filePath = join(dirname, "resources", "levels", `${levelName}.json`);
+         const fileContent = await readFile(filePath, "utf-8");
          const levelData = JSON.parse(fileContent);
 
          // create server
@@ -223,14 +212,18 @@ io.on("connection", (socket) => {
          // Store server instance and level data in the room
          rooms[index]["data"] = {
             server: roomServer,
-            levelName: levelName,
-            paused: true,
-            players: []
+            levelName: levelName
          };
 
       } catch (error) {
          console.error(`Error initializing game:`, error);
       }
+      rooms[index]["info"]["started"] = true;
+   });
+   socket.on("removeGame", ({ roomid }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      rooms.splice(index, 1);
    });
 
    socket.on("initPlayers", ({ roomid, players }) => {
