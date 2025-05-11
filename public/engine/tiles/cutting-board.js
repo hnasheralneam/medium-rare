@@ -72,7 +72,6 @@ export const CuttingBoard = {
     },
     disconnect(self) {
         self.data.active = false;
-        console.log("player disconnected, should update grid")
         if (self.serverComms) {
             self.serverComms.server.handleCellChanged(self);
             self.serverComms.emitRedraw();

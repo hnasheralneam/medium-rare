@@ -1,3 +1,31 @@
+.related-links {
+   position: fixed;
+   bottom: 0;
+   right: 0;
+   background-color: #ccc;
+   z-index: 2;
+   padding: .1rem .2rem;
+   font-family: sans-serif;
+   font-size: 1.1rem;
+}
+
+.related-links div {
+   display: inline-block;
+   margin: 0 .1rem;
+}
+
+.related-links a {
+   color: #444;
+   text-decoration: none;
+   transition: .2s;
+}
+
+.related-links a:hover {
+   color: #222;
+   text-decoration: underline;
+}
+
+/* level picker */
 .level-picker * {
    overflow: hidden;
 }
@@ -147,6 +175,17 @@
 }
 
 @media (prefers-color-scheme: dark) {
+   .related-links {
+      background-color: #111;
+      color: #bbb;
+   }
+   .related-links a {
+      color: #bbb;
+   }
+   .related-links a:hover {
+      color: #fff;
+   }
+
    .level-picker, .multiplayer-menu .inner, .join-room div, .create-room div {
       background-color: #252525;
       color: #eee;

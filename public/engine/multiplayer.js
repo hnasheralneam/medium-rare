@@ -1,9 +1,9 @@
-import { createPreGamePanel } from "../script.js";
 import { PlayerHandler } from "../engine/playerHandler.js";
 import { socket, userInfo } from "../scripts/lobby.js";
 import { Game } from "../state.js";
 import { setLevelData } from "../levelDataParser.js";
 import { rehydrateCell } from "./cellRehydrator.js";
+import { DisplayController } from "./displayController.js";
 
 // Add start button for leader
 async function leaderInit() {
@@ -23,8 +23,8 @@ document.querySelector(".start-game-button").addEventListener("click", leaderIni
 socket.on("gameInitialized", ({ levelName, levelData }) => {
    window.levelName = levelName;
    setLevelData(levelData);
-   Game.init(levelData);
-   createPreGamePanel();
+   Game.init(levelData); // Game.init should be called before DisplayController.createPreGamePanel if it relies on levelData through PlayerHandler
+   DisplayController.createPreGamePanel();
    document.querySelector(".multiplayer-lobby").remove();
 });
 
@@ -86,6 +86,9 @@ socket.on("gameStarted", async () => {
 
 socket.on("playerAdded", (player) => {
    PlayerHandler.addRemotePlayer(player);
+});
+socket.on("playerUpdated", ({ id, sprite, pos }) => {
+   PlayerHandler.updateRemotePlayer(id, sprite, pos);
 });
 socket.on("playerRemoved", (id) => {
    let player = PlayerHandler.pendingPlayers.find((player) => player.id == id);

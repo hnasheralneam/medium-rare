@@ -1,4 +1,6 @@
 import { PlayerHandler } from "./playerHandler.js";
+import { attemptStartingGame, gameStartListener } from "../script.js";
+import { SaveData } from "../storage.js";
 
 export const DisplayController = {
    hidePregamePanel() {
@@ -23,11 +25,21 @@ export const DisplayController = {
          <button class="remove"><img src="../icons/close.svg" alt="close"></button>
          <h2>Player ${i + 1}</h2>
          <p>(${player.type})</p>
-         <img src="/sprites/old/${player.sprite}${Math.random() > .5 ? "" : "-jump"}.png">
+         <div class="sprite-parent">
+            <img class="sprite" src="/sprites/old/${player.sprite}${Math.random() > .5 ? "" : "-jump"}.png">
+            <button class="sprite-change last-sprite" title="last sprite">&#10140;</button>
+            <button class="sprite-change next-sprite" title="next sprite">&#10140;</button>
+         </div>
          <div class="controls-map"></div>
       `;
       playerElement.querySelector(".remove").addEventListener("click", () => {
          PlayerHandler.removePlayer(player);
+      });
+      playerElement.querySelector(".next-sprite").addEventListener("click", () => {
+         PlayerHandler.changePlayerSpriteNext(player.id, playerElement.querySelector(".sprite"));
+      });
+      playerElement.querySelector(".last-sprite").addEventListener("click", () => {
+         PlayerHandler.changePlayerSpriteLast(player.id, playerElement.querySelector(".sprite"));
       });
       if (player.type == "keyboard") {
          const controlsMapElement = playerElement.querySelector(".controls-map");
@@ -87,5 +99,36 @@ export const DisplayController = {
    },
    addTouchpad(touchpad) {
    document.querySelector(".touchpad-container").append(touchpad);
+   },
+
+   createPreGamePanel() {
+      const preGamePanel = document.querySelector(".pre-game");
+      DisplayController.showPregamePanel();
+      let innerElement = document.createElement("div");
+      innerElement.classList.add("inner");
+      innerElement.append(document.createElement("br"));
+      innerElement.innerHTML = `
+         <div class="level-info">
+            <h2>Level: ${window.levelName}</h2>
+            <img src="/levels/${window.levelName}.png" height="230"><br><br>
+
+            <p class="output"></p>
+            ${(SaveData[window.levelName + "HighScore"] > 0 && !window.multiplayer) ? "<h1>Your high score: " + SaveData[window.levelName + "HighScore"] + "</h1>" : ""}
+            ${window.multiplayer ? (window.isLeader ? `<button class="attempt-start-game-button">Play</button>` : `
+                     <p>Are you ready yet?</p>
+                  `) : `
+                     <p>Press arrow/wsad keys or move controller or touch screen to add player</p>
+                     <button class="attempt-start-game-button">Play</button>
+                  `
+            }
+            <br>
+         </div>
+         <div class="connected-players"></div>
+      `;
+      preGamePanel.append(innerElement);
+
+      let attemptStartGameButton = preGamePanel.querySelector(".attempt-start-game-button");
+      if (attemptStartGameButton) attemptStartGameButton.addEventListener("click", attemptStartingGame);
+      document.addEventListener("keypress", gameStartListener);
    }
 }

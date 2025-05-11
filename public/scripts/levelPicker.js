@@ -1,4 +1,4 @@
-import { getLevelData } from "../levelDataParser.js";
+import { getOtherLevelData } from "../levelDataParser.js";
 
 let levelNames = ["square", "wide", "huge"];
 
@@ -9,7 +9,7 @@ async function showLevelPicker() {
 
     for (const i in levelNames) {
         let levelName = levelNames[i];
-        let level = await getLevelData(levelName);
+        let level = await getOtherLevelData(levelName);
         let levelElement = document.createElement("div");
         levelElement.classList.add("level-picker-element");
         levelElement.innerHTML = `

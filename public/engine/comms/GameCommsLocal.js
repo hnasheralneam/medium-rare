@@ -76,11 +76,14 @@ export const gameCommsLocal = {
 
 
 
-   emitPlayerAdded(_id, _sprite, _pos) {
-      return;
+   emitPlayerAdded(id, sprite, pos) {
+      Server.addPendingPlayer(id, sprite, pos);
    },
-   emitPlayerRemoved(_id) {
-      return;
+   emitPlayerUpdated(id, sprite, pos) {
+      Server.updatePendingPlayer(id, sprite, pos);
+   },
+   emitPlayerRemoved(id) {
+      Server.removePendingPlayer(id);
    },
 
    updateTickAnim(id, anim) {

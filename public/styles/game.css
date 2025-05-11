@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+/* @import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"); */
 
 * {
    padding: 0;
    margin: 0;
    box-sizing: border-box;
    overflow: hidden;
-   font-family: "Pixelify Sans"
 }
 
 canvas {
@@ -45,7 +44,6 @@ canvas {
 .alert {
    text-align: center;
    padding: 2rem;
-   font-family: cursive;
    font-size: 2rem;
    max-width: 700px;
 }
@@ -56,7 +54,6 @@ canvas {
 
 /* settings */
 .settings h1 {
-   font-family: cursive;
    font-size: 4rem;
    margin-bottom: 1rem;
    color: #444;
@@ -67,14 +64,10 @@ canvas {
 }
 
 .settings .continue {
-   height: 6.5rem;
-   width: 6.5rem;
-   background-color: #00538a;
+   font-size: 2rem;
+   padding: 1rem;
+   background-color: #006eff;
    color: #fff;
-   text-transform: uppercase;
-   border-radius: 50%;
-   font-weight: bold;
-   border: none;
    transition: .2s;
 }
 
@@ -254,6 +247,29 @@ canvas {
    height: 20rem;
    width: 12rem;
    text-align: center;
+   overflow: auto;
+}
+
+.pregame-player .sprite-parent {
+   position: relative;
+}
+
+.pregame-player .sprite-change {
+   background-color: #66666655;
+   position: absolute;
+   top: calc(50% - 1.25rem);
+   height: 2.5rem;
+   widtH: 2.5rem;
+   border-radius: 1.25rem;
+   border: none;
+}
+
+.sprite-change.last-sprite {
+   transform: rotate(180deg);
+   left: 0;
+}
+.sprite-change.next-sprite {
+   right: 0;
 }
 
 .pregame-player img {
@@ -406,6 +422,27 @@ canvas {
       height: 4rem;
       width: 4rem;
    }
+
+   .pre-game div.inner {
+      display: grid;
+      grid-template-columns: 45% 55%;
+   }
+   .level-info {
+      padding: 1rem 2rem;
+   }
+   .level-info img {
+      transform: scale(.8);
+      font-size: .8rem;
+   }
+   .pre-game .connected-players {
+      margin: 1rem 0;
+      max-height: 100vh;
+      overflow: auto;
+   }
+   .pre-game .pregame-player {
+      margin: .4rem;
+      height: 75vh;
+   }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -419,7 +456,15 @@ canvas {
    }
 
    .pregame-player {
-      background-color: #222;
+      background-color: #1e1e1e;
+   }
+
+   .pregame-player button.remove {
+      background-color: #333;
+   }
+
+   .pregame-player button.remove:hover {
+      box-shadow: 0 0 .2rem #999;
    }
 
    .timer {

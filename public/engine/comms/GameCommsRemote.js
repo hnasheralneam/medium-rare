@@ -106,6 +106,14 @@ export const gameCommsRemote = {
          pos: pos
       });
    },
+   emitPlayerUpdated(id, sprite, pos) {
+      window.socket.emit("updatePlayer", {
+         roomid: window.roomid,
+         id: id,
+         sprite: sprite,
+         pos: pos
+      });
+   },
    emitPlayerRemoved(id) {
       window.socket.emit("removePlayer", {
          roomid: window.roomid,

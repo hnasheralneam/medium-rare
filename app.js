@@ -280,6 +280,15 @@ io.on("connection", (socket) => {
       };
       io.in(roomid).emit("playerAdded", player);
    });
+   socket.on("updatePlayer", ({ roomid, id, sprite, pos }) => {
+      let index = rooms.findIndex(room => room.info.name === roomid);
+      if (!rooms[index]) return;
+      io.in(roomid).emit("playerUpdated", {
+         id: id,
+         sprite: sprite,
+         pos: pos
+      });
+   });
    socket.on("removePlayer", ({ roomid, id }) => {
       io.in(roomid).emit("playerRemoved", id);
    });

@@ -32,36 +32,7 @@ export function attemptStartingGame() {
     }
 }
 
-export function createPreGamePanel() {
-    const preGamePanel = document.querySelector(".pre-game");
-    DisplayController.showPregamePanel();
-    let innerElement = document.createElement("div");
-    innerElement.classList.add("inner");
-    innerElement.append(document.createElement("br"));
-    innerElement.innerHTML = `
-        <h2>Level: ${window.levelName}</h2>
-        <img src="/levels/${window.levelName}.png" height="230"><br><br>
-
-        <p class="output"></p>
-        ${(SaveData[window.levelName + "HighScore"] > 0 && !window.multiplayer) ? "<h1>Your high score: " + SaveData[window.levelName + "HighScore"] + "</h1>" : ""}
-        ${window.multiplayer ? (window.isLeader ? `<button class="attempt-start-game-button">Play</button>` : `
-                <p>Are you ready yet?</p>
-            `) : `
-                <p>Press arrow/wsad keys or move controller or touch screen to add player</p>
-                <button class="attempt-start-game-button">Play</button>
-            `
-    }
-        <br>
-        <div class="connected-players"></div>
-    `;
-    preGamePanel.append(innerElement);
-
-    let attemptStartGameButton = preGamePanel.querySelector(".attempt-start-game-button");
-    if (attemptStartGameButton) attemptStartGameButton.addEventListener("click", attemptStartingGame);
-    document.addEventListener("keypress", gameStartListener);
-}
-
-function gameStartListener(e) {
+export function gameStartListener(e) {
     if (e.key == "Enter") attemptStartingGame();
 }
 

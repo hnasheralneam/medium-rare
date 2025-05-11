@@ -3,6 +3,7 @@ import { OrderHandler } from "./orderHandler.js";
 import { Player } from "./player.js";
 
 class Server {
+   pendingPlayers = [];
    players = [];
    level = null;
    grid = null;
@@ -35,6 +36,19 @@ class Server {
          // ACTUALLY IMPORTANT LINE
          this.addPlayer(player);
       }
+   }
+
+   addPendingPlayer(id, sprite, pos) {
+
+   }
+
+   // called when sprite or pos changes
+   updatePendingPlayer(id, sprite, pos) {
+
+   }
+
+   removePendingPlayer(id) {
+
    }
 
    addPlayer(pendingPlayer) {

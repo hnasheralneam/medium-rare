@@ -38,7 +38,6 @@ function keyboardPlayerConnectionListener(e) {
    }
 }
 function touchPlayerConnectionListener() {
-   if (window.innerHeight < 800) requestFullscreen();
    if (createdTouchPlayer) return;
    createdTouchPlayer = true;
    const id = window.crypto.randomUUID();
@@ -86,6 +85,15 @@ let inputMaps = [{
 let playerSprites = ["phil", "bill", "frill", "still", "jill", "remi"];
 
 
+document.body.addEventListener("touchstart", (e) => {
+   if (window.innerHeight < 760 || window.innerWidth < 500) {
+      const element = document.documentElement;
+      if (element.requestFullscreen) element.requestFullscreen();
+      else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+      else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+   }
+});
+
 export const PlayerHandler = {
    pendingPlayers: [],
    playerIndex: 0,
@@ -123,7 +131,7 @@ export const PlayerHandler = {
       };
       this.pendingPlayers.push(pendingPlayer);
       updatePlayersOnPregameDisplay();
-      this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addKeyboardPlayer(inputMapIndex) {
       let id = window.crypto.randomUUID();
@@ -140,7 +148,7 @@ export const PlayerHandler = {
          };
          this.pendingPlayers.push(pendingPlayer);
          updatePlayersOnPregameDisplay();
-         this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+         Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
       }
    },
    addTouchPlayer(id) {
@@ -152,7 +160,7 @@ export const PlayerHandler = {
       };
       this.pendingPlayers.push(pendingPlayer);
       updatePlayersOnPregameDisplay();
-      this.emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
    },
    addRemotePlayer(remotePlayer) {
       let existingPlayer = this.pendingPlayers.find((player) => player.id == remotePlayer.id);
@@ -168,6 +176,31 @@ export const PlayerHandler = {
          updatePlayersOnPregameDisplay();
       }
    },
+   updateRemotePlayer(id, sprite, pos) {
+      let player = this.pendingPlayers.find((obj) => obj.id == id);
+      if (!player) return;
+      player.sprite = sprite;
+      player.pos = pos;
+      updatePlayersOnPregameDisplay();
+   },
+
+   changePlayerSpriteNext(id, element) {
+      let player = this.pendingPlayers.find((obj) => obj.id == id);
+      let newSprite = playerSprites[playerSprites.indexOf(player.sprite) + 1];
+      if (!newSprite) newSprite = playerSprites[0];
+      this.setPlayerSprite(player, element, newSprite);
+   },
+   changePlayerSpriteLast(id, element) {
+      let player = this.pendingPlayers.find((obj) => obj.id == id);
+      let newSprite = playerSprites[playerSprites.indexOf(player.sprite) - 1];
+      if (!newSprite) newSprite = playerSprites[playerSprites.length - 1];
+      this.setPlayerSprite(player, element, newSprite);
+   },
+   setPlayerSprite(player, element, sprite) {
+      player.sprite = sprite;
+      Game.getComms().emitPlayerUpdated(player.id, player.sprite, player.pos);
+      element.src = `/sprites/old/${player.sprite}${Math.random() > .5 ? "" : "-jump"}.png`;
+   },
 
    removePlayer(player) {
       let oldPlayer = this.pendingPlayers.find((obj) => obj.id == player.id);
@@ -176,25 +209,15 @@ export const PlayerHandler = {
       if (oldPlayer.type == "touch") createdTouchPlayer = false;
       this.pendingPlayers.splice(index, 1);
       updatePlayersOnPregameDisplay();
-      this.emitPlayerRemoved(player.id);
+      Game.getComms().emitPlayerRemoved(player.id);
       for (let i = this.pendingPlayers.length - 1; i > index; i--) {
          this.pendingPlayers[i].pos = this.pendingPlayers[i - 1].pos;
+         Game.getComms().emitPlayerUpdated(this.pendingPlayers[i].id, this.pendingPlayers[i].sprite, this.pendingPlayers[i].pos);
       }
-      if (this.pendingPlayers[index]) this.pendingPlayers[index].pos = removedPos;
+      if (this.pendingPlayers[index]) {
+         this.pendingPlayers[index].pos = removedPos;
+         Game.getComms().emitPlayerUpdated(this.pendingPlayers[index].id, this.pendingPlayers[index].sprite, this.pendingPlayers[index].pos);
+      }
       this.playerIndex--;
-   },
-
-   emitPlayerAdded(id, sprite, pos) {
-      Game.getComms().emitPlayerAdded(id, sprite, pos);
-   },
-   emitPlayerRemoved(id) {
-      Game.getComms().emitPlayerRemoved(id);
    }
-}
-
-function requestFullscreen() {
-   const element = document.documentElement;
-   if (element.requestFullscreen) element.requestFullscreen();
-   else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
-   else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
 }
