@@ -6,4 +6,5 @@ A cooking game - help Phil and his clones stop angry customers from tearing apar
 ![Level screenshot](/assets/levels/wide.png)
 
 Scan the QR to play the beta!
+
 ![QR code](/assets/branding/betaqrcode.png)

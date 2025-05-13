@@ -3,7 +3,6 @@ import { pause, resume } from "../../script.js";
 import { Game, Server } from "../../state.js";
 import { DisplayController } from "../displayController.js";
 import { Order } from "../order.js";
-import { PlayerHandler } from "../playerHandler.js";
 
 // on game, emitting to server
 export const gameCommsLocal = {
@@ -24,7 +23,6 @@ export const gameCommsLocal = {
       if (Game.started) return;
       Game.started = true;
       console.info("Starting local game");
-      Server.initializePlayers(PlayerHandler.pendingPlayers);
       Server.start();
    },
 
@@ -76,8 +74,8 @@ export const gameCommsLocal = {
 
 
 
-   emitPlayerAdded(id, sprite, pos) {
-      Server.addPendingPlayer(id, sprite, pos);
+   emitPlayerAdded(id, sprite, pos, type) {
+      Server.addPendingPlayer(id, sprite, pos, type);
    },
    emitPlayerUpdated(id, sprite, pos) {
       Server.updatePendingPlayer(id, sprite, pos);

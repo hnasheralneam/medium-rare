@@ -50,6 +50,11 @@ export const CuttingBoard = {
     },
     startCutting(self, player) {
         let activeInterval = setInterval(() => {
+            if (self.serverComms && self.serverComms.server.paused) {
+                self.data.lastTick = Date.now();
+                self.data.timeLeft = self.data.timeNeededMs;
+                return;
+            }
             if (!self.data.active) clearInterval(activeInterval);
             let delta = Date.now() - self.data.lastTick;
             self.data.lastTick = Date.now();

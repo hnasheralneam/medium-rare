@@ -7,16 +7,28 @@ export const OrderHandler = {
     failedOrders: [],
     orderCount: 0,
 
-    init(mealOptions, serverComms) {
+    init(mealOptions, serverComms, server) {
         this.mealOptions = mealOptions;
         this.serverComms = serverComms;
-        // speed of order generation should be defined in the level
-        // consider using an array of times instead
-        setTimeout(() => { this.attemptAddingOrder(); }, 2000);
-        setTimeout(() => { this.attemptAddingOrder(); }, 10000);
-        setTimeout(() => { this.attemptAddingOrder(); }, 25000);
-        setTimeout(() => { this.attemptAddingOrder(); }, 40000);
-        setTimeout(() => { this.attemptAddingOrder(); }, 50000);
+        this.orderCreationInterval(server);
+    },
+
+    orderCreationInterval(server) {
+        // orderTimes should be defined in the level
+        let orderTimes = [2000, 10000, 25000, 40000, 50000];
+        setInterval(() => {
+            let paused = server.paused;
+            let timeLeft = server.timeLeft;
+            let totalTime = server.level.timeSeconds;
+            if (paused) return;
+            let timePassed = (totalTime - timeLeft) * 1000;
+            for (let i = 0; i < orderTimes.length; i++) {
+                if (orderTimes[0] && orderTimes[0] <= timePassed) {
+                    this.attemptAddingOrder();
+                    orderTimes.shift();
+                }
+            }
+        }, 1000);
     },
 
     attemptAddingOrder() {
@@ -33,7 +45,7 @@ export const OrderHandler = {
         let meal = this.mealOptions[Math.floor(Math.random() * this.mealOptions.length)];
         let newOrderData = {
             name: meal,
-            time: 25000,
+            time: 22000,
             number: ++this.orderCount
         };
         this.orders.push(newOrderData);
@@ -57,9 +69,8 @@ export const OrderHandler = {
         let order = this.orders.find(o => o.number == number);
         if (!order) return;
         if (!failed) this.completedOrders.push(order);
-        else {
-            this.failedOrders.push(order);
-        }
+        // this check is here because in multiplayer each client sends failed
+        else if (!this.failedOrders.includes(order)) this.failedOrders.push(order);
         this.orders.splice(this.orders.indexOf(order), 1);
         // should take away time/score and give visual feedback
         if (this.orders.length == 0) {

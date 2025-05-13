@@ -12,13 +12,15 @@
 </head>
 <body>
    <div class="related-links">
-      <div><a href="mailto:hnasheralneam@gmail.com" title="hnasheralneam@gmail.com">Feedback</a></div>
+      <div><a tabindex="0" href="javascript:void(0)" onclick="openModal('changelog')">v0.2.5-beta</a></div>
       |
-      <div><a href="https://discord.gg/vBcz33FYwV" title="Medium Rare Fan Club">Discord</a></div>
+      <div><a tabindex="0" target="_blank" href="mailto:phil.mediumrare@gmail.com" title="phil.mediumrare@gmail.com">Feedback</a></div>
       |
-      <div><a href="https://github.com/hnasheralneam/medium-rare" title="hnasheralneam/medium-rare">GitHub</a></div>
+      <div><a tabindex="0" target="_blank" href="https://discord.gg/vBcz33FYwV" title="Medium Rare Fan Club">Discord</a></div>
       |
-      <div><a href="https://beta.mediumrare.hnasheralneam.dev" title="beta">Beta</a></div>
+      <div><a tabindex="0" target="_blank" href="https://github.com/hnasheralneam/medium-rare" title="hnasheralneam/medium-rare">GitHub</a></div>
+      |
+      <div><a tabindex="0" target="_blank" href="https://beta.mediumrare.hnasheralneam.dev" title="beta">Beta</a></div>
    </div>
    <div class="level-picker">
       <h1>Pick a level (Play alone)</h1>
@@ -36,35 +38,84 @@
       </div>
    </div>
    <!-- Modals -->
-   <div class="join-room">
+   <div class="modal changelog changelog-room hidden">
+      <div class="content">
+         <button class="close-modal" onclick="openModal('changelog')">X</button>
+         <h1>Changelog</h1>
+         <br>
+         <p>Note: all v0.2.x releases are beta software and may contain bugs</p>
+         <br><br>
+         <div class="changelog-elements"></div>
+      </div>
+   </div>
+   <div class="join-room room-modal">
       <div class="modal-content">
          <div>
-            <h1>Join a Room</h1>
+            <h1>Join or find a room</h1>
             <button class="close-modal" onclick="openModal('join')">X</button>
             <p class="error-place"></p>
             <form class="join-form" action="" onsubmit="return joinRoom(event)">
-               <h2>Room Code</h2>
+               <h2>Join a room</h2>
+               <p>Room Code</p>
                <input class="roomcode" type="text" name="roomcode" required>
-               <h3>Nickname</h3>
-               <input class="nickname name-join" type="text" name="nickname" required><br>
-               <input type="submit" value="Let's go!">
+               <p>Nickname</p>
+               <input class="nickname" type="text" name="nickname" required><br>
+               <input type="submit" value="Join room!">
+               <br><br><br>
             </form>
-            <br><br><br>
-            <div class="waiting-room hidden">
-               <p class="waiting-nickname"></p>
-               <h2>Waiting to be let in...</h2>
+            <form class="find-form" action="" onsubmit="return findOpenRoom(event)">
+               <h2>Or find an open room</h2>
+               <h3>Nickname</h3>
+               <input class="nickname" type="text" name="nickname" required><br>
+               <input type="submit" value="Find room!">
+               <br><br><br>
+            </form>
+         </div>
+      </div>
+   </div>
+   <div class="find-room room-modal">
+         <div class="modal-content">
+            <div>
+               <h1>Join an open room</h1>
+               <button class="close-modal" onclick="location.reload();">X</button>
+               <div class="find-open-rooms">
+                  <p class="waiting-nickname"></p>
+                  <p class="searching-for-rooms">Searching for rooms<span class="ellipsis"></span></p>
+                  <div class="open-rooms"></div>
+                  <br><br>
+                  <button onclick="location.reload()">Stop searching</button>
+               </div>
             </div>
          </div>
       </div>
    </div>
-   <div class="create-room">
+   <div class="waiting-room room-modal">
+      <div class="modal-content">
+         <div>
+            <h1>Waiting room</h1>
+            <br>
+            <button class="close-modal" onclick="location.reload();">X</button>
+            <div class="find-open-rooms">
+               <p class="waiting-nickname"></p>
+               <h2>Waiting to be let in...</h2>
+               <br><br>
+               <button onclick="location.reload()">Stop waiting</button>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="create-room room-modal">
       <div class="modal-content">
          <div>
             <h1>Create a Room</h1>
             <button class="close-modal" onclick="openModal('create')">X</button>
             <form class="create-form" action="" onsubmit="return createRoom(event)">
-               <h2>Nickname</h2>
-               <input class="nickname name-create" type="text" name="nickname" required><br>
+               <p>Nickname</p>
+               <input class="nickname name-create" type="text" name="nickname" required>
+               <br><br>
+               <input type="checkbox" id="is-public-room" name="is-public-room" checked>
+               <label for="is-public-room"> Make public <span title="So anyone can join. If not checked, people will need the room code to join">(?)</span></label>
+               <br><br>
                <input type="submit" value="Let's do it!">
             </form>
          </div>
@@ -72,6 +123,7 @@
    </div>
 </body>
 <div class="scripts"></div>
+<script src="/scripts/changelog.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/scripts/roomHome.js"></script>
 <script src="/scripts/levelPicker.js" type="module"></script>

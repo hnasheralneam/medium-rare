@@ -52,10 +52,15 @@ socket.on("someone in waiting room", (newUserInfo) => {
       let listItem = document.createElement("LI");
       listItem.innerHTML = `
             <p>${newUserInfo.nickname}<p>
-            <button>Let in</button>
+            <button class="let-in-button">Let in</button>
+            <button class="reject-button">Reject</button>
         `;
       listItem.id = "id-" + newUserInfo.socketid;
-      listItem.querySelector("button").onclick = () => { letIn(newUserInfo); }
+      listItem.querySelector(".let-in-button").onclick = () => { letIn(newUserInfo); }
+      listItem.querySelector(".reject-button").onclick = () => {
+         if (listItem) listItem.remove();
+         reject(newUserInfo);
+      }
       document.querySelector(".waiting").append(listItem);
    }
 });
@@ -81,6 +86,9 @@ function goHome() {
 
 function letIn(newUser) {
    socket.emit("let in", newUser);
+}
+function reject(newUser) {
+   socket.emit("reject", newUser);
 }
 
 function kick(newUser) {

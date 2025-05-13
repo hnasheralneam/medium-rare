@@ -20,6 +20,12 @@
    transition: .2s;
 }
 
+.related-links a:focus {
+   background-color: orange;
+   color: #fff;
+   outline: none;
+}
+
 .related-links a:hover {
    color: #222;
    text-decoration: underline;
@@ -106,7 +112,7 @@
    font-size: 1.2rem;
 }
 
-.join-room, .create-room {
+.room-modal {
    position: fixed;
    top: 0;
    right: 0;
@@ -130,34 +136,79 @@
    background-color: #fff;
    box-shadow: 0 .2em .5em #ddd;
    transition: .3s;
-   border-radius: .6em;
    display: flex;
    justify-content: center;
    align-items: center;
    text-align: center;
+
+   border: dotted .35rem #bbb;
 }
 
 .modal-content:hover {
    box-shadow: 0 .8em 1.5em #aaa;
 }
 
+.room-modal input {
+   color: inherit;
+   padding: .2rem .3rem;
+   margin: .2rem;
+   border-radius: .3rem;
+   transition: .1s;
+}
+.room-modal input:focus {
+   border: none;
+   outline: solid .2rem orange;
+}
+
 .close-modal {
    position: absolute;
    top: 0;
    right: 0;
-   margin: 1.5rem;
+   margin: .5rem 1rem;
+   padding: 0;
+   font-size: 2rem;
    font-weight: 900;
+   font-family: monospace, sans-serif;
+   color: #aaa;
+   background-color: transparent;
+   border: none;
+   transition: .2s all;
+}
+
+.close-modal:hover {
    color: red;
-   border-radius: 2rem;
-   height: 2.5rem;
-   width: 2.5rem;
-   background-color: #eee;
-   border: solid .2rem #ccc;
 }
 
 .multiplayer-menu button {
    padding: .4em .6em;
    border-radius: .4em;
+}
+
+/* Changelog */
+.changelog {
+   overflow: auto;
+}
+
+.changelog .content {
+   text-align: left;
+   max-width: 500px;
+   margin: 0 auto;
+}
+
+.changelog .content h1 {
+   text-align: center;
+}
+
+.changelog .content h2 {
+   margin-top: 1rem;
+}
+
+/* Open rooms */
+.open-rooms .room {
+   border-radius: .5rem;
+   margin: .6rem 0;
+   padding: .8rem;
+   background-color: #eee;
 }
 
 
@@ -186,12 +237,16 @@
       color: #fff;
    }
 
-   .level-picker, .multiplayer-menu .inner, .join-room div, .create-room div {
+   .room-modal .modal-content {
+      border: dotted .35rem #444;
+   }
+
+   .level-picker, .multiplayer-menu .inner, .room-modal div, .modal {
       background-color: #252525;
       color: #eee;
    }
 
-   .join-room, .create-room {
+   .room-modal {
       background-color: #22222260;
    }
 
@@ -202,10 +257,24 @@
       box-shadow: 0 .8em 1.5em #000;
    }
 
+   .open-rooms .room {
+      background-color: #333;
+   }
+
 
    .multiplayer-menu .inner {
       box-shadow: 0 .1rem .6rem #111;
       border: dotted .35rem #444;
       border-radius: 0;
+   }
+
+   .room-modal input {
+      background-color: #444;
+      border: none;
+   }
+
+   .close-modal {
+      color: #666;
+      background-color: transparent;
    }
 }

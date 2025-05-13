@@ -28,7 +28,9 @@
 
 @media (prefers-color-scheme: dark) {
    button {
-      background-color: #222;
+      padding: .2rem .3rem;
+      margin: .3rem .1rem;
+      background-color: #1b1b1b;
       color: #fff;
       border-style: dotted;
       border-color: #000;

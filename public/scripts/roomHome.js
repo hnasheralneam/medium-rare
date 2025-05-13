@@ -26,7 +26,16 @@ function joinRoom(event) {
 function createRoom(event) {
    event.preventDefault();
    if (setNickname(".create-form")) return;
-   socket.emit("create room", nickname);
+   let isOpen = document.querySelector(".create-form").querySelector("#is-public-room").checked;
+   socket.emit("create room", isOpen);
+}
+
+function findOpenRoom(event) {
+   event.preventDefault();
+   if (setNickname(".find-form")) return;
+   attachScript("scripts/findRoom.js");
+   document.querySelector(".join-form").classList.add("hidden");
+   document.querySelector(".find-form").classList.add("hidden");
 }
 
 function setNickname(form) {
@@ -68,7 +77,8 @@ socket.on("joined room", (data) => {
    }));
 
    attachScript("scripts/waitingRoom.js");
-   document.querySelector(".join-form").remove();
+   document.querySelector(".join-form").classList.add("hidden");
+   document.querySelector(".find-form").classList.add("hidden");
 });
 
 socket.on("no such room", (errorMessage) => {

@@ -30,42 +30,46 @@ class Server {
       return this.level;
    }
 
-   initializePlayers(players) {
-      for (const player of players) {
-         // we know players are broken, will fix later
-         // ACTUALLY IMPORTANT LINE
+   initializePlayers() {
+      for (const player of this.pendingPlayers) {
          this.addPlayer(player);
       }
    }
 
-   addPendingPlayer(id, sprite, pos) {
-
+   addPendingPlayer(id, sprite, pos, type) {
+      if (this.players.find(p => p.id === id)) {
+         console.warn(`Player with ID ${id} already exists.`);
+         return;
+      }
+      this.pendingPlayers.push({
+         id: id,
+         sprite: sprite,
+         pos: pos,
+         type: type
+      });
    }
 
-   // called when sprite or pos changes
    updatePendingPlayer(id, sprite, pos) {
-
+      let player = this.pendingPlayers.find(p => p.id === id);
+      if (!player) return;
+      player.sprite = sprite;
+      player.pos = pos;
    }
 
    removePendingPlayer(id) {
-
+      this.pendingPlayers = this.pendingPlayers.filter(p => p.id !== id);
    }
 
    addPlayer(pendingPlayer) {
-      // this is related to comments in method above
-      if (this.players.find(p => p.id === pendingPlayer.id)) {
-         console.warn(`Server.addPlayer: Player with ID ${pendingPlayer.id} already exists. Skipping.`);
-         return;
-      }
-
       let player = new Player(pendingPlayer.pos, pendingPlayer.sprite, pendingPlayer.id);
       player.setType(pendingPlayer.type);
       this.players.push(player);
    }
 
    async start() {
+      this.initializePlayers();
       this.startTimer();
-      OrderHandler.init(this.level.menuOptions, this.comms);
+      OrderHandler.init(this.level.menuOptions, this.comms, this);
       this.orderHandler = OrderHandler;
       this.comms.emitStarted();
    }
@@ -80,17 +84,17 @@ class Server {
    }
 
    startTimer() {
-      let timeLeft = this.level.timeSeconds;
-      this.comms.emitUpdateTime(timeLeft);
+      this.timeLeft = this.level.timeSeconds;
+      this.comms.emitUpdateTime(this.timeLeft);
       this.timer = setInterval(() => {
          if (this.paused)
             return;
-         timeLeft--;
-         if (timeLeft <= 0) {
+         this.timeLeft--;
+         if (this.timeLeft <= 0) {
             this.end();
             return;
          }
-         this.comms.emitUpdateTime(timeLeft);
+         this.comms.emitUpdateTime(this.timeLeft);
       }, 1000);
 
    }

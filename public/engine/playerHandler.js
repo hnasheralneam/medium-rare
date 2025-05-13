@@ -131,7 +131,7 @@ export const PlayerHandler = {
       };
       this.pendingPlayers.push(pendingPlayer);
       updatePlayersOnPregameDisplay();
-      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos, pendingPlayer.type);
    },
    addKeyboardPlayer(inputMapIndex) {
       let id = window.crypto.randomUUID();
@@ -148,7 +148,7 @@ export const PlayerHandler = {
          };
          this.pendingPlayers.push(pendingPlayer);
          updatePlayersOnPregameDisplay();
-         Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+         Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos, pendingPlayer.type);
       }
    },
    addTouchPlayer(id) {
@@ -160,7 +160,7 @@ export const PlayerHandler = {
       };
       this.pendingPlayers.push(pendingPlayer);
       updatePlayersOnPregameDisplay();
-      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos);
+      Game.getComms().emitPlayerAdded(id, pendingPlayer.sprite, pendingPlayer.pos, pendingPlayer.type);
    },
    addRemotePlayer(remotePlayer) {
       let existingPlayer = this.pendingPlayers.find((player) => player.id == remotePlayer.id);

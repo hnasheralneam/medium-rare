@@ -32,13 +32,7 @@ export const gameCommsRemote = {
    emitStartGame() {
       if (Game.started) return;
       Game.started = true;
-
       console.info("Starting remote game");
-
-      window.socket.emit("initPlayers", {
-         roomid: window.roomid,
-         players: PlayerHandler.pendingPlayers
-      });
       if (window.isLeader) {
          window.socket.emit("startGame", {
             roomid: window.roomid
@@ -98,12 +92,13 @@ export const gameCommsRemote = {
 
 
 
-   emitPlayerAdded(id, sprite, pos) {
+   emitPlayerAdded(id, sprite, pos, type) {
       window.socket.emit("addPlayer", {
          roomid: window.roomid,
          id: id,
          sprite: sprite,
-         pos: pos
+         pos: pos,
+         type: type
       });
    },
    emitPlayerUpdated(id, sprite, pos) {
