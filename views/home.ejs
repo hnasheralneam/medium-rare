@@ -12,7 +12,7 @@
 </head>
 <body>
    <div class="related-links">
-      <div><a tabindex="0" href="javascript:void(0)" onclick="openModal('changelog')">v0.2.5-beta</a></div>
+      <div><a tabindex="0" href="javascript:void(0)" onclick="openModal('changelog')">v0.2.5-stable</a></div>
       |
       <div><a tabindex="0" target="_blank" href="mailto:phil.mediumrare@gmail.com" title="phil.mediumrare@gmail.com">Feedback</a></div>
       |
@@ -28,14 +28,14 @@
       <hr><br>
       <div class="level-picker-contents"></div>
       <br><br><br>
-      <div class="multiplayer-menu">
+      <!-- <div class="multiplayer-menu">
          <div class="inner">
             <p>Multiplayer (Experimental)</p>
             <br>
             <button onclick="openModal('join'); document.querySelector('.roomcode').focus()">Join</button>
             <button onclick="openModal('create'); document.querySelector('.name-create').focus()">Create</button>
          </div>
-      </div>
+      </div> -->
    </div>
    <!-- Modals -->
    <div class="modal changelog changelog-room hidden">
@@ -43,7 +43,7 @@
          <button class="close-modal" onclick="openModal('changelog')">X</button>
          <h1>Changelog</h1>
          <br>
-         <p>Note: all v0.2.x releases are beta software and may contain bugs</p>
+         <p>Note: multiplayer is not available in the stable version, you can play it on the <a href="https://beta.mediumrare.hnasheralneam.dev">beta</a></p>
          <br><br>
          <div class="changelog-elements"></div>
       </div>
